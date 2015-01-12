@@ -30,8 +30,8 @@ public class DatabaseConnectionManager {
 		drivers.put("teradata", "com.teradata.jdbc.TeraDriver");
 		drivers.put("mysql", "com.mysql.jdbc.Driver");
 		drivers.put("db2", "com.ibm.db2.jcc.DB2Driver");
-		drivers.put("hdb", "com.sap.db.jdbc.Driver");
-		drivers.put("sap", "com.sap.db.jdbc.Driver");
+		//drivers.put("hdb", "com.sap.db.jdbc.Driver");
+		//drivers.put("sap", "com.sap.db.jdbc.Driver");
 
 		dialects = new HashMap<String, String>();
 		dialects.put("oracle", "org.hibernate.dialect.OracleDialect");
@@ -41,8 +41,8 @@ public class DatabaseConnectionManager {
 		dialects.put("teradata", "org.hibernate.dialect.TeradataDialect");
 		dialects.put("mysql", "org.hibernate.dialect.MySQLDialect");
 		dialects.put("db2", "org.hibernate.dialect.DB2Dialect");
-		dialects.put("hdb", "org.hibernate.dialect.SAPDBDialect");
-		dialects.put("sap", "org.hibernate.dialect.SAPDBDialect");
+		//dialects.put("hdb", "org.hibernate.dialect.SAPDBDialect");
+		//dialects.put("sap", "org.hibernate.dialect.SAPDBDialect");
 
 	};
 
@@ -92,10 +92,10 @@ public class DatabaseConnectionManager {
 		} else if (dbname.toLowerCase().contains("db2")) {
 			dialect = "org.hibernate.dialect.DB2Dialect";
 			driver = "com.ibm.db2.jcc.DB2Driver";
-		} else if (dbname.toLowerCase().contains("sap") || dbname.toLowerCase().contains("hdb")) {
+		} /*else if (dbname.toLowerCase().contains("sap") || dbname.toLowerCase().contains("hdb")) {
 			dialect = "org.hibernate.dialect.SAPDBDialect";
 			driver = "com.sap.db.jdbc.Driver";
-		}
+		}*/
 
 		return dialect;
 	}
