@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="libs/qbecore/spagobi-qbecore-5.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/qbecore/jgrapht-jdk1.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/jdbc/db2jcc.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/jdbc/hsqldb1_8_0_2.jar"/>
@@ -33,5 +32,6 @@
 	<classpathentry exported="true" kind="lib" path="libs/qbecore/jackson-databind-2.0.2.jar"/>
 	<classpathentry kind="lib" path="libs/qbecore/sbiutils/spagobi-utils-5.1.0.jar"/>
 	<classpathentry kind="lib" path="libs/qbecore/sbiutils/spagobi-utils-json-5.1.0.jar"/>
+	<classpathentry kind="lib" path="libs/qbecore/spagobi-qbecore-5.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
