@@ -69,7 +69,7 @@ public class DatabaseConnectionManager {
 		if (dbname.toLowerCase().contains("oracle")) {
 			dialect = "org.hibernate.dialect.OracleDialect";
 			driver = "oracle.jdbc.OracleDriver";
-		} else if (dbname.toLowerCase().contains("postgres")) {
+		} else if (dbname.toLowerCase().contains("postgres") || dbname.toLowerCase().contains("hive") || dbname.toLowerCase().contains("spark") || dbname.toLowerCase().contains("impala")) {
 			dialect = "org.hibernate.dialect.PostgreSQLDialect";
 			driver = "org.postgresql.Driver";
 		} else if (dbname.toLowerCase().contains("ingres")) {
