@@ -26,7 +26,8 @@ Require-Bundle: org.eclipse.core.runtime,
  it.eng.spagobi.meta.initializer;bundle-version="1.0.0",
  it.eng.spagobi.commons;bundle-version="1.0.0",
  org.junit;bundle-version="3.8.2",
- org.eclipse.ui
+ org.eclipse.ui,
+ it.eng.spagobi.studio.utils;bundle-version="5.1.0"
 Bundle-ActivationPolicy: lazy
 Import-Package: it.eng.spagobi.commons.utilities,
  org.eclipse.datatools.connectivity,

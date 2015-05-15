@@ -12,6 +12,7 @@ package it.eng.spagobi.meta.editor.multi;
 import it.eng.spagobi.commons.exception.SpagoBIPluginException;
 import it.eng.spagobi.commons.resource.IResourceLocator;
 import it.eng.spagobi.meta.editor.SpagoBIMetaEditorPlugin;
+import it.eng.spagobi.meta.editor.business.BusinessModelEditor;
 import it.eng.spagobi.meta.model.Model;
 import it.eng.spagobi.meta.model.ModelPackage;
 
@@ -51,6 +52,8 @@ public class SpagoBIModelEditorAdapterLauncher implements IEditorLauncher {
 	private static IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator();
 	private static Logger logger = LoggerFactory.getLogger(SpagoBIModelEditorAdapterLauncher.class);
 		
+	String projectName;
+	
 	@Override
 	public void open(IPath path) {
 		Resource resource;
@@ -104,6 +107,7 @@ public class SpagoBIModelEditorAdapterLauncher implements IEditorLauncher {
 			IFile ifile= workspace.getRoot().getFileForLocation(location);
 	        try {
 	        	ifile.refreshLocal(IResource.DEPTH_ZERO, null);
+	        	projectName = ifile.getProject().getName();
 				logger.debug("Refresh Local workspace on [{}]",ifile.getRawLocation().toOSString());
 
 			} catch (CoreException e) {
@@ -137,8 +141,17 @@ public class SpagoBIModelEditorAdapterLauncher implements IEditorLauncher {
 			IEditorPart editor = page.openEditor( editorInput , SpagoBIModelEditor.EDITOR_ID);
 			
 			SpagoBIModelEditor modelEditor = (SpagoBIModelEditor)editor;
+			modelEditor.setProjectName(projectName);
 			modelEditor.setFocus();
 			IEditorPart[] innerEditors = modelEditor.getInnerEditors();
+
+			for (int i = 0; i < innerEditors.length; i++) {
+				if(innerEditors[i] instanceof BusinessModelEditor){
+					BusinessModelEditor bme = (BusinessModelEditor)innerEditors[i];
+					bme.setProjectName(projectName);
+				}
+			}
+			
 			innerEditors[0].setFocus();
 			
 		} catch (PartInitException exception) {

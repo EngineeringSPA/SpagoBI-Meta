@@ -28,6 +28,7 @@ public class SpagoBIModelEditorInput extends MultiEditorInput {
 	
 	String modelName;
 	String modelDescription;
+	String projectName;
 	
 	
 	public SpagoBIModelEditorInput(File modelFile, Model spagobiModel) {
@@ -55,4 +56,13 @@ public class SpagoBIModelEditorInput extends MultiEditorInput {
 	public String getToolTipText() {
 		return modelDescription;
 	}
+
+	public String getProjectName() {
+		return projectName;
+	}
+
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+	
 }

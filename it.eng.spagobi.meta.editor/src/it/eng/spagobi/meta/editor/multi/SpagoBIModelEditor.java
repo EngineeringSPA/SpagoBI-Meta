@@ -72,6 +72,7 @@ public class SpagoBIModelEditor extends MultiEditor {
 	public static final int LEFT = 0;
 	public static final int RIGHT = 1;
 	
+	String projectName;
 	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator(); 
 	private static final Logger logger = LoggerFactory.getLogger(SpagoBIModelEditor.class);
 	
@@ -370,4 +371,13 @@ public class SpagoBIModelEditor extends MultiEditor {
 		return -1;
 	}
 
+	public String getProjectName() {
+		return projectName;
+	}
+
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+
+	
 }

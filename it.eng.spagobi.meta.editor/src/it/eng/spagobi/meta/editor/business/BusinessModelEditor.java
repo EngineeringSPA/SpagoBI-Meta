@@ -39,10 +39,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.emf.common.command.BasicCommandStack;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
@@ -117,6 +121,8 @@ public class BusinessModelEditor
 	implements IEditingDomainProvider, IMenuListener, IViewerProvider {
 	
 	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator(); 
+	
+	String projectName;
 	
 	public static final String EDITOR_ID = BusinessModelEditor.class.getName();
 	
@@ -644,6 +650,25 @@ public class BusinessModelEditor
 		this.isDirty = isDirty;
 	}
 	
+	
+	public void getProjectNameIfNull(URI resourceURI){
+		// when 
+	    //Force Workspace refresh
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();    
+		IPath location= Path.fromOSString(resourceURI.devicePath()); 
+		IFile ifile= workspace.getRoot().getFileForLocation(location);
+        try {
+        	ifile.refreshLocal(IResource.DEPTH_ZERO, null);
+        	projectName = ifile.getProject().getName();
+			logger.debug("Refresh Local workspace on [{}]",ifile.getRawLocation().toOSString());
+
+		} catch (CoreException e) {
+			logger.error("Refresh Local workspace error [{}]",e);
+			e.printStackTrace();
+		}
+	}
+	
+	
 	/**
 	 * This is the method called to load a resource into the editing domain's 
 	 * resource set based on the editor's input.
@@ -651,6 +676,13 @@ public class BusinessModelEditor
 	public void loadModel() {
 		URI resourceURI = ((BusinessModelEditorInput)getEditorInput()).getResourceFileURI();
 		try {
+
+			// in case editor is opening after model creation launcher is not run, than
+			// retrieve here project name
+			if(projectName == null){
+				getProjectNameIfNull(resourceURI);	
+			}
+			
 			Resource resource = editingDomain.getResourceSet().getResource(resourceURI, true);
 			List<EObject> eObjects = resource.getContents();
 			Model model = (Model)eObjects.get(0);
@@ -1195,4 +1227,14 @@ public class BusinessModelEditor
 	      }
 	    }
 	  }
+
+	public String getProjectName() {
+		return projectName;
+	}
+
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+	  
+	  
 }

@@ -21,6 +21,7 @@ import it.eng.spagobi.meta.editor.business.actions.CreateQueryAction;
 import it.eng.spagobi.meta.editor.business.actions.EditBusinessColumnsAction;
 import it.eng.spagobi.meta.editor.business.actions.EditBusinessViewInnerJoinRelationshipsAction;
 import it.eng.spagobi.meta.editor.business.actions.GenerateJPAMappingAction;
+import it.eng.spagobi.meta.editor.business.actions.LinkToProfileAttributeAction;
 import it.eng.spagobi.meta.editor.business.actions.RemoveFromIdentifierAction;
 import it.eng.spagobi.meta.editor.olap.actions.CreateMondrianAction;
 import it.eng.spagobi.meta.editor.olap.actions.EditHierarchiesAction;
@@ -145,6 +146,18 @@ public class BusinessModelMenuActionFactory {
 				}
 				actions.put("Edit", editActions);
 			}
+			
+			// Link to ProfileAttribute
+			LinkToProfileAttributeAction linkToProfileAttributeAction = new LinkToProfileAttributeAction(activeEditorPart, selection);
+			Command command = linkToProfileAttributeAction.getPerformFinishCommand();
+			
+			//Check if Command is executable
+			if (command instanceof ISpagoBIModelCommand){
+				editActions.add(linkToProfileAttributeAction);
+			}
+			actions.put("Edit", editActions);
+			
+			// Cube commands
 			Cube cube = checkIfInsideCube((BusinessColumn)target);
 			if (cube != null){
 				String columnType = getColumnType((BusinessColumn)target);
@@ -162,6 +175,7 @@ public class BusinessModelMenuActionFactory {
 			List removeActions = new ArrayList();
 			CalculatedBusinessColumn businessColumn = (CalculatedBusinessColumn)target;
 			editActions.add(new AddCalculatedFieldAction(activeEditorPart, selection));	
+			editActions.add(new LinkToProfileAttributeAction(activeEditorPart, selection));
 			actions.put("Edit", editActions);
 
 	    } else if(target instanceof BusinessRootItemProvider) {
