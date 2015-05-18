@@ -17,6 +17,7 @@ import it.eng.spagobi.meta.model.business.BusinessIdentifier;
 import it.eng.spagobi.meta.model.business.BusinessModel;
 import it.eng.spagobi.meta.model.business.BusinessRelationship;
 import it.eng.spagobi.meta.model.olap.OlapModel;
+import it.eng.spagobi.meta.model.physical.PhysicalModel;
 
 /**
  * @author Andrea Gioia (andrea.gioia@eng.it)
@@ -44,6 +45,8 @@ public class ModelExtractor {
 			model = getModel( ((BusinessRelationship)o).getModel() );
 		} else if(o instanceof OlapModel){
 			model = ((OlapModel)o).getParentModel();
+		} else if(o instanceof PhysicalModel){
+			model = ((PhysicalModel)o).getParentModel();
 		}
 		
 		return model;

@@ -6,17 +6,16 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this file,
  You can obtain one at http://mozilla.org/MPL/2.0/.
  
-**/
+ **/
 package it.eng.spagobi.meta.editor.physical;
-
 
 import it.eng.spagobi.commons.resource.IResourceLocator;
 import it.eng.spagobi.meta.editor.SpagoBIMetaEditorPlugin;
-import it.eng.spagobi.meta.editor.commons.DiagnosticPartListener;
 import it.eng.spagobi.meta.editor.dnd.PhysicalObjectDragListener;
 import it.eng.spagobi.meta.editor.properties.CustomizedAdapterFactoryContentProvider;
 import it.eng.spagobi.meta.editor.properties.CustomizedPhysicalPropertySheetPage;
 import it.eng.spagobi.meta.editor.properties.CustomizedPropertySheetSorter;
+import it.eng.spagobi.meta.initializer.ModelSingleton;
 import it.eng.spagobi.meta.model.analytical.provider.AnalyticalModelItemProviderAdapterFactory;
 import it.eng.spagobi.meta.model.behavioural.provider.BehaviouralModelItemProviderAdapterFactory;
 import it.eng.spagobi.meta.model.business.provider.BusinessModelItemProviderAdapterFactory;
@@ -29,8 +28,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EventObject;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -50,9 +47,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.emf.common.command.BasicCommandStack;
-import org.eclipse.emf.common.command.Command;
-import org.eclipse.emf.common.command.CommandStack;
-import org.eclipse.emf.common.command.CommandStackListener;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.ui.MarkerHelper;
@@ -90,7 +84,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -118,416 +111,349 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IPartListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.eclipse.ui.statushandlers.StatusManager;
-import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.properties.IPropertySheetPage;
-import org.eclipse.ui.views.properties.PropertySheet;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * This is an example of a PhysicalModel model editor.
- * <!-- begin-user-doc -->
- * <!-- end-user-doc -->
+ * This is an example of a PhysicalModel model editor. <!-- begin-user-doc --> <!-- end-user-doc -->
+ * 
  * @generated
  */
-public class PhysicalModelEditor
-	extends MultiPageEditorPart
-	implements IEditingDomainProvider, ISelectionProvider, IMenuListener, IViewerProvider, IGotoMarker {
-	
-	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator(); 
-	
+public class PhysicalModelEditor extends MultiPageEditorPart implements IEditingDomainProvider, IMenuListener, IViewerProvider, IGotoMarker {
+
+	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator();
+
 	public static final String EDITOR_ID = PhysicalModelEditor.class.getName();
 
 	private static Logger logger = LoggerFactory.getLogger(PhysicalModelEditor.class);
-	
 
 	/**
-	 * This keeps track of the editing domain that is used to track all changes to the model.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This keeps track of the editing domain that is used to track all changes to the model. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected AdapterFactoryEditingDomain editingDomain;
 
 	/**
-	 * This is the one adapter factory used for providing views of the model.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is the one adapter factory used for providing views of the model. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected ComposedAdapterFactory adapterFactory;
 
 	/**
-	 * This is the content outline page.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is the content outline page. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected IContentOutlinePage contentOutlinePage;
 
 	/**
-	 * This is a kludge...
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is a kludge... <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected IStatusLineManager contentOutlineStatusLineManager;
 
 	/**
-	 * This is the content outline page's viewer.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is the content outline page's viewer. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected TreeViewer contentOutlineViewer;
 
 	/**
-	 * This is the property sheet page.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is the property sheet page. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected PropertySheetPage propertySheetPage;
 
 	/**
-	 * This is the viewer that shadows the selection in the content outline.
-	 * The parent relation must be correctly defined for this to work.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is the viewer that shadows the selection in the content outline. The parent relation must be correctly defined for this to work. <!-- begin-user-doc
+	 * --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected TreeViewer selectionViewer;
 
 	/**
-	 * This inverts the roll of parent and child in the content provider and show parents as a tree.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This inverts the roll of parent and child in the content provider and show parents as a tree. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected TreeViewer parentViewer;
 
 	/**
-	 * This shows how a tree view works.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This shows how a tree view works. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected TreeViewer treeViewer;
 
 	/**
-	 * This shows how a list view works.
-	 * A list viewer doesn't support icons.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This shows how a list view works. A list viewer doesn't support icons. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected ListViewer listViewer;
 
 	/**
-	 * This shows how a table view works.
-	 * A table can be used as a list with icons.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This shows how a table view works. A table can be used as a list with icons. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected TableViewer tableViewer;
 
 	/**
-	 * This shows how a tree view with columns works.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This shows how a tree view with columns works. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected TreeViewer treeViewerWithColumns;
 
 	/**
-	 * This keeps track of the active viewer pane, in the book.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This keeps track of the active viewer pane, in the book. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected ViewerPane currentViewerPane;
 
 	/**
-	 * This keeps track of the active content viewer, which may be either one of the viewers in the pages or the content outline viewer.
-	 * <!-- begin-user-doc -->
+	 * This keeps track of the active content viewer, which may be either one of the viewers in the pages or the content outline viewer. <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected Viewer currentViewer;
 
 	/**
-	 * This listens to which ever viewer is active.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This listens to which ever viewer is active. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected ISelectionChangedListener selectionChangedListener;
 
-	/**
-	 * This keeps track of all the {@link org.eclipse.jface.viewers.ISelectionChangedListener}s that are listening to this editor.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected Collection<ISelectionChangedListener> selectionChangedListeners = new ArrayList<ISelectionChangedListener>();
+	protected PhysicalModelEditorSelectionProvider selectionProvider;
 
 	/**
-	 * This keeps track of the selection of the editor as a whole.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	protected ISelection editorSelection = StructuredSelection.EMPTY;
-
-	/**
-	 * The MarkerHelper is responsible for creating workspace resource markers presented
-	 * in Eclipse's Problems View.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * The MarkerHelper is responsible for creating workspace resource markers presented in Eclipse's Problems View. <!-- begin-user-doc --> <!-- end-user-doc
+	 * -->
+	 * 
 	 * @generated
 	 */
 	protected MarkerHelper markerHelper = new EditUIMarkerHelper();
 
 	/**
-	 * This listens for when the outline becomes active
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
+	 * This listens for when the outline becomes active <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 */
-	protected IPartListener partListener =
-		new DiagnosticPartListener(logger) {
-			public void partActivated(IWorkbenchPart p) {
-				logger.debug("Activated part [{}]", p.getClass().getName());
-				if (p instanceof ContentOutline) {
-					if (((ContentOutline)p).getCurrentPage() == contentOutlinePage) {
-						getActionBarContributor().setActiveEditor(PhysicalModelEditor.this);
-
-						setCurrentViewer(contentOutlineViewer);
-					}
-				}
-				else if (p instanceof PropertySheet) {
-					if (((PropertySheet)p).getCurrentPage() == propertySheetPage) {
-						getActionBarContributor().setActiveEditor(PhysicalModelEditor.this);
-						handleActivate();
-					}
-				}
-				else if (p == PhysicalModelEditor.this) {
-					handleActivate();
-				}
-			}
-		};
-
+	protected IPartListener partListener;
+	// MC:Commented the generated part
+	/*
+	 * protected IPartListener partListener = new DiagnosticPartListener(logger) { public void partActivated(IWorkbenchPart p) {
+	 * logger.debug("Activated part [{}]", p.getClass().getName()); if (p instanceof ContentOutline) { if (((ContentOutline)p).getCurrentPage() ==
+	 * contentOutlinePage) { getActionBarContributor().setActiveEditor(PhysicalModelEditor.this);
+	 * 
+	 * setCurrentViewer(contentOutlineViewer); } } else if (p instanceof PropertySheet) { if (((PropertySheet)p).getCurrentPage() == propertySheetPage) {
+	 * getActionBarContributor().setActiveEditor(PhysicalModelEditor.this); handleActivate(); } } else if (p == PhysicalModelEditor.this) { handleActivate(); }
+	 * } };
+	 */
 	/**
-	 * Resources that have been removed since last activation.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Resources that have been removed since last activation. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected Collection<Resource> removedResources = new ArrayList<Resource>();
 
 	/**
-	 * Resources that have been changed since last activation.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Resources that have been changed since last activation. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected Collection<Resource> changedResources = new ArrayList<Resource>();
 
 	/**
-	 * Resources that have been saved.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Resources that have been saved. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected Collection<Resource> savedResources = new ArrayList<Resource>();
 
 	/**
-	 * Map to store the diagnostic associated with a resource.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Map to store the diagnostic associated with a resource. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected Map<Resource, Diagnostic> resourceToDiagnosticMap = new LinkedHashMap<Resource, Diagnostic>();
 
 	/**
-	 * Controls whether the problem indication should be updated.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Controls whether the problem indication should be updated. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected boolean updateProblemIndication = true;
 
 	/**
-	 * Adapter used to update the problem indication when resources are demanded loaded.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Adapter used to update the problem indication when resources are demanded loaded. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
-	protected EContentAdapter problemIndicationAdapter = 
-		new EContentAdapter() {
-			@Override
-			public void notifyChanged(Notification notification) {
-				if (notification.getNotifier() instanceof Resource) {
-					switch (notification.getFeatureID(Resource.class)) {
-						case Resource.RESOURCE__IS_LOADED:
-						case Resource.RESOURCE__ERRORS:
-						case Resource.RESOURCE__WARNINGS: {
-							Resource resource = (Resource)notification.getNotifier();
-							Diagnostic diagnostic = analyzeResourceProblems(resource, null);
-							if (diagnostic.getSeverity() != Diagnostic.OK) {
-								resourceToDiagnosticMap.put(resource, diagnostic);
-							}
-							else {
-								resourceToDiagnosticMap.remove(resource);
-							}
-
-							if (updateProblemIndication) {
-								getSite().getShell().getDisplay().asyncExec
-									(new Runnable() {
-										 public void run() {
-											 updateProblemIndication();
-										 }
-									 });
-							}
-							break;
-						}
+	protected EContentAdapter problemIndicationAdapter = new EContentAdapter() {
+		@Override
+		public void notifyChanged(Notification notification) {
+			if (notification.getNotifier() instanceof Resource) {
+				switch (notification.getFeatureID(Resource.class)) {
+				case Resource.RESOURCE__IS_LOADED:
+				case Resource.RESOURCE__ERRORS:
+				case Resource.RESOURCE__WARNINGS: {
+					Resource resource = (Resource) notification.getNotifier();
+					Diagnostic diagnostic = analyzeResourceProblems(resource, null);
+					if (diagnostic.getSeverity() != Diagnostic.OK) {
+						resourceToDiagnosticMap.put(resource, diagnostic);
+					} else {
+						resourceToDiagnosticMap.remove(resource);
 					}
-				}
-				else {
-					super.notifyChanged(notification);
-				}
-			}
 
-			@Override
-			protected void setTarget(Resource target) {
-				basicSetTarget(target);
+					if (updateProblemIndication) {
+						getSite().getShell().getDisplay().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								updateProblemIndication();
+							}
+						});
+					}
+					break;
+				}
+				}
+			} else {
+				super.notifyChanged(notification);
 			}
+		}
 
-			@Override
-			protected void unsetTarget(Resource target) {
-				basicUnsetTarget(target);
-			}
-		};
+		@Override
+		protected void setTarget(Resource target) {
+			basicSetTarget(target);
+		}
+
+		@Override
+		protected void unsetTarget(Resource target) {
+			basicUnsetTarget(target);
+		}
+	};
 
 	/**
-	 * This listens for workspace changes.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This listens for workspace changes. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
-	protected IResourceChangeListener resourceChangeListener =
-		new IResourceChangeListener() {
-			public void resourceChanged(IResourceChangeEvent event) {
-				logger.debug("resourceChanged");
-				IResourceDelta delta = event.getDelta();
-				try {
-					class ResourceDeltaVisitor implements IResourceDeltaVisitor {
-						protected ResourceSet resourceSet = editingDomain.getResourceSet();
-						protected Collection<Resource> changedResources = new ArrayList<Resource>();
-						protected Collection<Resource> removedResources = new ArrayList<Resource>();
+	protected IResourceChangeListener resourceChangeListener = new IResourceChangeListener() {
+		@Override
+		public void resourceChanged(IResourceChangeEvent event) {
+			logger.debug("resourceChanged");
+			IResourceDelta delta = event.getDelta();
+			try {
+				class ResourceDeltaVisitor implements IResourceDeltaVisitor {
+					protected ResourceSet resourceSet = editingDomain.getResourceSet();
+					protected Collection<Resource> changedResources = new ArrayList<Resource>();
+					protected Collection<Resource> removedResources = new ArrayList<Resource>();
 
-						public boolean visit(IResourceDelta delta) {
-							if (delta.getResource().getType() == IResource.FILE) {
-								if (delta.getKind() == IResourceDelta.REMOVED ||
-								    delta.getKind() == IResourceDelta.CHANGED && delta.getFlags() != IResourceDelta.MARKERS) {
-									Resource resource = resourceSet.getResource(URI.createPlatformResourceURI(delta.getFullPath().toString(), true), false);
-									if (resource != null) {
-										if (delta.getKind() == IResourceDelta.REMOVED) {
-											removedResources.add(resource);
-										}
-										else if (!savedResources.remove(resource)) {
-											changedResources.add(resource);
-										}
+					@Override
+					public boolean visit(IResourceDelta delta) {
+						if (delta.getResource().getType() == IResource.FILE) {
+							if (delta.getKind() == IResourceDelta.REMOVED || delta.getKind() == IResourceDelta.CHANGED
+									&& delta.getFlags() != IResourceDelta.MARKERS) {
+								Resource resource = resourceSet.getResource(URI.createPlatformResourceURI(delta.getFullPath().toString(), true), false);
+								if (resource != null) {
+									if (delta.getKind() == IResourceDelta.REMOVED) {
+										removedResources.add(resource);
+									} else if (!savedResources.remove(resource)) {
+										changedResources.add(resource);
 									}
 								}
 							}
-
-							return true;
 						}
 
-						public Collection<Resource> getChangedResources() {
-							return changedResources;
-						}
-
-						public Collection<Resource> getRemovedResources() {
-							return removedResources;
-						}
+						return true;
 					}
 
-					final ResourceDeltaVisitor visitor = new ResourceDeltaVisitor();
-					delta.accept(visitor);
-
-					if (!visitor.getRemovedResources().isEmpty()) {
-						getSite().getShell().getDisplay().asyncExec
-							(new Runnable() {
-								 public void run() {
-									 removedResources.addAll(visitor.getRemovedResources());
-									 if (!isDirty()) {
-										 getSite().getPage().closeEditor(PhysicalModelEditor.this, false);
-									 }
-								 }
-							 });
+					public Collection<Resource> getChangedResources() {
+						return changedResources;
 					}
 
-					if (!visitor.getChangedResources().isEmpty()) {
-						getSite().getShell().getDisplay().asyncExec
-							(new Runnable() {
-								 public void run() {
-									 changedResources.addAll(visitor.getChangedResources());
-									 if (getSite().getPage().getActiveEditor() == PhysicalModelEditor.this) {
-										 handleActivate();
-									 }
-								 }
-							 });
+					public Collection<Resource> getRemovedResources() {
+						return removedResources;
 					}
 				}
-				catch (CoreException e) {
-					IStatus status = new Status(IStatus.ERROR, SpagoBIMetaEditorPlugin.PLUGIN_ID, IStatus.OK, "Unexpected error occurred", e);
-				    StatusManager.getManager().handle(status, StatusManager.LOG|StatusManager.SHOW);
+
+				final ResourceDeltaVisitor visitor = new ResourceDeltaVisitor();
+				delta.accept(visitor);
+
+				if (!visitor.getRemovedResources().isEmpty()) {
+					getSite().getShell().getDisplay().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							removedResources.addAll(visitor.getRemovedResources());
+							if (!isDirty()) {
+								getSite().getPage().closeEditor(PhysicalModelEditor.this, false);
+							}
+						}
+					});
 				}
+
+				if (!visitor.getChangedResources().isEmpty()) {
+					getSite().getShell().getDisplay().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							changedResources.addAll(visitor.getChangedResources());
+							if (getSite().getPage().getActiveEditor() == PhysicalModelEditor.this) {
+								handleActivate();
+							}
+						}
+					});
+				}
+			} catch (CoreException e) {
+				IStatus status = new Status(IStatus.ERROR, SpagoBIMetaEditorPlugin.PLUGIN_ID, IStatus.OK, "Unexpected error occurred", e);
+				StatusManager.getManager().handle(status, StatusManager.LOG | StatusManager.SHOW);
 			}
-		};
+		}
+	};
 
 	/**
-	 * Handles activation of the editor or it's associated views.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Handles activation of the editor or it's associated views. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected void handleActivate() {
 		// Recompute the read only state.
 		//
 		if (editingDomain.getResourceToReadOnlyMap() != null) {
-		  editingDomain.getResourceToReadOnlyMap().clear();
+			editingDomain.getResourceToReadOnlyMap().clear();
 
-		  // Refresh any actions that may become enabled or disabled.
-		  //
-		  setSelection(getSelection());
+			// Refresh any actions that may become enabled or disabled.
+			//
+			// MC: setSelection(getSelection());
 		}
 
 		if (!removedResources.isEmpty()) {
 			if (handleDirtyConflict()) {
 				getSite().getPage().closeEditor(PhysicalModelEditor.this, false);
-			}
-			else {
+			} else {
 				removedResources.clear();
 				changedResources.clear();
 				savedResources.clear();
 			}
-		}
-		else if (!changedResources.isEmpty()) {
+		} else if (!changedResources.isEmpty()) {
 			changedResources.removeAll(savedResources);
 			handleChangedResources();
 			changedResources.clear();
@@ -536,57 +462,34 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * Handles what to do with changed resources on activation.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Handles what to do with changed resources on activation. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected void handleChangedResources() {
-		if (!changedResources.isEmpty() && (!isDirty() || handleDirtyConflict())) {
-			if (isDirty()) {
-				changedResources.addAll(editingDomain.getResourceSet().getResources());
-			}
-			editingDomain.getCommandStack().flush();
-
-			updateProblemIndication = false;
-			for (Resource resource : changedResources) {
-				if (resource.isLoaded()) {
-					resource.unload();
-					try {
-						resource.load(Collections.EMPTY_MAP);
-					}
-					catch (IOException exception) {
-						if (!resourceToDiagnosticMap.containsKey(resource)) {
-							resourceToDiagnosticMap.put(resource, analyzeResourceProblems(resource, exception));
-						}
-					}
-				}
-			}
-
-			if (AdapterFactoryEditingDomain.isStale(editorSelection)) {
-				setSelection(StructuredSelection.EMPTY);
-			}
-
-			updateProblemIndication = true;
-			updateProblemIndication();
-		}
+		/*
+		 * Commented by MC if (!changedResources.isEmpty() && (!isDirty() || handleDirtyConflict())) { if (isDirty()) {
+		 * changedResources.addAll(editingDomain.getResourceSet().getResources()); } editingDomain.getCommandStack().flush();
+		 * 
+		 * updateProblemIndication = false; for (Resource resource : changedResources) { if (resource.isLoaded()) { resource.unload(); try {
+		 * resource.load(Collections.EMPTY_MAP); } catch (IOException exception) { if (!resourceToDiagnosticMap.containsKey(resource)) {
+		 * resourceToDiagnosticMap.put(resource, analyzeResourceProblems(resource, exception)); } } } }
+		 * 
+		 * if (AdapterFactoryEditingDomain.isStale(editorSelection)) { setSelection(StructuredSelection.EMPTY); }
+		 * 
+		 * updateProblemIndication = true; updateProblemIndication(); }
+		 */
 	}
-  
+
 	/**
-	 * Updates the problems indication with the information described in the specified diagnostic.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Updates the problems indication with the information described in the specified diagnostic. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected void updateProblemIndication() {
 		if (updateProblemIndication) {
-			BasicDiagnostic diagnostic =
-				new BasicDiagnostic
-					(Diagnostic.OK,
-					 "it.eng.spagobi.meta.editor",
-					 0,
-					 null,
-					 new Object [] { editingDomain.getResourceSet() });
+			BasicDiagnostic diagnostic = new BasicDiagnostic(Diagnostic.OK, "it.eng.spagobi.meta.editor", 0, null,
+					new Object[] { editingDomain.getResourceSet() });
 			for (Diagnostic childDiagnostic : resourceToDiagnosticMap.values()) {
 				if (childDiagnostic.getSeverity() != Diagnostic.OK) {
 					diagnostic.add(childDiagnostic);
@@ -595,12 +498,11 @@ public class PhysicalModelEditor
 
 			int lastEditorPage = getPageCount() - 1;
 			if (lastEditorPage >= 0 && getEditor(lastEditorPage) instanceof ProblemEditorPart) {
-				((ProblemEditorPart)getEditor(lastEditorPage)).setDiagnostic(diagnostic);
+				((ProblemEditorPart) getEditor(lastEditorPage)).setDiagnostic(diagnostic);
 				if (diagnostic.getSeverity() != Diagnostic.OK) {
 					setActivePage(lastEditorPage);
 				}
-			}
-			else if (diagnostic.getSeverity() != Diagnostic.OK) {
+			} else if (diagnostic.getSeverity() != Diagnostic.OK) {
 				ProblemEditorPart problemEditorPart = new ProblemEditorPart();
 				problemEditorPart.setDiagnostic(diagnostic);
 				problemEditorPart.setMarkerHelper(markerHelper);
@@ -609,10 +511,9 @@ public class PhysicalModelEditor
 					setPageText(lastEditorPage, problemEditorPart.getPartName());
 					setActivePage(lastEditorPage);
 					showTabs();
-				}
-				catch (PartInitException e) {
+				} catch (PartInitException e) {
 					IStatus status = new Status(IStatus.ERROR, SpagoBIMetaEditorPlugin.PLUGIN_ID, IStatus.OK, "Unexpected error occurred", e);
-				    StatusManager.getManager().handle(status, StatusManager.LOG|StatusManager.SHOW);
+					StatusManager.getManager().handle(status, StatusManager.LOG | StatusManager.SHOW);
 				}
 			}
 
@@ -621,10 +522,9 @@ public class PhysicalModelEditor
 				if (diagnostic.getSeverity() != Diagnostic.OK) {
 					try {
 						markerHelper.createMarkers(diagnostic);
-					}
-					catch (CoreException e) {
+					} catch (CoreException e) {
 						IStatus status = new Status(IStatus.ERROR, SpagoBIMetaEditorPlugin.PLUGIN_ID, IStatus.OK, "Unexpected error occurred", e);
-					    StatusManager.getManager().handle(status, StatusManager.LOG|StatusManager.SHOW);
+						StatusManager.getManager().handle(status, StatusManager.LOG | StatusManager.SHOW);
 					}
 				}
 			}
@@ -632,23 +532,18 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * Shows a dialog that asks if conflicting changes should be discarded.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Shows a dialog that asks if conflicting changes should be discarded. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected boolean handleDirtyConflict() {
-		return
-			MessageDialog.openQuestion
-				(getSite().getShell(),
-				 RL.getString("business.editor.dialog.fileconflict.label"),
-				 RL.getString("business.editor.dialog.fileconflict.message"));
+		return MessageDialog.openQuestion(getSite().getShell(), RL.getString("business.editor.dialog.fileconflict.label"),
+				RL.getString("business.editor.dialog.fileconflict.message"));
 	}
 
 	/**
-	 * This creates a model editor.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This creates a model editor. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public PhysicalModelEditor() {
@@ -657,9 +552,7 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * This sets up the editing domain for the model editor.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This sets up the editing domain for the model editor. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
 	 */
 	protected void initializeEditingDomain() {
@@ -676,68 +569,42 @@ public class PhysicalModelEditor
 		adapterFactory.addAdapterFactory(new AnalyticalModelItemProviderAdapterFactory());
 		adapterFactory.addAdapterFactory(new ReflectiveItemProviderAdapterFactory());
 
-		//MOD by M.C
-		//using TransactionalEditingDomain shared between two editor 
-		
-		// Create a transactional editing domain
-	    //
-	    //TransactionalEditingDomain domain = TransactionalEditingDomain.Factory.INSTANCE.createEditingDomain();
-	    //domain.setID("it.eng.spagobi.meta.model.editor.EditingDomain");
-	    //adding editing domain to Registry
-	    //TransactionalEditingDomain.Registry.INSTANCE.add("it.eng.spagobi.meta.model.editor.EditingDomain", domain);
-		
 		// Create the command stack that will notify this editor as commands are executed.
 		//
 		BasicCommandStack commandStack = new BasicCommandStack();
 
 		// Add a listener to set the most recent command's affected objects to be the selection of the viewer with focus.
 		//
-		commandStack.addCommandStackListener
-	    //domain.getCommandStack().addCommandStackListener
-			(new CommandStackListener() {
-				 public void commandStackChanged(final EventObject event) {
-					 getContainer().getDisplay().asyncExec
-						 (new Runnable() {
-							  public void run() {
-								  firePropertyChange(IEditorPart.PROP_DIRTY);
-
-								  // Try to select the affected objects.
-								  //
-								  Command mostRecentCommand = ((CommandStack)event.getSource()).getMostRecentCommand();
-								  if (mostRecentCommand != null) {
-									  setSelectionToViewer(mostRecentCommand.getAffectedObjects());
-								  }
-								  if (propertySheetPage != null && !propertySheetPage.getControl().isDisposed()) {
-									  propertySheetPage.refresh();
-								  }
-							  }
-						  });
-				 }
-			 });
+		commandStack.addCommandStackListener(new PhysicalModelEditorCommandStackListener(this));
 
 		// Create the editing domain with a special command stack.
 		//
-		editingDomain = new AdapterFactoryEditingDomain(adapterFactory, commandStack, new HashMap<Resource, Boolean>());
-	    //editingDomain = (AdapterFactoryEditingDomain) domain;
-	   
+		// editingDomain = new AdapterFactoryEditingDomain(adapterFactory, commandStack, new HashMap<Resource, Boolean>());
+
+		// **** Using the same editingDomain of BusinessModelEditor
+		// for avoiding duplicating the model instance
+		ModelSingleton singleton = ModelSingleton.getInstance();
+
+		editingDomain = (AdapterFactoryEditingDomain) singleton.getEditingDomain();
+		editingDomain.getCommandStack().addCommandStackListener(new PhysicalModelEditorCommandStackListener(this));
+
+		// *********
 
 	}
 
 	/**
-	 * This is here for the listener to be able to call it.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is here for the listener to be able to call it. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
-			@Override
+	@Override
 	protected void firePropertyChange(int action) {
 		super.firePropertyChange(action);
 	}
 
 	/**
-	 * This sets the selection into whichever viewer is active.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This sets the selection into whichever viewer is active. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public void setSelectionToViewer(Collection<?> collection) {
@@ -745,41 +612,44 @@ public class PhysicalModelEditor
 		// Make sure it's okay.
 		//
 		if (theSelection != null && !theSelection.isEmpty()) {
-			Runnable runnable =
-				new Runnable() {
-					public void run() {
-						// Try to select the items in the current content viewer of the editor.
-						//
-						if (currentViewer != null) {
-							currentViewer.setSelection(new StructuredSelection(theSelection.toArray()), true);
-						}
+			Runnable runnable = new Runnable() {
+				@Override
+				public void run() {
+					// Try to select the items in the current content viewer of the editor.
+					//
+					if (currentViewer != null) {
+						currentViewer.setSelection(new StructuredSelection(theSelection.toArray()), true);
 					}
-				};
+				}
+			};
 			getSite().getShell().getDisplay().asyncExec(runnable);
 		}
 	}
 
 	/**
-	 * This returns the editing domain as required by the {@link IEditingDomainProvider} interface.
-	 * This is important for implementing the static methods of {@link AdapterFactoryEditingDomain}
-	 * and for supporting {@link org.eclipse.emf.edit.ui.action.CommandAction}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This returns the editing domain as required by the {@link IEditingDomainProvider} interface. This is important for implementing the static methods of
+	 * {@link AdapterFactoryEditingDomain} and for supporting {@link org.eclipse.emf.edit.ui.action.CommandAction}. <!-- begin-user-doc --> <!-- end-user-doc
+	 * -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public EditingDomain getEditingDomain() {
 		return editingDomain;
 	}
 
+	// ------------------------------------------------------------------
+
+	// Inner class
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public class ReverseAdapterFactoryContentProvider extends AdapterFactoryContentProvider {
 		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
+		 * <!-- begin-user-doc --> <!-- end-user-doc -->
+		 * 
 		 * @generated
 		 */
 		public ReverseAdapterFactoryContentProvider(AdapterFactory adapterFactory) {
@@ -787,30 +657,30 @@ public class PhysicalModelEditor
 		}
 
 		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
+		 * <!-- begin-user-doc --> <!-- end-user-doc -->
+		 * 
 		 * @generated
 		 */
 		@Override
-		public Object [] getElements(Object object) {
+		public Object[] getElements(Object object) {
 			Object parent = super.getParent(object);
 			return (parent == null ? Collections.EMPTY_SET : Collections.singleton(parent)).toArray();
 		}
 
 		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
+		 * <!-- begin-user-doc --> <!-- end-user-doc -->
+		 * 
 		 * @generated
 		 */
 		@Override
-		public Object [] getChildren(Object object) {
+		public Object[] getChildren(Object object) {
 			Object parent = super.getParent(object);
 			return (parent == null ? Collections.EMPTY_SET : Collections.singleton(parent)).toArray();
 		}
 
 		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
+		 * <!-- begin-user-doc --> <!-- end-user-doc -->
+		 * 
 		 * @generated
 		 */
 		@Override
@@ -820,8 +690,8 @@ public class PhysicalModelEditor
 		}
 
 		/**
-		 * <!-- begin-user-doc -->
-		 * <!-- end-user-doc -->
+		 * <!-- begin-user-doc --> <!-- end-user-doc -->
+		 * 
 		 * @generated
 		 */
 		@Override
@@ -830,9 +700,33 @@ public class PhysicalModelEditor
 		}
 	}
 
+	// ------------------------------------------------------------------
+
+	public void refreshViewer() {
+		if (currentViewer != null) {
+			// currentViewer.refresh();
+			if (currentViewer instanceof TreeViewer) {
+				TreeViewer treeViewer = (TreeViewer) currentViewer;
+				Object[] elements = treeViewer.getExpandedElements();
+				treeViewer.refresh();
+				for (Object element : elements) {
+					treeViewer.setExpandedState(element, true);
+				}
+				// treeViewer.setExpandedElements(elements);
+			}
+		} else {
+			// if there are no viewer set current viewer to the modelTreeViewer and refresh it
+			if (selectionViewer != null) {
+				setCurrentViewer(selectionViewer);
+				refreshViewer();
+			}
+		}
+
+	}
+
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public void setCurrentViewerPane(ViewerPane viewerPane) {
@@ -846,37 +740,28 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * This makes sure that one content viewer, either for the current page or the outline view, if it has focus,
-	 * is the current one.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
+	 * This makes sure that one content viewer, either for the current page or the outline view, if it has focus, is the current one.
 	 */
 	public void setCurrentViewer(Viewer viewer) {
 		// If it is changing...
-		//
 		if (currentViewer != viewer) {
 			if (selectionChangedListener == null) {
 				// Create the listener on demand.
-				//
-				selectionChangedListener =
-					new ISelectionChangedListener() {
-						// This just notifies those things that are affected by the section.
-						//
-						public void selectionChanged(SelectionChangedEvent selectionChangedEvent) {
-							setSelection(selectionChangedEvent.getSelection());
-						}
-					};
+				selectionChangedListener = new ISelectionChangedListener() {
+					// This just notifies those things that are affected by the section.
+					@Override
+					public void selectionChanged(SelectionChangedEvent selectionChangedEvent) {
+						selectionProvider.setSelection(selectionChangedEvent.getSelection());
+					}
+				};
 			}
 
 			// Stop listening to the old one.
-			//
 			if (currentViewer != null) {
 				currentViewer.removeSelectionChangedListener(selectionChangedListener);
 			}
 
 			// Start listening to the new one.
-			//
 			if (viewer != null) {
 				viewer.addSelectionChangedListener(selectionChangedListener);
 			}
@@ -886,25 +771,22 @@ public class PhysicalModelEditor
 			currentViewer = viewer;
 
 			// Set the editors selection based on the current viewer's selection.
-			//
-			setSelection(currentViewer == null ? StructuredSelection.EMPTY : currentViewer.getSelection());
+			selectionProvider.setSelection(currentViewer == null ? StructuredSelection.EMPTY : currentViewer.getSelection());
 		}
 	}
 
 	/**
-	 * This returns the viewer as required by the {@link IViewerProvider} interface.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This returns the viewer as required by the {@link IViewerProvider} interface. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public Viewer getViewer() {
 		return currentViewer;
 	}
 
 	/**
-	 * This creates a context menu for the viewer and adds a listener as well registering the menu for extension.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This creates a context menu for the viewer and adds a listener as well registering the menu for extension. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
 	 */
 	protected void createContextMenuFor(StructuredViewer viewer) {
@@ -912,90 +794,75 @@ public class PhysicalModelEditor
 		contextMenu.add(new Separator("additions"));
 		contextMenu.setRemoveAllWhenShown(true);
 		contextMenu.addMenuListener(this);
-		Menu menu= contextMenu.createContextMenu(viewer.getControl());
+		Menu menu = contextMenu.createContextMenu(viewer.getControl());
 		viewer.getControl().setMenu(menu);
 		getSite().registerContextMenu(contextMenu, new UnwrappingSelectionProvider(viewer));
 
 		/*
-		int dndOperations = DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
-		Transfer[] transfers = new Transfer[] { LocalTransfer.getInstance() };
-		viewer.addDragSupport(dndOperations, transfers, new ViewerDragAdapter(viewer));
-		viewer.addDropSupport(dndOperations, transfers, new EditingDomainViewerDropAdapter(editingDomain, viewer));
-		*/
-		
-		//set drag source
+		 * int dndOperations = DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK; Transfer[] transfers = new Transfer[] { LocalTransfer.getInstance() };
+		 * viewer.addDragSupport(dndOperations, transfers, new ViewerDragAdapter(viewer)); viewer.addDropSupport(dndOperations, transfers, new
+		 * EditingDomainViewerDropAdapter(editingDomain, viewer));
+		 */
+
+		// set drag source
 		int operations = DND.DROP_COPY | DND.DROP_MOVE;
-		Transfer[] transferTypes = new Transfer[]{TextTransfer.getInstance()};
+		Transfer[] transferTypes = new Transfer[] { TextTransfer.getInstance() };
 		DragSourceListener dragSourceListener = new PhysicalObjectDragListener(viewer);
 		viewer.addDragSupport(operations, transferTypes, dragSourceListener);
 	}
 
 	/**
-	 * This is the method called to load a resource into the editing domain's resource set based on the editor's input.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is the method called to load a resource into the editing domain's resource set based on the editor's input. <!-- begin-user-doc --> <!--
+	 * end-user-doc -->
 	 * 
 	 */
 	public void createModel() {
-		//URI resourceURI = EditUIUtil.getURI(getEditorInput());
-		URI resourceURI = ((PhysicalModelEditorInput)getEditorInput()).getResourceFileURI();
-		
+		// URI resourceURI = EditUIUtil.getURI(getEditorInput());
+		URI resourceURI = ((PhysicalModelEditorInput) getEditorInput()).getResourceFileURI();
+
 		Exception exception = null;
 		Resource resource = null;
+
 		try {
 			// Load the resource through the editing domain.
 			//
 			resource = editingDomain.getResourceSet().getResource(resourceURI, true);
-		}
-		catch (Exception e) {
+
+		} catch (Exception e) {
 			exception = e;
 			resource = editingDomain.getResourceSet().getResource(resourceURI, false);
 		}
 
 		Diagnostic diagnostic = analyzeResourceProblems(resource, exception);
 		if (diagnostic.getSeverity() != Diagnostic.OK) {
-			resourceToDiagnosticMap.put(resource,  analyzeResourceProblems(resource, exception));
+			resourceToDiagnosticMap.put(resource, analyzeResourceProblems(resource, exception));
 		}
 		editingDomain.getResourceSet().eAdapters().add(problemIndicationAdapter);
 	}
 
 	/**
-	 * Returns a diagnostic describing the errors and warnings listed in the resource
-	 * and the specified exception (if any).
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Returns a diagnostic describing the errors and warnings listed in the resource and the specified exception (if any). <!-- begin-user-doc --> <!--
+	 * end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public Diagnostic analyzeResourceProblems(Resource resource, Exception exception) {
 		if (!resource.getErrors().isEmpty() || !resource.getWarnings().isEmpty()) {
-			BasicDiagnostic basicDiagnostic =
-				new BasicDiagnostic
-					(Diagnostic.ERROR,
-					 "it.eng.spagobi.meta.editor",
-					 0,
-					 RL.getString("business.editor.diagnostic.createmodelerror.message", new Object[]{resource.getURI()}),
-					 new Object [] { exception == null ? (Object)resource : exception });
+			BasicDiagnostic basicDiagnostic = new BasicDiagnostic(Diagnostic.ERROR, "it.eng.spagobi.meta.editor", 0, RL.getString(
+					"business.editor.diagnostic.createmodelerror.message", new Object[] { resource.getURI() }),
+					new Object[] { exception == null ? (Object) resource : exception });
 			basicDiagnostic.merge(EcoreUtil.computeDiagnostic(resource, true));
 			return basicDiagnostic;
-		}
-		else if (exception != null) {
-			return
-				new BasicDiagnostic
-					(Diagnostic.ERROR,
-					 "it.eng.spagobi.meta.editor",
-					 0,
-					 RL.getString("business.editor.diagnostic.createmodelerror.message", new Object[]{resource.getURI()}),
-					 new Object[] { exception });
-		}
-		else {
+		} else if (exception != null) {
+			return new BasicDiagnostic(Diagnostic.ERROR, "it.eng.spagobi.meta.editor", 0, RL.getString("business.editor.diagnostic.createmodelerror.message",
+					new Object[] { resource.getURI() }), new Object[] { exception });
+		} else {
 			return Diagnostic.OK_INSTANCE;
 		}
 	}
 
 	/**
-	 * This is the method used by the framework to install your own controls.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is the method used by the framework to install your own controls. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
 	 */
 	@Override
@@ -1010,267 +877,176 @@ public class PhysicalModelEditor
 			// Create a page for the selection tree view.
 			//
 			{
-				ViewerPane viewerPane =
-					new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
-						@Override
-						public Viewer createViewer(Composite composite) {
-							Tree tree = new Tree(composite, SWT.MULTI);
-							TreeViewer newTreeViewer = new TreeViewer(tree);
-							return newTreeViewer;
-						}
-						@Override
-						public void requestActivation() {
-							super.requestActivation();
-							setCurrentViewerPane(this);
-						}
-					};
+				ViewerPane viewerPane = new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
+					@Override
+					public Viewer createViewer(Composite composite) {
+						Tree tree = new Tree(composite, SWT.MULTI);
+						TreeViewer newTreeViewer = new TreeViewer(tree);
+						return newTreeViewer;
+					}
+
+					@Override
+					public void requestActivation() {
+						super.requestActivation();
+						setCurrentViewerPane(this);
+					}
+				};
 				viewerPane.createControl(getContainer());
 
-				selectionViewer = (TreeViewer)viewerPane.getViewer();
+				selectionViewer = (TreeViewer) viewerPane.getViewer();
 				selectionViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
 				selectionViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
-				
+
 				selectionViewer.getTree().addKeyListener(new KeyAdapter() {
-				      public void keyPressed(KeyEvent event) {
-				    	  if (event.keyCode == SWT.DEL) {
-				    		 // stops propagation
-				    		 event.doit = false;
-				    	  }
-				    }
+					@Override
+					public void keyPressed(KeyEvent event) {
+						if (event.keyCode == SWT.DEL) {
+							// stops propagation
+							event.doit = false;
+						}
+					}
 				});
-				
-				URI rootObjectURI = ((PhysicalModelEditorInput)getEditorInput()).getRootObjectURI();
+
+				URI rootObjectURI = ((PhysicalModelEditorInput) getEditorInput()).getRootObjectURI();
 				EObject rootObject = editingDomain.getResourceSet().getEObject(rootObjectURI, false);
-				
-				//selectionViewer.setInput(editingDomain.getResourceSet());
+
+				// selectionViewer.setInput(editingDomain.getResourceSet());
 				selectionViewer.setInput(rootObject);
-				
-				//selectionViewer.setInput(editingDomain.getResourceSet());
-				//selectionViewer.setSelection(new StructuredSelection(editingDomain.getResourceSet().getResources().get(0)), true);
+
+				// selectionViewer.setInput(editingDomain.getResourceSet());
+				// selectionViewer.setSelection(new StructuredSelection(editingDomain.getResourceSet().getResources().get(0)), true);
 				viewerPane.setTitle(editingDomain.getResourceSet());
 
 				new AdapterFactoryTreeEditor(selectionViewer.getTree(), adapterFactory);
-
 				createContextMenuFor(selectionViewer);
 				int pageIndex = addPage(viewerPane.getControl());
 				setPageText(pageIndex, RL.getString("business.editor.selectionpage.label"));
-				
+
 				selectionViewer.expandToLevel(2);
 			}
 			/*
-			// Create a page for the parent tree view.
-			//
-			{
-				ViewerPane viewerPane =
-					new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
-						@Override
-						public Viewer createViewer(Composite composite) {
-							Tree tree = new Tree(composite, SWT.MULTI);
-							TreeViewer newTreeViewer = new TreeViewer(tree);
-							return newTreeViewer;
-						}
-						@Override
-						public void requestActivation() {
-							super.requestActivation();
-							setCurrentViewerPane(this);
-						}
-					};
-				viewerPane.createControl(getContainer());
+			 * // Create a page for the parent tree view. // { ViewerPane viewerPane = new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
+			 * 
+			 * @Override public Viewer createViewer(Composite composite) { Tree tree = new Tree(composite, SWT.MULTI); TreeViewer newTreeViewer = new
+			 * TreeViewer(tree); return newTreeViewer; }
+			 * 
+			 * @Override public void requestActivation() { super.requestActivation(); setCurrentViewerPane(this); } }; viewerPane.createControl(getContainer());
+			 * 
+			 * parentViewer = (TreeViewer)viewerPane.getViewer(); parentViewer.setAutoExpandLevel(30); parentViewer.setContentProvider(new
+			 * ReverseAdapterFactoryContentProvider(adapterFactory)); parentViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
+			 * 
+			 * createContextMenuFor(parentViewer); int pageIndex = addPage(viewerPane.getControl()); setPageText(pageIndex, getString("_UI_ParentPage_label"));
+			 * }
+			 * 
+			 * 
+			 * // This is the page for the list viewer // { ViewerPane viewerPane = new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
+			 * 
+			 * @Override public Viewer createViewer(Composite composite) { return new ListViewer(composite); }
+			 * 
+			 * @Override public void requestActivation() { super.requestActivation(); setCurrentViewerPane(this); } }; viewerPane.createControl(getContainer());
+			 * listViewer = (ListViewer)viewerPane.getViewer(); listViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
+			 * listViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
+			 * 
+			 * createContextMenuFor(listViewer); int pageIndex = addPage(viewerPane.getControl()); setPageText(pageIndex, getString("_UI_ListPage_label")); }
+			 * 
+			 * // This is the page for the tree viewer // { ViewerPane viewerPane = new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
+			 * 
+			 * @Override public Viewer createViewer(Composite composite) { return new TreeViewer(composite); }
+			 * 
+			 * @Override public void requestActivation() { super.requestActivation(); setCurrentViewerPane(this); } }; viewerPane.createControl(getContainer());
+			 * treeViewer = (TreeViewer)viewerPane.getViewer(); treeViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
+			 * treeViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
+			 * 
+			 * new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
+			 * 
+			 * createContextMenuFor(treeViewer); int pageIndex = addPage(viewerPane.getControl()); setPageText(pageIndex, getString("_UI_TreePage_label")); }
+			 * 
+			 * // This is the page for the table viewer. // { ViewerPane viewerPane = new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
+			 * 
+			 * @Override public Viewer createViewer(Composite composite) { return new TableViewer(composite); }
+			 * 
+			 * @Override public void requestActivation() { super.requestActivation(); setCurrentViewerPane(this); } }; viewerPane.createControl(getContainer());
+			 * tableViewer = (TableViewer)viewerPane.getViewer();
+			 * 
+			 * Table table = tableViewer.getTable(); TableLayout layout = new TableLayout(); table.setLayout(layout); table.setHeaderVisible(true);
+			 * table.setLinesVisible(true);
+			 * 
+			 * TableColumn objectColumn = new TableColumn(table, SWT.NONE); layout.addColumnData(new ColumnWeightData(3, 100, true));
+			 * objectColumn.setText(getString("_UI_ObjectColumn_label")); objectColumn.setResizable(true);
+			 * 
+			 * TableColumn selfColumn = new TableColumn(table, SWT.NONE); layout.addColumnData(new ColumnWeightData(2, 100, true));
+			 * selfColumn.setText(getString("_UI_SelfColumn_label")); selfColumn.setResizable(true);
+			 * 
+			 * tableViewer.setColumnProperties(new String [] {"a", "b"}); tableViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
+			 * tableViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
+			 * 
+			 * createContextMenuFor(tableViewer); int pageIndex = addPage(viewerPane.getControl()); setPageText(pageIndex, getString("_UI_TablePage_label")); }
+			 * 
+			 * // This is the page for the table tree viewer. // { ViewerPane viewerPane = new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
+			 * 
+			 * @Override public Viewer createViewer(Composite composite) { return new TreeViewer(composite); }
+			 * 
+			 * @Override public void requestActivation() { super.requestActivation(); setCurrentViewerPane(this); } }; viewerPane.createControl(getContainer());
+			 * 
+			 * treeViewerWithColumns = (TreeViewer)viewerPane.getViewer();
+			 * 
+			 * Tree tree = treeViewerWithColumns.getTree(); tree.setLayoutData(new FillLayout()); tree.setHeaderVisible(true); tree.setLinesVisible(true);
+			 * 
+			 * TreeColumn objectColumn = new TreeColumn(tree, SWT.NONE); objectColumn.setText(getString("_UI_ObjectColumn_label"));
+			 * objectColumn.setResizable(true); objectColumn.setWidth(250);
+			 * 
+			 * TreeColumn selfColumn = new TreeColumn(tree, SWT.NONE); selfColumn.setText(getString("_UI_SelfColumn_label")); selfColumn.setResizable(true);
+			 * selfColumn.setWidth(200);
+			 * 
+			 * treeViewerWithColumns.setColumnProperties(new String [] {"a", "b"}); treeViewerWithColumns.setContentProvider(new
+			 * AdapterFactoryContentProvider(adapterFactory)); treeViewerWithColumns.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
+			 * 
+			 * createContextMenuFor(treeViewerWithColumns); int pageIndex = addPage(viewerPane.getControl()); setPageText(pageIndex,
+			 * getString("_UI_TreeWithColumnsPage_label")); }
+			 */
 
-				parentViewer = (TreeViewer)viewerPane.getViewer();
-				parentViewer.setAutoExpandLevel(30);
-				parentViewer.setContentProvider(new ReverseAdapterFactoryContentProvider(adapterFactory));
-				parentViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
-
-				createContextMenuFor(parentViewer);
-				int pageIndex = addPage(viewerPane.getControl());
-				setPageText(pageIndex, getString("_UI_ParentPage_label"));
-			}
-
-			
-			// This is the page for the list viewer
-			//
-			{
-				ViewerPane viewerPane =
-					new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
-						@Override
-						public Viewer createViewer(Composite composite) {
-							return new ListViewer(composite);
-						}
-						@Override
-						public void requestActivation() {
-							super.requestActivation();
-							setCurrentViewerPane(this);
-						}
-					};
-				viewerPane.createControl(getContainer());
-				listViewer = (ListViewer)viewerPane.getViewer();
-				listViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
-				listViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
-
-				createContextMenuFor(listViewer);
-				int pageIndex = addPage(viewerPane.getControl());
-				setPageText(pageIndex, getString("_UI_ListPage_label"));
-			}
-
-			// This is the page for the tree viewer
-			//
-			{
-				ViewerPane viewerPane =
-					new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
-						@Override
-						public Viewer createViewer(Composite composite) {
-							return new TreeViewer(composite);
-						}
-						@Override
-						public void requestActivation() {
-							super.requestActivation();
-							setCurrentViewerPane(this);
-						}
-					};
-				viewerPane.createControl(getContainer());
-				treeViewer = (TreeViewer)viewerPane.getViewer();
-				treeViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
-				treeViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
-
-				new AdapterFactoryTreeEditor(treeViewer.getTree(), adapterFactory);
-
-				createContextMenuFor(treeViewer);
-				int pageIndex = addPage(viewerPane.getControl());
-				setPageText(pageIndex, getString("_UI_TreePage_label"));
-			}
-
-			// This is the page for the table viewer.
-			//
-			{
-				ViewerPane viewerPane =
-					new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
-						@Override
-						public Viewer createViewer(Composite composite) {
-							return new TableViewer(composite);
-						}
-						@Override
-						public void requestActivation() {
-							super.requestActivation();
-							setCurrentViewerPane(this);
-						}
-					};
-				viewerPane.createControl(getContainer());
-				tableViewer = (TableViewer)viewerPane.getViewer();
-
-				Table table = tableViewer.getTable();
-				TableLayout layout = new TableLayout();
-				table.setLayout(layout);
-				table.setHeaderVisible(true);
-				table.setLinesVisible(true);
-
-				TableColumn objectColumn = new TableColumn(table, SWT.NONE);
-				layout.addColumnData(new ColumnWeightData(3, 100, true));
-				objectColumn.setText(getString("_UI_ObjectColumn_label"));
-				objectColumn.setResizable(true);
-
-				TableColumn selfColumn = new TableColumn(table, SWT.NONE);
-				layout.addColumnData(new ColumnWeightData(2, 100, true));
-				selfColumn.setText(getString("_UI_SelfColumn_label"));
-				selfColumn.setResizable(true);
-
-				tableViewer.setColumnProperties(new String [] {"a", "b"});
-				tableViewer.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
-				tableViewer.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
-
-				createContextMenuFor(tableViewer);
-				int pageIndex = addPage(viewerPane.getControl());
-				setPageText(pageIndex, getString("_UI_TablePage_label"));
-			}
-
-			// This is the page for the table tree viewer.
-			//
-			{
-				ViewerPane viewerPane =
-					new ViewerPane(getSite().getPage(), PhysicalModelEditor.this) {
-						@Override
-						public Viewer createViewer(Composite composite) {
-							return new TreeViewer(composite);
-						}
-						@Override
-						public void requestActivation() {
-							super.requestActivation();
-							setCurrentViewerPane(this);
-						}
-					};
-				viewerPane.createControl(getContainer());
-
-				treeViewerWithColumns = (TreeViewer)viewerPane.getViewer();
-
-				Tree tree = treeViewerWithColumns.getTree();
-				tree.setLayoutData(new FillLayout());
-				tree.setHeaderVisible(true);
-				tree.setLinesVisible(true);
-
-				TreeColumn objectColumn = new TreeColumn(tree, SWT.NONE);
-				objectColumn.setText(getString("_UI_ObjectColumn_label"));
-				objectColumn.setResizable(true);
-				objectColumn.setWidth(250);
-
-				TreeColumn selfColumn = new TreeColumn(tree, SWT.NONE);
-				selfColumn.setText(getString("_UI_SelfColumn_label"));
-				selfColumn.setResizable(true);
-				selfColumn.setWidth(200);
-
-				treeViewerWithColumns.setColumnProperties(new String [] {"a", "b"});
-				treeViewerWithColumns.setContentProvider(new AdapterFactoryContentProvider(adapterFactory));
-				treeViewerWithColumns.setLabelProvider(new AdapterFactoryLabelProvider(adapterFactory));
-
-				createContextMenuFor(treeViewerWithColumns);
-				int pageIndex = addPage(viewerPane.getControl());
-				setPageText(pageIndex, getString("_UI_TreeWithColumnsPage_label"));
-			}
-			*/
-
-			getSite().getShell().getDisplay().asyncExec
-				(new Runnable() {
-					 public void run() {
-						 setActivePage(0);
-					 }
-				 });
+			getSite().getShell().getDisplay().asyncExec(new Runnable() {
+				@Override
+				public void run() {
+					setActivePage(0);
+				}
+			});
 		}
 
 		// Ensures that this editor will only display the page's tab
 		// area if there are more than one page
 		//
-		getContainer().addControlListener
-			(new ControlAdapter() {
-				boolean guard = false;
-				@Override
-				public void controlResized(ControlEvent event) {
-					if (!guard) {
-						guard = true;
-						hideTabs();
-						guard = false;
-					}
-				}
-			 });
+		getContainer().addControlListener(new ControlAdapter() {
+			boolean guard = false;
 
-		getSite().getShell().getDisplay().asyncExec
-			(new Runnable() {
-				 public void run() {
-					 updateProblemIndication();
-				 }
-			 });
+			@Override
+			public void controlResized(ControlEvent event) {
+				if (!guard) {
+					guard = true;
+					hideTabs();
+					guard = false;
+				}
+			}
+		});
+
+		getSite().getShell().getDisplay().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				updateProblemIndication();
+			}
+		});
 	}
 
 	/**
-	 * If there is just one page in the multi-page editor part,
-	 * this hides the single tab at the bottom.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * If there is just one page in the multi-page editor part, this hides the single tab at the bottom. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected void hideTabs() {
 		if (getPageCount() <= 1) {
 			setPageText(0, "");
 			if (getContainer() instanceof CTabFolder) {
-				((CTabFolder)getContainer()).setTabHeight(1);
+				((CTabFolder) getContainer()).setTabHeight(1);
 				Point point = getContainer().getSize();
 				getContainer().setSize(point.x, point.y + 6);
 			}
@@ -1278,17 +1054,15 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * If there is more than one page in the multi-page editor part,
-	 * this shows the tabs at the bottom.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * If there is more than one page in the multi-page editor part, this shows the tabs at the bottom. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected void showTabs() {
 		if (getPageCount() > 1) {
 			setPageText(0, RL.getString("business.editor.selectionpage.label"));
 			if (getContainer() instanceof CTabFolder) {
-				((CTabFolder)getContainer()).setTabHeight(SWT.DEFAULT);
+				((CTabFolder) getContainer()).setTabHeight(SWT.DEFAULT);
 				Point point = getContainer().getSize();
 				getContainer().setSize(point.x, point.y - 6);
 			}
@@ -1296,9 +1070,8 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * This is used to track the active viewer.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is used to track the active viewer. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
@@ -1311,9 +1084,8 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * This is how the framework determines which interfaces we implement.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is how the framework determines which interfaces we implement. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@SuppressWarnings("rawtypes")
@@ -1321,22 +1093,18 @@ public class PhysicalModelEditor
 	public Object getAdapter(Class key) {
 		if (key.equals(IContentOutlinePage.class)) {
 			return showOutlineView() ? getContentOutlinePage() : null;
-		}
-		else if (key.equals(IPropertySheetPage.class)) {
+		} else if (key.equals(IPropertySheetPage.class)) {
 			return getPropertySheetPage();
-		}
-		else if (key.equals(IGotoMarker.class)) {
+		} else if (key.equals(IGotoMarker.class)) {
 			return this;
-		}
-		else {
+		} else {
 			return super.getAdapter(key);
 		}
 	}
 
 	/**
-	 * This accesses a cached version of the content outliner.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This accesses a cached version of the content outliner. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public IContentOutlinePage getContentOutlinePage() {
@@ -1361,9 +1129,9 @@ public class PhysicalModelEditor
 					createContextMenuFor(contentOutlineViewer);
 
 					if (!editingDomain.getResourceSet().getResources().isEmpty()) {
-					  // Select the root object in the view.
-					  //
-					  contentOutlineViewer.setSelection(new StructuredSelection(editingDomain.getResourceSet().getResources().get(0)), true);
+						// Select the root object in the view.
+						//
+						contentOutlineViewer.setSelection(new StructuredSelection(editingDomain.getResourceSet().getResources().get(0)), true);
 					}
 				}
 
@@ -1384,45 +1152,44 @@ public class PhysicalModelEditor
 
 			// Listen to selection so that we can handle it is a special way.
 			//
-			contentOutlinePage.addSelectionChangedListener
-				(new ISelectionChangedListener() {
-					 // This ensures that we handle selections correctly.
-					 //
-					 public void selectionChanged(SelectionChangedEvent event) {
-						 handleContentOutlineSelection(event.getSelection());
-					 }
-				 });
+			contentOutlinePage.addSelectionChangedListener(new ISelectionChangedListener() {
+				// This ensures that we handle selections correctly.
+				//
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					handleContentOutlineSelection(event.getSelection());
+				}
+			});
 		}
 
 		return contentOutlinePage;
 	}
 
 	/**
-	 * This accesses a cached version of the property sheet.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This accesses a cached version of the property sheet. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public IPropertySheetPage getPropertySheetPage() {
 		if (propertySheetPage == null) {
-//			propertySheetPage =
-//				new ExtendedPropertySheetPage(editingDomain) {
-//					@Override
-//					public void setSelectionToViewer(List<?> selection) {
-//						PhysicalModelEditor.this.setSelectionToViewer(selection);
-//						PhysicalModelEditor.this.setFocus();
-//					}
-//
-//					@Override
-//					public void setActionBars(IActionBars actionBars) {
-//						super.setActionBars(actionBars);
-//						getActionBarContributor().shareGlobalActions(this, actionBars);
-//					}
-//				};
-//			propertySheetPage.setPropertySourceProvider(new AdapterFactoryContentProvider(adapterFactory));
+			// propertySheetPage =
+			// new ExtendedPropertySheetPage(editingDomain) {
+			// @Override
+			// public void setSelectionToViewer(List<?> selection) {
+			// PhysicalModelEditor.this.setSelectionToViewer(selection);
+			// PhysicalModelEditor.this.setFocus();
+			// }
+			//
+			// @Override
+			// public void setActionBars(IActionBars actionBars) {
+			// super.setActionBars(actionBars);
+			// getActionBarContributor().shareGlobalActions(this, actionBars);
+			// }
+			// };
+			// propertySheetPage.setPropertySourceProvider(new AdapterFactoryContentProvider(adapterFactory));
 			CustomizedPropertySheetSorter propertySheetSorter = new CustomizedPropertySheetSorter();
 			propertySheetPage = new CustomizedPhysicalPropertySheetPage(this, propertySheetSorter);
-			//propertySheetPage.setPropertySourceProvider(new AdapterFactoryContentProvider(adapterFactory));
+			// propertySheetPage.setPropertySourceProvider(new AdapterFactoryContentProvider(adapterFactory));
 			propertySheetPage.setPropertySourceProvider(new CustomizedAdapterFactoryContentProvider(adapterFactory));
 		}
 
@@ -1430,14 +1197,13 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * This deals with how we want selection in the outliner to affect the other views.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This deals with how we want selection in the outliner to affect the other views. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public void handleContentOutlineSelection(ISelection selection) {
 		if (currentViewerPane != null && !selection.isEmpty() && selection instanceof IStructuredSelection) {
-			Iterator<?> selectedElements = ((IStructuredSelection)selection).iterator();
+			Iterator<?> selectedElements = ((IStructuredSelection) selection).iterator();
 			if (selectedElements.hasNext()) {
 				// Get the first selected element.
 				//
@@ -1455,8 +1221,7 @@ public class PhysicalModelEditor
 					// Set the selection to the widget.
 					//
 					selectionViewer.setSelection(new StructuredSelection(selectionList));
-				}
-				else {
+				} else {
 					// Set the input to the widget.
 					//
 					if (currentViewerPane.getViewer().getInput() != selectedElement) {
@@ -1469,84 +1234,80 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * This is for implementing {@link IEditorPart} and simply tests the command stack.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is for implementing {@link IEditorPart} and simply tests the command stack. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	public boolean isDirty() {
-		return ((BasicCommandStack)editingDomain.getCommandStack()).isSaveNeeded();
+		return ((BasicCommandStack) editingDomain.getCommandStack()).isSaveNeeded();
 	}
 
 	/**
-	 * This is for implementing {@link IEditorPart} and simply saves the model file.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This is for implementing {@link IEditorPart} and simply saves the model file. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 * 
 	 */
 	@Override
 	public void doSave(IProgressMonitor progressMonitor) {
 		logger.debug("doSave");
-//		// Save only resources that have actually changed.
-//		//
-//		final Map<Object, Object> saveOptions = new HashMap<Object, Object>();
-//		//saveOptions.put(Resource.OPTION_SAVE_ONLY_IF_CHANGED, Resource.OPTION_SAVE_ONLY_IF_CHANGED_MEMORY_BUFFER);
-//
-//		// Do the work within an operation because this is a long running activity that modifies the workbench.
-//		//
-//		WorkspaceModifyOperation operation =
-//			new WorkspaceModifyOperation() {
-//				// This is the method that gets invoked when the operation runs.
-//				//
-//				@Override
-//				public void execute(IProgressMonitor monitor) {
-//					// Save the resources to the file system.
-//					//
-//					boolean first = true;
-//					for (Resource resource : editingDomain.getResourceSet().getResources()) {
-//						if ((first || !resource.getContents().isEmpty() || isPersisted(resource)) && !editingDomain.isReadOnly(resource)) {
-//							try {
-//								long timeStamp = resource.getTimeStamp();
-//								resource.save(saveOptions);
-//								if (resource.getTimeStamp() != timeStamp) {
-//									savedResources.add(resource);
-//								}
-//							}
-//							catch (Exception exception) {
-//								resourceToDiagnosticMap.put(resource, analyzeResourceProblems(resource, exception));
-//							}
-//							first = false;
-//						}
-//					}
-//				}
-//			};
-//
-//		updateProblemIndication = false;
-//		try {
-//			// This runs the options, and shows progress.
-//			//
-//			new ProgressMonitorDialog(getSite().getShell()).run(true, false, operation);
-//
-//			// Refresh the necessary state.
-//			//
-//			((BasicCommandStack)editingDomain.getCommandStack()).saveIsDone();
-//			firePropertyChange(IEditorPart.PROP_DIRTY);
-//		}
-//		catch (Exception exception) {
-//			// Something went wrong that shouldn't.
-//			//
-//			SpagoBIMetaModelEditorPlugin.INSTANCE.log(exception);
-//		}
-//		updateProblemIndication = true;
-//		updateProblemIndication();
+		// // Save only resources that have actually changed.
+		// //
+		// final Map<Object, Object> saveOptions = new HashMap<Object, Object>();
+		// //saveOptions.put(Resource.OPTION_SAVE_ONLY_IF_CHANGED, Resource.OPTION_SAVE_ONLY_IF_CHANGED_MEMORY_BUFFER);
+		//
+		// // Do the work within an operation because this is a long running activity that modifies the workbench.
+		// //
+		// WorkspaceModifyOperation operation =
+		// new WorkspaceModifyOperation() {
+		// // This is the method that gets invoked when the operation runs.
+		// //
+		// @Override
+		// public void execute(IProgressMonitor monitor) {
+		// // Save the resources to the file system.
+		// //
+		// boolean first = true;
+		// for (Resource resource : editingDomain.getResourceSet().getResources()) {
+		// if ((first || !resource.getContents().isEmpty() || isPersisted(resource)) && !editingDomain.isReadOnly(resource)) {
+		// try {
+		// long timeStamp = resource.getTimeStamp();
+		// resource.save(saveOptions);
+		// if (resource.getTimeStamp() != timeStamp) {
+		// savedResources.add(resource);
+		// }
+		// }
+		// catch (Exception exception) {
+		// resourceToDiagnosticMap.put(resource, analyzeResourceProblems(resource, exception));
+		// }
+		// first = false;
+		// }
+		// }
+		// }
+		// };
+		//
+		// updateProblemIndication = false;
+		// try {
+		// // This runs the options, and shows progress.
+		// //
+		// new ProgressMonitorDialog(getSite().getShell()).run(true, false, operation);
+		//
+		// // Refresh the necessary state.
+		// //
+		// ((BasicCommandStack)editingDomain.getCommandStack()).saveIsDone();
+		// firePropertyChange(IEditorPart.PROP_DIRTY);
+		// }
+		// catch (Exception exception) {
+		// // Something went wrong that shouldn't.
+		// //
+		// SpagoBIMetaModelEditorPlugin.INSTANCE.log(exception);
+		// }
+		// updateProblemIndication = true;
+		// updateProblemIndication();
 	}
 
 	/**
-	 * This returns whether something has been persisted to the URI of the specified resource.
-	 * The implementation uses the URI converter from the editor's resource set to try to open an input stream. 
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This returns whether something has been persisted to the URI of the specified resource. The implementation uses the URI converter from the editor's
+	 * resource set to try to open an input stream. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected boolean isPersisted(Resource resource) {
@@ -1557,17 +1318,15 @@ public class PhysicalModelEditor
 				result = true;
 				stream.close();
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			// Ignore
 		}
 		return result;
 	}
 
 	/**
-	 * This always returns true because it is not currently supported.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This always returns true because it is not currently supported. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
@@ -1576,9 +1335,8 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * This also changes the editor's input.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This also changes the editor's input. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
@@ -1595,26 +1353,25 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected void doSaveAs(URI uri, IEditorInput editorInput) {
 		(editingDomain.getResourceSet().getResources().get(0)).setURI(uri);
 		setInputWithNotify(editorInput);
 		setPartName(editorInput.getName());
-		IProgressMonitor progressMonitor =
-			getActionBars().getStatusLineManager() != null ?
-				getActionBars().getStatusLineManager().getProgressMonitor() :
-				new NullProgressMonitor();
+		IProgressMonitor progressMonitor = getActionBars().getStatusLineManager() != null ? getActionBars().getStatusLineManager().getProgressMonitor()
+				: new NullProgressMonitor();
 		doSave(progressMonitor);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public void gotoMarker(IMarker marker) {
 		try {
 			if (marker.getType().equals(EValidator.MARKER)) {
@@ -1623,152 +1380,105 @@ public class PhysicalModelEditor
 					URI uri = URI.createURI(uriAttribute);
 					EObject eObject = editingDomain.getResourceSet().getEObject(uri, true);
 					if (eObject != null) {
-					  setSelectionToViewer(Collections.singleton(editingDomain.getWrapper(eObject)));
+						setSelectionToViewer(Collections.singleton(editingDomain.getWrapper(eObject)));
 					}
 				}
 			}
-		}
-		catch (CoreException e) {
+		} catch (CoreException e) {
 			IStatus status = new Status(IStatus.ERROR, SpagoBIMetaEditorPlugin.PLUGIN_ID, IStatus.OK, "Unexpected error occurred", e);
-		    StatusManager.getManager().handle(status, StatusManager.LOG|StatusManager.SHOW);
+			StatusManager.getManager().handle(status, StatusManager.LOG | StatusManager.SHOW);
 		}
 	}
 
 	/**
-	 * This is called during startup.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
+	 * This is called during startup. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 */
 	@Override
 	public void init(IEditorSite site, IEditorInput editorInput) {
 		setSite(site);
 		setInputWithNotify(editorInput);
 		setPartName(editorInput.getName());
-		site.setSelectionProvider(this);
-		//site.getPage().addPartListener(partListener);
+
+		selectionProvider = new PhysicalModelEditorSelectionProvider(this);
+		partListener = new PhysicalModelPartListener(this, logger);
+
+		site.setSelectionProvider(selectionProvider);
+		// site.getPage().addPartListener(partListener);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(resourceChangeListener, IResourceChangeEvent.POST_CHANGE);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	public void setFocus() {
 		if (currentViewerPane != null) {
 			currentViewerPane.setFocus();
-		}
-		else {
+		} else {
 			getControl(getActivePage()).setFocus();
 		}
 	}
 
 	/**
-	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		selectionChangedListeners.add(listener);
-	}
-
-	/**
-	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-		selectionChangedListeners.remove(listener);
-	}
-
-	/**
-	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider} to return this editor's overall selection.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public ISelection getSelection() {
-		return editorSelection;
-	}
-
-	/**
-	 * This implements {@link org.eclipse.jface.viewers.ISelectionProvider} to set this editor's overall selection.
-	 * Calling this result will notify the listeners.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @generated
-	 */
-	public void setSelection(ISelection selection) {
-		editorSelection = selection;
-
-		for (ISelectionChangedListener listener : selectionChangedListeners) {
-			listener.selectionChanged(new SelectionChangedEvent(this, selection));
-		}
-		setStatusLineManager(selection);
-	}
-
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public void setStatusLineManager(ISelection selection) {
-		IStatusLineManager statusLineManager = currentViewer != null && currentViewer == contentOutlineViewer ?
-			contentOutlineStatusLineManager : getActionBars().getStatusLineManager();
+		IStatusLineManager statusLineManager = currentViewer != null && currentViewer == contentOutlineViewer ? contentOutlineStatusLineManager
+				: getActionBars().getStatusLineManager();
 
 		if (statusLineManager != null) {
 			if (selection instanceof IStructuredSelection) {
-				Collection<?> collection = ((IStructuredSelection)selection).toList();
+				Collection<?> collection = ((IStructuredSelection) selection).toList();
 				switch (collection.size()) {
-					case 0: {
-						statusLineManager.setMessage(RL.getString("business.editor.status.noobjectselected"));
-						break;
-					}
-					case 1: {
-						String text = new AdapterFactoryItemDelegator(adapterFactory).getText(collection.iterator().next());
-						statusLineManager.setMessage(RL.getString("business.editor.status.singleobjectselected", new Object[]{text}));
-						break;
-					}
-					default: {
-						statusLineManager.setMessage(RL.getString("business.editor.status.multiobjectselected", new Object[]{Integer.toString(collection.size())} ));
-						break;
-					}
+				case 0: {
+					statusLineManager.setMessage(RL.getString("business.editor.status.noobjectselected"));
+					break;
 				}
-			}
-			else {
+				case 1: {
+					String text = new AdapterFactoryItemDelegator(adapterFactory).getText(collection.iterator().next());
+					statusLineManager.setMessage(RL.getString("business.editor.status.singleobjectselected", new Object[] { text }));
+					break;
+				}
+				default: {
+					statusLineManager.setMessage(RL.getString("business.editor.status.multiobjectselected",
+							new Object[] { Integer.toString(collection.size()) }));
+					break;
+				}
+				}
+			} else {
 				statusLineManager.setMessage("");
 			}
 		}
 	}
 
-	
-	
 	/**
-	 * This implements {@link org.eclipse.jface.action.IMenuListener} to help fill the context menus with contributions from the Edit menu.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This implements {@link org.eclipse.jface.action.IMenuListener} to help fill the context menus with contributions from the Edit menu. <!-- begin-user-doc
+	 * --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public void menuAboutToShow(IMenuManager menuManager) {
-		//((IMenuListener)getEditorSite().getActionBarContributor()).menuAboutToShow(menuManager);
+		((IMenuListener) getEditorSite().getActionBarContributor()).menuAboutToShow(menuManager);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public EditingDomainActionBarContributor getActionBarContributor() {
-		return (EditingDomainActionBarContributor)getEditorSite().getActionBarContributor();
+		return (EditingDomainActionBarContributor) getEditorSite().getActionBarContributor();
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public IActionBars getActionBars() {
@@ -1776,8 +1486,8 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public AdapterFactory getAdapterFactory() {
@@ -1785,15 +1495,15 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	public void dispose() {
 		updateProblemIndication = false;
 
-		ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
+		// ResourcesPlugin.getWorkspace().removeResourceChangeListener(resourceChangeListener);
 
 		getSite().getPage().removePartListener(partListener);
 
@@ -1815,9 +1525,8 @@ public class PhysicalModelEditor
 	}
 
 	/**
-	 * Returns whether the outline view should be presented to the user.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * Returns whether the outline view should be presented to the user. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected boolean showOutlineView() {

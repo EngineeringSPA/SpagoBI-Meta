@@ -12,6 +12,10 @@ package it.eng.spagobi.meta.editor.physical;
 
 import it.eng.spagobi.commons.resource.IResourceLocator;
 import it.eng.spagobi.meta.editor.SpagoBIMetaEditorPlugin;
+import it.eng.spagobi.meta.editor.business.menu.BusinessModelMenuBarContributor;
+import it.eng.spagobi.meta.editor.business.menu.BusinessModelPopupMenuContributor;
+import it.eng.spagobi.meta.editor.physical.menu.PhysicalModelMenuBarContributor;
+import it.eng.spagobi.meta.editor.physical.menu.PhysicalModelPopupMenuContributor;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,6 +78,10 @@ public class PhysicalModelEditorWorkbenchContributor
 	 * @generated
 	 */
 	protected ISelectionProvider selectionProvider;
+	
+	// added
+	protected PhysicalModelMenuBarContributor toolbarMenu;
+	protected PhysicalModelPopupMenuContributor popupMenu;
 
 	/**
 	 * This action opens the Properties view.
@@ -158,7 +166,7 @@ public class PhysicalModelEditorWorkbenchContributor
 	 * This creates an instance of the contributor.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * 
 	 */
 	public PhysicalModelEditorWorkbenchContributor() {
 		super(ADDITIONS_LAST_STYLE);
@@ -184,39 +192,43 @@ public class PhysicalModelEditorWorkbenchContributor
 	 * as well as the sub-menus for object creation items.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * 
 	 */
 	@Override
 	public void contributeToMenu(IMenuManager menuManager) {
 		super.contributeToMenu(menuManager);
-
-		IMenuManager submenuManager = new MenuManager(RL.getString("_UI_PhysicalModelEditor_menu"), "it.eng.spagobi.meta.model.physicalMenuID");
-		menuManager.insertAfter("additions", submenuManager);
-		submenuManager.add(new Separator("settings"));
-		submenuManager.add(new Separator("actions"));
-		submenuManager.add(new Separator("additions"));
-		submenuManager.add(new Separator("additions-end"));
-
-		// Prepare for CreateChild item addition or removal.
-		//
-		createChildMenuManager = new MenuManager(RL.getString("_UI_CreateChild_menu_item"));
-		submenuManager.insertBefore("additions", createChildMenuManager);
-
-		// Prepare for CreateSibling item addition or removal.
-		//
-		createSiblingMenuManager = new MenuManager(RL.getString("_UI_CreateSibling_menu_item"));
-		submenuManager.insertBefore("additions", createSiblingMenuManager);
-
-		// Force an update because Eclipse hides empty menus now.
-		//
-		submenuManager.addMenuListener
-			(new IMenuListener() {
-				 public void menuAboutToShow(IMenuManager menuManager) {
-					 menuManager.updateAll(true);
-				 }
-			 });
-
-		addGlobalActions(submenuManager);
+		toolbarMenu = new PhysicalModelMenuBarContributor(menuManager, true, "additions");
+		popupMenu = new PhysicalModelPopupMenuContributor();
+//Commented by MC
+//		IMenuManager submenuManager = new MenuManager(RL.getString("_UI_PhysicalModelEditor_menu"), "it.eng.spagobi.meta.model.physicalMenuID");
+//		menuManager.insertAfter("additions", submenuManager);
+//		submenuManager.add(new Separator("settings"));
+//		submenuManager.add(new Separator("actions"));
+//		submenuManager.add(new Separator("additions"));
+//		submenuManager.add(new Separator("additions-end"));
+//
+//		// Prepare for CreateChild item addition or removal.
+//		//
+//		
+//		createChildMenuManager = new MenuManager(RL.getString("_UI_CreateChild_menu_item"));
+//		submenuManager.insertBefore("additions", createChildMenuManager);
+//		
+//		// Prepare for CreateSibling item addition or removal.
+//		//
+//		/*
+//		createSiblingMenuManager = new MenuManager(RL.getString("_UI_CreateSibling_menu_item"));
+//		submenuManager.insertBefore("additions", createSiblingMenuManager);
+//		*/
+//		// Force an update because Eclipse hides empty menus now.
+//		//
+//		submenuManager.addMenuListener
+//			(new IMenuListener() {
+//				 public void menuAboutToShow(IMenuManager menuManager) {
+//					 menuManager.updateAll(true);
+//				 }
+//			 });
+//
+//		addGlobalActions(submenuManager);
 	}
 
 	/**
@@ -248,6 +260,9 @@ public class PhysicalModelEditorWorkbenchContributor
 				selectionChanged(new SelectionChangedEvent(selectionProvider, selectionProvider.getSelection()));
 			}
 		}
+		
+		this.toolbarMenu.setActiveEditor(activeEditorPart);
+		this.popupMenu.setActiveEditor(activeEditorPart);
 	}
 
 	/**
@@ -259,45 +274,54 @@ public class PhysicalModelEditorWorkbenchContributor
 	 * 
 	 */
 	public void selectionChanged(SelectionChangedEvent event) {
-		// Remove any menu items for old selection.
-		//
-		if (createChildMenuManager != null) {
-			depopulateManager(createChildMenuManager, createChildActions);
-		}
-		if (createSiblingMenuManager != null) {
-			depopulateManager(createSiblingMenuManager, createSiblingActions);
-		}
-
-		// Query the new selection for appropriate new child/sibling descriptors
-		//
-		Collection<?> newChildDescriptors = null;
-		Collection<?> newSiblingDescriptors = null;
-
-		ISelection selection = event.getSelection();
-		if (selection instanceof IStructuredSelection && ((IStructuredSelection)selection).size() == 1) {
-			Object object = ((IStructuredSelection)selection).getFirstElement();
-
-			EditingDomain domain = ((IEditingDomainProvider)activeEditorPart).getEditingDomain();
-			
-			if(object instanceof EObject) {
-				newChildDescriptors = domain.getNewChildDescriptors(object, null);
-				newSiblingDescriptors = domain.getNewChildDescriptors(null, object);
-			}
-		}
-
-		// Generate actions for selection; populate and redraw the menus.
-		//
-		createChildActions = generateCreateChildActions(newChildDescriptors, selection);
-		createSiblingActions = generateCreateSiblingActions(newSiblingDescriptors, selection);
-
-		if (createChildMenuManager != null) {
-			populateManager(createChildMenuManager, createChildActions, null);
-			createChildMenuManager.update(true);
-		}
-		if (createSiblingMenuManager != null) {
-			populateManager(createSiblingMenuManager, createSiblingActions, null);
-			createSiblingMenuManager.update(true);
-		}
+		toolbarMenu.selectionChanged(activeEditorPart, event);
+		popupMenu.selectionChanged(activeEditorPart, event);
+		
+		
+//Commented by MC		
+//		// Remove any menu items for old selection.
+//		//
+//		if (createChildMenuManager != null) {
+//			depopulateManager(createChildMenuManager, createChildActions);
+//		}
+//		if (createSiblingMenuManager != null) {
+//			depopulateManager(createSiblingMenuManager, createSiblingActions);
+//		}
+//
+//		// Query the new selection for appropriate new child/sibling descriptors
+//		//
+//		Collection<?> newChildDescriptors = null;
+//		Collection<?> newSiblingDescriptors = null;
+//
+//		ISelection selection = event.getSelection();
+//		if (selection instanceof IStructuredSelection && ((IStructuredSelection)selection).size() == 1) {
+//			Object object = ((IStructuredSelection)selection).getFirstElement();
+//
+//			EditingDomain domain = ((IEditingDomainProvider)activeEditorPart).getEditingDomain();
+//			
+//			if(object instanceof EObject) {
+//				newChildDescriptors = domain.getNewChildDescriptors(object, null);
+//				newSiblingDescriptors = domain.getNewChildDescriptors(null, object);
+//			}
+//		}
+//
+//		// Generate actions for selection; populate and redraw the menus.
+//		//
+//		
+//		createChildActions = generateCreateChildActions(newChildDescriptors, selection);
+//		createSiblingActions = generateCreateSiblingActions(newSiblingDescriptors, selection);
+//
+//		if (createChildMenuManager != null) {
+//			populateManager(createChildMenuManager, createChildActions, null);
+//			createChildMenuManager.update(true);
+//		}
+//		/*
+//		if (createSiblingMenuManager != null) {
+//			populateManager(createSiblingMenuManager, createSiblingActions, null);
+//			createSiblingMenuManager.update(true);
+//		}
+//		*/
+		
 	}
 
 	/**
@@ -390,35 +414,47 @@ public class PhysicalModelEditorWorkbenchContributor
 	 * This populates the pop-up menu before it appears.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * 
 	 */
 	@Override
 	public void menuAboutToShow(IMenuManager menuManager) {
+		cutAction.setEnabled(false);
+		copyAction.setEnabled(false);
+		pasteAction.setEnabled(false);
+		deleteAction.setEnabled(false);
 		super.menuAboutToShow(menuManager);
+		
+		popupMenu.menuAboutToShow(menuManager);
+
+		/*Commented by MC
 		MenuManager submenuManager = null;
 
+		
 		submenuManager = new MenuManager(RL.getString("_UI_CreateChild_menu_item"));
 		populateManager(submenuManager, createChildActions, null);
 		menuManager.insertBefore("edit", submenuManager);
-
+		
 		submenuManager = new MenuManager(RL.getString("_UI_CreateSibling_menu_item"));
 		populateManager(submenuManager, createSiblingActions, null);
 		menuManager.insertBefore("edit", submenuManager);
+		*/
 	}
 
 	/**
 	 * This inserts global actions before the "additions-end" separator.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
-	 * @generated
+	 * 
 	 */
 	@Override
 	protected void addGlobalActions(IMenuManager menuManager) {
+		/*
 		menuManager.insertAfter("additions-end", new Separator("ui-actions"));
 		menuManager.insertAfter("ui-actions", showPropertiesViewAction);
 
 		refreshViewerAction.setEnabled(refreshViewerAction.isEnabled());		
 		menuManager.insertAfter("ui-actions", refreshViewerAction);
+		*/
 
 		super.addGlobalActions(menuManager);
 	}

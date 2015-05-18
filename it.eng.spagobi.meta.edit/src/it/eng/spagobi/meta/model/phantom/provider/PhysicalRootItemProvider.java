@@ -9,12 +9,21 @@
 **/
 package it.eng.spagobi.meta.model.phantom.provider;
 
+import it.eng.spagobi.meta.model.business.commands.edit.relationship.AddBusinessRelationshipCommand;
+import it.eng.spagobi.meta.model.business.commands.edit.table.CreateBusinessTableCommand;
+import it.eng.spagobi.meta.model.business.commands.edit.table.CreateEmptyBusinessTableCommand;
+import it.eng.spagobi.meta.model.business.commands.generate.CreateQueryCommand;
+import it.eng.spagobi.meta.model.business.commands.generate.GenerateJPAMappingCommand;
+import it.eng.spagobi.meta.model.olap.commands.edit.generate.CreateMondrianCommand;
 import it.eng.spagobi.meta.model.physical.PhysicalModel;
+import it.eng.spagobi.meta.model.physical.commands.update.UpdatePhysicalModelCommand;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.notify.AdapterFactory;
+import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.domain.EditingDomain;
 
 public class PhysicalRootItemProvider extends FolderItemProvider{
@@ -34,5 +43,17 @@ public class PhysicalRootItemProvider extends FolderItemProvider{
 
 	   
 	    return super.getNewChildDescriptors(physicalModel, editingDomain, sibling);
+	}
+	
+	public Command createCustomCommand(Object object, EditingDomain domain, Class<? extends Command> commandClass, CommandParameter commandParameter) {
+		 Command result;
+		 
+		 result = null;
+		 
+		 if(commandClass == UpdatePhysicalModelCommand.class) {
+		   	result = new UpdatePhysicalModelCommand(domain, commandParameter);
+		 } 
+		 
+		 return result;
 	}
 }

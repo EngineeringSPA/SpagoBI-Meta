@@ -10,8 +10,9 @@
 package it.eng.spagobi.meta.initializer;
 
 import it.eng.spagobi.meta.initializer.properties.IPropertiesInitializer;
-import it.eng.spagobi.meta.initializer.properties.PhysicalModelDefaultPropertiesInitializer;
+import it.eng.spagobi.meta.initializer.properties.PhysicalModelPropertiesFromFileInitializer;
 import it.eng.spagobi.meta.model.Model;
+import it.eng.spagobi.meta.model.ModelProperty;
 import it.eng.spagobi.meta.model.physical.PhysicalColumn;
 import it.eng.spagobi.meta.model.physical.PhysicalForeignKey;
 import it.eng.spagobi.meta.model.physical.PhysicalModel;
@@ -32,6 +33,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.eclipse.emf.common.util.EList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +50,8 @@ public class PhysicalModelInitializer {
 	static public PhysicalModelFactory FACTORY = PhysicalModelFactory.eINSTANCE;
 
 	public PhysicalModelInitializer() {
-		setPropertiesInitializer(new PhysicalModelDefaultPropertiesInitializer());
+		// setPropertiesInitializer(new PhysicalModelDefaultPropertiesInitializer());
+		setPropertiesInitializer(new PhysicalModelPropertiesFromFileInitializer());
 
 	}
 
@@ -83,23 +86,29 @@ public class PhysicalModelInitializer {
 			getPropertiesInitializer().addProperties(model);
 
 			// Setting Connection properties values
-			model.getPropertyType("connection.name").setDefaultValue(connectionName);
-			logger.debug("PhysicalModel Property: Connection name is [{}]", model.getPropertyType("connection.name").getDefaultValue());
+			model.setProperty(PhysicalModelPropertiesFromFileInitializer.CONNECTION_NAME, connectionName);
+			logger.debug("PhysicalModel Property: Connection name is [{}]",
+					model.getProperties().get(PhysicalModelPropertiesFromFileInitializer.CONNECTION_NAME).getValue());
 
-			model.getPropertyType("connection.driver").setDefaultValue(connectionDriver);
-			logger.debug("PhysicalModel Property: Connection driver is [{}]", model.getPropertyType("connection.driver").getDefaultValue());
+			model.setProperty(PhysicalModelPropertiesFromFileInitializer.CONNECTION_DRIVER, connectionDriver);
+			logger.debug("PhysicalModel Property: Connection driver is [{}]",
+					model.getProperties().get(PhysicalModelPropertiesFromFileInitializer.CONNECTION_DRIVER).getValue());
 
-			model.getPropertyType("connection.url").setDefaultValue(connectionUrl);
-			logger.debug("PhysicalModel Property: Connection url is [{}]", model.getPropertyType("connection.url").getDefaultValue());
+			model.setProperty(PhysicalModelPropertiesFromFileInitializer.CONNECTION_URL, connectionUrl);
+			logger.debug("PhysicalModel Property: Connection url is [{}]", model.getProperties().get(PhysicalModelPropertiesFromFileInitializer.CONNECTION_URL)
+					.getValue());
 
-			model.getPropertyType("connection.username").setDefaultValue(connectionUsername);
-			logger.debug("PhysicalModel Property: Connection username is [{}]", model.getPropertyType("connection.username").getDefaultValue());
+			model.setProperty(PhysicalModelPropertiesFromFileInitializer.CONNECTION_USERNAME, connectionUsername);
+			logger.debug("PhysicalModel Property: Connection username is [{}]",
+					model.getProperties().get(PhysicalModelPropertiesFromFileInitializer.CONNECTION_USERNAME).getValue());
 
-			model.getPropertyType("connection.password").setDefaultValue(connectionPassword);
-			logger.debug("PhysicalModel Property: Connection password is [{}]", model.getPropertyType("connection.password").getDefaultValue());
+			model.setProperty(PhysicalModelPropertiesFromFileInitializer.CONNECTION_PASSWORD, connectionPassword);
+			logger.debug("PhysicalModel Property: Connection password is [{}]",
+					model.getProperties().get(PhysicalModelPropertiesFromFileInitializer.CONNECTION_PASSWORD).getValue());
 
-			model.getPropertyType("connection.databasename").setDefaultValue(connectionDatabaseName);
-			logger.debug("PhysicalModel Property: Connection databasename is [{}]", model.getPropertyType("connection.databasename").getDefaultValue());
+			model.setProperty(PhysicalModelPropertiesFromFileInitializer.CONNECTION_DATABASENAME, connectionDatabaseName);
+			logger.debug("PhysicalModel Property: Connection databasename is [{}]",
+					model.getProperties().get(PhysicalModelPropertiesFromFileInitializer.CONNECTION_DATABASENAME).getValue());
 
 			// Quote string identification
 			String quote = dbMeta.getIdentifierQuoteString();
@@ -107,9 +116,34 @@ public class PhysicalModelInitializer {
 			if (quote.equals("\"")) {
 				quote = "\\\"";
 			}
-			model.getPropertyType("connection.databasequotestring").setDefaultValue(quote);
-			logger.debug("PhysicalModel Property: Connection databasequotestring is [{}]", model.getPropertyType("connection.databasequotestring")
-					.getDefaultValue());
+			model.setProperty(PhysicalModelPropertiesFromFileInitializer.CONNECTION_DATABASE_QUOTESTRING, quote);
+			logger.debug("PhysicalModel Property: Connection databasequotestring is [{}]",
+					model.getProperties().get(PhysicalModelPropertiesFromFileInitializer.CONNECTION_DATABASE_QUOTESTRING).getValue());
+
+			/*
+			 * model.getPropertyType("connection.name").setDefaultValue(connectionName); logger.debug("PhysicalModel Property: Connection name is [{}]",
+			 * model.getPropertyType("connection.name").getDefaultValue());
+			 * 
+			 * model.getPropertyType("connection.driver").setDefaultValue(connectionDriver); logger.debug("PhysicalModel Property: Connection driver is [{}]",
+			 * model.getPropertyType("connection.driver").getDefaultValue());
+			 * 
+			 * model.getPropertyType("connection.url").setDefaultValue(connectionUrl); logger.debug("PhysicalModel Property: Connection url is [{}]",
+			 * model.getPropertyType("connection.url").getDefaultValue());
+			 * 
+			 * model.getPropertyType("connection.username").setDefaultValue(connectionUsername);
+			 * logger.debug("PhysicalModel Property: Connection username is [{}]", model.getPropertyType("connection.username").getDefaultValue());
+			 * 
+			 * model.getPropertyType("connection.password").setDefaultValue(connectionPassword);
+			 * logger.debug("PhysicalModel Property: Connection password is [{}]", model.getPropertyType("connection.password").getDefaultValue());
+			 * 
+			 * model.getPropertyType("connection.databasename").setDefaultValue(connectionDatabaseName);
+			 * logger.debug("PhysicalModel Property: Connection databasename is [{}]", model.getPropertyType("connection.databasename").getDefaultValue());
+			 * 
+			 * // Quote string identification String quote = dbMeta.getIdentifierQuoteString(); // check if escaping is needed if (quote.equals("\"")) { quote =
+			 * "\\\""; } model.getPropertyType("connection.databasequotestring").setDefaultValue(quote);
+			 * logger.debug("PhysicalModel Property: Connection databasequotestring is [{}]", model.getPropertyType("connection.databasequotestring")
+			 * .getDefaultValue());
+			 */
 		} catch (Throwable t) {
 			throw new RuntimeException("Impossible to initialize physical model", t);
 		}
@@ -248,28 +282,19 @@ public class PhysicalModelInitializer {
 			tableRs = dbMeta.getTables(model.getCatalog(), model.getSchema(), null, new String[] { "TABLE", "VIEW" });
 
 			/*
-			 * -------------------------------------------------- resultset's
-			 * structure -------------------------------------------------- 1.
-			 * TABLE_CAT String => table catalog (may be null) 2. TABLE_SCHEM
-			 * String => table schema (may be null) 3. TABLE_NAME String =>
-			 * table name
+			 * -------------------------------------------------- resultset's structure -------------------------------------------------- 1. TABLE_CAT String
+			 * => table catalog (may be null) 2. TABLE_SCHEM String => table schema (may be null) 3. TABLE_NAME String => table name
 			 * 
-			 * Data Warehouse Management Model 181 4. TABLE_TYPE String => table
-			 * type. Typical types are “TABLE”, “VIEW”, “SYSTEM TABLE”,”GLOBAL
-			 * TEMPORARY”, “LOCAL TEMPORARY”, “ALIAS”, “SYNONYM”. 5. REMARKS
-			 * String => explanatory comment on the table 6. TYPE_CAT String =>
-			 * the types catalog (may be null) 7. TYPE_SCHEM String => the types
-			 * schema (may be null) 8. TYPE_NAME String => type name (may be
-			 * null) 9. SELF_REFERENCING_COL_NAME String => name of the
-			 * designated “identifier” column of a typed table (may be null) 10.
-			 * REF_GENERATION String => specifies how values in
-			 * SELF_REFERENCING_COL_NAME are created. Values are “SYSTEM”,
-			 * “USER”, “DERIVED”. (may be null)
+			 * Data Warehouse Management Model 181 4. TABLE_TYPE String => table type. Typical types are ï¿½TABLEï¿½, ï¿½VIEWï¿½, ï¿½SYSTEM TABLEï¿½,ï¿½GLOBAL TEMPORARYï¿½,
+			 * ï¿½LOCAL TEMPORARYï¿½, ï¿½ALIASï¿½, ï¿½SYNONYMï¿½. 5. REMARKS String => explanatory comment on the table 6. TYPE_CAT String => the types catalog (may be
+			 * null) 7. TYPE_SCHEM String => the types schema (may be null) 8. TYPE_NAME String => type name (may be null) 9. SELF_REFERENCING_COL_NAME String
+			 * => name of the designated ï¿½identifierï¿½ column of a typed table (may be null) 10. REF_GENERATION String => specifies how values in
+			 * SELF_REFERENCING_COL_NAME are created. Values are ï¿½SYSTEMï¿½, ï¿½USERï¿½, ï¿½DERIVEDï¿½. (may be null)
 			 */
 			while (tableRs.next()) {
 				if ((!filterTable) || ((selectedTables != null) && (selectedTables.contains(tableRs.getString("TABLE_NAME"))))) {
 					table = FACTORY.createPhysicalTable();
-					getPropertiesInitializer().addProperties(table);
+					table.setModel(model);
 
 					table.setName(tableRs.getString("TABLE_NAME"));
 					table.setComment(getEscapedMetadataPropertyValue(tableRs, "REMARKS"));
@@ -280,6 +305,7 @@ public class PhysicalModelInitializer {
 					initColumnsMeta(dbMeta, model, table);
 
 					model.getTables().add(table);
+					getPropertiesInitializer().addProperties(table);
 				}
 			}
 			tableRs.close();
@@ -297,41 +323,24 @@ public class PhysicalModelInitializer {
 			rs = dbMeta.getColumns(model.getCatalog(), model.getSchema(), table.getName(), null);
 
 			/*
-			 * 1. TABLE_CAT String => table catalog (may be null) 2. TABLE_SCHEM
-			 * String => table schema (may be null) 3. TABLE_NAME String =>
-			 * table name 4. COLUMN_NAME String => column name 5. DATA_TYPE
-			 * short => SQL type from java.sql.Types 6. TYPE_NAME String => Data
-			 * source dependent type name, for a UDT the type name is fully
-			 * qualified 7. COLUMN_SIZE int => column size. For char or date
-			 * types this is the maximum number of characters, for numeric or
-			 * decimal types this is precision. 8. BUFFER_LENGTH is not used. 9.
-			 * DECIMAL_DIGITS int => the number of fractional digits 10.
-			 * NUM_PREC_RADIX int => Radix (typically either 10 or 2) 11.
-			 * NULLABLE int => is NULL allowed. columnNoNulls - might not allow
-			 * NULL values; columnNullable - definitely allows NULL values;
-			 * columnNullableUnknown - nullability unknown 12. REMARKS String =>
-			 * comment describing column (may be null) 13. COLUMN_DEF String =>
-			 * default value (may be null) 14. SQL_DATA_TYPE int => unused 15.
-			 * SQL_DATETIME_SUB int => unused 16. CHAR_OCTET_LENGTH int => for
-			 * char types the maximum number of bytes in the column 17.
-			 * ORDINAL_POSITION int => index of column in table (starting at 1)
-			 * 18. IS_NULLABLE String => “NO” means column definitely does not
-			 * allow NULL values; “YES” means the column might allow NULL
-			 * values. An empty string means nobody knows. 19. SCOPE_CATLOG
-			 * String => catalog of table that is the scope of a reference
-			 * attribute (null if DATA_TYPE isn’t REF) 20. SCOPE_SCHEMA String
-			 * => schema of table that is the scope of a
+			 * 1. TABLE_CAT String => table catalog (may be null) 2. TABLE_SCHEM String => table schema (may be null) 3. TABLE_NAME String => table name 4.
+			 * COLUMN_NAME String => column name 5. DATA_TYPE short => SQL type from java.sql.Types 6. TYPE_NAME String => Data source dependent type name, for
+			 * a UDT the type name is fully qualified 7. COLUMN_SIZE int => column size. For char or date types this is the maximum number of characters, for
+			 * numeric or decimal types this is precision. 8. BUFFER_LENGTH is not used. 9. DECIMAL_DIGITS int => the number of fractional digits 10.
+			 * NUM_PREC_RADIX int => Radix (typically either 10 or 2) 11. NULLABLE int => is NULL allowed. columnNoNulls - might not allow NULL values;
+			 * columnNullable - definitely allows NULL values; columnNullableUnknown - nullability unknown 12. REMARKS String => comment describing column (may
+			 * be null) 13. COLUMN_DEF String => default value (may be null) 14. SQL_DATA_TYPE int => unused 15. SQL_DATETIME_SUB int => unused 16.
+			 * CHAR_OCTET_LENGTH int => for char types the maximum number of bytes in the column 17. ORDINAL_POSITION int => index of column in table (starting
+			 * at 1) 18. IS_NULLABLE String => ï¿½NOï¿½ means column definitely does not allow NULL values; ï¿½YESï¿½ means the column might allow NULL values. An empty
+			 * string means nobody knows. 19. SCOPE_CATLOG String => catalog of table that is the scope of a reference attribute (null if DATA_TYPE isnï¿½t REF)
+			 * 20. SCOPE_SCHEMA String => schema of table that is the scope of a
 			 * 
-			 * 182 Chapter 5 reference attribute (null if the DATA_TYPE isn’t
-			 * REF) 21. SCOPE_TABLE String => table name that is the scope of a
-			 * reference attribute (null if the DATA_TYPE isn’t REF) 22.
-			 * SOURCE_DATA_TYPE short => source type of a distinct type or
-			 * user-generated Ref type, SQL type from java.sql.Types (null if
-			 * DATA_TYPE isn’t DISTINCT or user-generated REF)
+			 * 182 Chapter 5 reference attribute (null if the DATA_TYPE isnï¿½t REF) 21. SCOPE_TABLE String => table name that is the scope of a reference
+			 * attribute (null if the DATA_TYPE isnï¿½t REF) 22. SOURCE_DATA_TYPE short => source type of a distinct type or user-generated Ref type, SQL type
+			 * from java.sql.Types (null if DATA_TYPE isnï¿½t DISTINCT or user-generated REF)
 			 */
 			while (rs.next()) {
 				column = FACTORY.createPhysicalColumn();
-				getPropertiesInitializer().addProperties(column);
 
 				// to prevent ojdbc bug
 				try {
@@ -357,6 +366,8 @@ public class PhysicalModelInitializer {
 
 				table.getColumns().add(column);
 				log("  - column: " + column.getName() + " [" + column.getTypeName() + "]" + " [" + column.getDefaultValue() + "]");
+				getPropertiesInitializer().addProperties(column);
+
 			}
 			rs.close();
 		} catch (Throwable t) {
@@ -390,11 +401,8 @@ public class PhysicalModelInitializer {
 		try {
 			rs = dbMeta.getPrimaryKeys(model.getCatalog(), model.getSchema(), table.getName());
 			/*
-			 * 1. TABLE_CAT String => table catalog (may be null) 2. TABLE_SCHEM
-			 * String => table schema (may be null) 3. TABLE_NAME String =>
-			 * table name 4. COLUMN_NAME String => column name 5. KEY_SEQ short
-			 * => sequence number within primary key 6. PK_NAME String =>
-			 * primary key name (may be null)
+			 * 1. TABLE_CAT String => table catalog (may be null) 2. TABLE_SCHEM String => table schema (may be null) 3. TABLE_NAME String => table name 4.
+			 * COLUMN_NAME String => column name 5. KEY_SEQ short => sequence number within primary key 6. PK_NAME String => primary key name (may be null)
 			 */
 
 			while (rs.next()) {
@@ -432,38 +440,20 @@ public class PhysicalModelInitializer {
 		try {
 			rs = dbMeta.getImportedKeys(model.getCatalog(), model.getSchema(), table.getName());
 			/*
-			 * 1. PKTABLE_CAT String => primary key table catalog (may be null)
-			 * 2. PKTABLE_SCHEM String => primary key table schema (may be null)
-			 * 3. PKTABLE_NAME String => primary key table name 4. PKCOLUMN_NAME
-			 * String => primary key column name 5. FKTABLE_CAT String =>
-			 * foreign key table catalog (may be null) being exported (may be
-			 * null) 6. FKTABLE_SCHEM String => foreign key table schema (may be
-			 * null) being exported (may be null) 7. FKTABLE_NAME String =>
-			 * foreign key table name being exported 8. FKCOLUMN_NAME String =>
-			 * foreign key column name being exported 9. KEY_SEQ short =>
-			 * sequence number within foreign key 10. UPDATE_RULE short => What
-			 * happens to foreign key when primary is updated: importedNoAction
-			 * - do not allow update of primary key if it has been imported
-			 * importedKeyCascade - change imported key to agree with primary
-			 * key update importedKeySetNull - change imported key to NULL if
-			 * its primary key has been updated importedKeySetDefault - change
-			 * imported key to default values if its primary key has been
-			 * updated importedKeyRestrict - same as importedKeyNoAction (for
-			 * ODBC 2.x compatibility) 11. DELETE_RULE short => What happens to
-			 * the foreign key when primary is deleted: importedKeyNoAction - do
-			 * not allow delete of primary key if it has been imported
-			 * importedKeyCascade - delete rows that import a deleted key
-			 * importedKeySetNull - change imported key to NULL if its primary
-			 * key has been deleted importedKeyRestrict - same as
-			 * importedKeyNoAction (for ODBC 2.x compatibility)
-			 * importedKeySetDefault - change imported key to default if its
-			 * primary key has been deleted 12. FK_NAME String => foreign key
-			 * name (may be null) 13. PK_NAME String => primary key name (may be
-			 * null) 14. DEFERRABILITY short => can the evaluation of foreign
-			 * key constraints be deferred until commit:
-			 * importedKeyInitiallyDeferred - see SQL92 for definition
-			 * importedKeyInitiallyImmediate - see SQL92 for definition
-			 * importedKeyNotDeferrable - see SQL92 for definition
+			 * 1. PKTABLE_CAT String => primary key table catalog (may be null) 2. PKTABLE_SCHEM String => primary key table schema (may be null) 3.
+			 * PKTABLE_NAME String => primary key table name 4. PKCOLUMN_NAME String => primary key column name 5. FKTABLE_CAT String => foreign key table
+			 * catalog (may be null) being exported (may be null) 6. FKTABLE_SCHEM String => foreign key table schema (may be null) being exported (may be null)
+			 * 7. FKTABLE_NAME String => foreign key table name being exported 8. FKCOLUMN_NAME String => foreign key column name being exported 9. KEY_SEQ
+			 * short => sequence number within foreign key 10. UPDATE_RULE short => What happens to foreign key when primary is updated: importedNoAction - do
+			 * not allow update of primary key if it has been imported importedKeyCascade - change imported key to agree with primary key update
+			 * importedKeySetNull - change imported key to NULL if its primary key has been updated importedKeySetDefault - change imported key to default
+			 * values if its primary key has been updated importedKeyRestrict - same as importedKeyNoAction (for ODBC 2.x compatibility) 11. DELETE_RULE short
+			 * => What happens to the foreign key when primary is deleted: importedKeyNoAction - do not allow delete of primary key if it has been imported
+			 * importedKeyCascade - delete rows that import a deleted key importedKeySetNull - change imported key to NULL if its primary key has been deleted
+			 * importedKeyRestrict - same as importedKeyNoAction (for ODBC 2.x compatibility) importedKeySetDefault - change imported key to default if its
+			 * primary key has been deleted 12. FK_NAME String => foreign key name (may be null) 13. PK_NAME String => primary key name (may be null) 14.
+			 * DEFERRABILITY short => can the evaluation of foreign key constraints be deferred until commit: importedKeyInitiallyDeferred - see SQL92 for
+			 * definition importedKeyInitiallyImmediate - see SQL92 for definition importedKeyNotDeferrable - see SQL92 for definition
 			 */
 			String fkName = null;
 			PhysicalTable sourceTable = null;
@@ -542,9 +532,214 @@ public class PhysicalModelInitializer {
 		}
 	}
 
+	// ---------------------------------------------------------
+	// Physical Model Update
+	// ---------------------------------------------------------
+	/**
+	 * Get tables names that are present in the database but not in the passed physical model
+	 * 
+	 * @param connection
+	 *            jdbc connection to the database
+	 * @param physicalModel
+	 *            physical model to check
+	 */
+	public List<String> getMissingTablesNames(Connection connection, PhysicalModel physicalModel) {
+		try {
+			DatabaseMetaData dbMeta = connection.getMetaData();
+
+			List<String> tablesOnDatabase = new ArrayList<String>();
+			ResultSet tableRs = dbMeta.getTables(physicalModel.getCatalog(), physicalModel.getSchema(), null, new String[] { "TABLE", "VIEW" });
+
+			while (tableRs.next()) {
+				String tableName = tableRs.getString("TABLE_NAME");
+				tablesOnDatabase.add(tableName);
+			}
+			tableRs.close();
+
+			EList<PhysicalTable> originalTables = physicalModel.getTables();
+			Iterator<String> tablesIterator = tablesOnDatabase.iterator();
+			while (tablesIterator.hasNext()) {
+				String tableName = tablesIterator.next();
+				if (findTable(tableName, originalTables) != null) {
+					// already present, remove table name from the list of tables that can be imported
+					tablesIterator.remove();
+				}
+			}
+			return tablesOnDatabase;
+
+		} catch (SQLException e) {
+			throw new RuntimeException("Physical Model - Impossible to get missing tables names", e);
+
+		}
+
+	}
+
+	/**
+	 * Update originaModel with new tables and columns from updateModel, also mark as deleted the tables or columns not found in the updated model
+	 * 
+	 */
+	public PhysicalModel updateModel(PhysicalModel originalModel, PhysicalModel updatedModel, List<String> selectedTables) {
+		EList<PhysicalTable> originalTables = originalModel.getTables();
+		EList<PhysicalTable> updatedTables = updatedModel.getTables();
+
+		// 1 - Find new tables and columns not present in the original Model
+		List<PhysicalTable> tablesToAdd = new ArrayList<PhysicalTable>();
+		for (PhysicalTable updatedTable : updatedTables) {
+			String updatedTableName = updatedTable.getName();
+			PhysicalTable tableFound = findTable(updatedTableName, originalTables);
+			if (tableFound == null) {
+				// New table to add to the original model
+
+				// Check also if the table was selected to be imported
+				if (selectedTables.contains(updatedTableName)) {
+					tablesToAdd.add(updatedTable);
+
+					// Add also the primary keys related to this table
+					PhysicalPrimaryKey primaryKey = updatedTable.getPrimaryKey();
+					if (primaryKey != null) {
+						originalModel.getPrimaryKeys().add(primaryKey);
+					}
+				}
+			} else {
+				// Table already present in the original model
+
+				// perform a compare of the columns of this table
+				// in the two models
+				updateTable(tableFound, updatedTable);
+
+			}
+		}
+
+		// 2 - Find deleted tables and columns, namely not present in the updatedModel
+		for (PhysicalTable originalTable : originalTables) {
+			PhysicalTable tableFound = findTable(originalTable.getName(), updatedTables);
+			if (tableFound == null) {
+				// The table as to be marked as deleted in the original model
+				setProperty(originalTable, PhysicalModelPropertiesFromFileInitializer.IS_DELETED, "true");
+
+				// mark also all of its columns as deleted
+				markAllColumnsAsDeleted(originalTable);
+			}
+
+		}
+
+		int previousSize = originalModel.getTables().size();
+		// Add new Tables
+		originalModel.getTables().addAll(tablesToAdd);
+
+		// Add foreign keys for added tables
+		addForeignKeysForAddedTables(tablesToAdd);
+
+		return originalModel;
+	}
+
+	public void markAllColumnsAsDeleted(PhysicalTable physicalTable) {
+		EList<PhysicalColumn> physicalColumns = physicalTable.getColumns();
+		Iterator<PhysicalColumn> iterator = physicalColumns.iterator();
+		while (iterator.hasNext()) {
+			PhysicalColumn physicalColumn = iterator.next();
+			physicalColumn.getProperties().get(PhysicalModelPropertiesFromFileInitializer.IS_DELETED).setValue("true");
+		}
+	}
+
+	public void addUpdatedTables(PhysicalModel originalModel, List<PhysicalTable> physicalTables) {
+		for (PhysicalTable physicalTable : physicalTables) {
+
+		}
+	}
+
+	public void addForeignKeysForAddedTables(List<PhysicalTable> physicalTables) {
+		for (PhysicalTable physicalTable : physicalTables) {
+			List<PhysicalForeignKey> foreignKeys = physicalTable.getForeignKeys();
+			if (!foreignKeys.isEmpty()) {
+				physicalTable.getModel().getForeignKeys().addAll(foreignKeys);
+			}
+
+		}
+
+	}
+
+	/**
+	 * Update originaTable with new columns information found in the updatedTable
+	 */
+	public PhysicalTable updateTable(PhysicalTable originalTable, PhysicalTable updatedTable) {
+		EList<PhysicalColumn> originalColumns = originalTable.getColumns();
+		EList<PhysicalColumn> updatedColumns = updatedTable.getColumns();
+
+		// 1 - Find new columns not present in the originalTable
+		List<PhysicalColumn> columnsToAdd = new ArrayList<PhysicalColumn>();
+		for (PhysicalColumn updatedColumn : updatedColumns) {
+			PhysicalColumn columnFound = findColumn(updatedColumn.getName(), originalColumns);
+			if (columnFound == null) {
+				// New column to add to the original table
+				columnsToAdd.add(updatedColumn);
+			} else {
+				// Column already present
+
+				// TODO: check if the column has changed type (or something else?)
+			}
+
+		}
+
+		// 2- Find deleted columns, namely not present in the updatedTable
+		for (PhysicalColumn originalColumn : originalColumns) {
+			PhysicalColumn columnFound = findColumn(originalColumn.getName(), updatedColumns);
+			if (columnFound == null) {
+				// Column as to be marked as deleted in the original model
+				setProperty(originalColumn, PhysicalModelPropertiesFromFileInitializer.IS_DELETED, "true");
+			}
+
+		}
+
+		// Add new columns
+		originalTable.getColumns().addAll(columnsToAdd);
+
+		return originalTable;
+
+	}
+
 	// --------------------------------------------------------
 	// Accessor methods
 	// --------------------------------------------------------
+
+	public PhysicalColumn findColumn(String columnName, EList<PhysicalColumn> physicalColumns) {
+
+		for (PhysicalColumn physicalColumn : physicalColumns) {
+			if (physicalColumn.getName().equals(columnName)) {
+				return physicalColumn;
+			}
+		}
+		return null;
+	}
+
+	public PhysicalTable findTable(String tableName, EList<PhysicalTable> physicalTables) {
+
+		for (PhysicalTable physicalTable : physicalTables) {
+			if (physicalTable.getName().equals(tableName)) {
+				return physicalTable;
+			}
+		}
+		return null;
+	}
+
+	private String getProperty(PhysicalTable physicalTable, String propertyName) {
+		ModelProperty property = physicalTable.getProperties().get(propertyName);
+		return property != null ? property.getValue() : null;
+	}
+
+	private void setProperty(PhysicalTable physicalTable, String propertyName, String value) {
+		ModelProperty property = physicalTable.getProperties().get(propertyName);
+		if (property != null) {
+			property.setValue(value);
+		}
+	}
+
+	private void setProperty(PhysicalColumn physicalColumn, String propertyName, String value) {
+		ModelProperty property = physicalColumn.getProperties().get(propertyName);
+		if (property != null) {
+			property.setValue(value);
+		}
+	}
 
 	public IPropertiesInitializer getPropertiesInitializer() {
 		return propertiesInitializer;

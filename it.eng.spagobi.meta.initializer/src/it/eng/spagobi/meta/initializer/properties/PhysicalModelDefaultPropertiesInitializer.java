@@ -21,6 +21,7 @@ import it.eng.spagobi.meta.model.physical.PhysicalPrimaryKey;
 import it.eng.spagobi.meta.model.physical.PhysicalTable;
 
 /**
+ * @deprecated
  * @author Andrea Gioia (andrea.gioia@eng.it)
  *
  */
@@ -61,14 +62,18 @@ public class PhysicalModelDefaultPropertiesInitializer implements IPropertiesIni
 	
 	
 	private ModelPropertyCategory createPropertyCategoryIfNotExist(PhysicalModel o, String id, String name, String description) {
-		ModelPropertyCategory connectionCategory;
+		ModelPropertyCategory connectionCategory = null;
 		
-		connectionCategory =  o.getParentModel().getPropertyCategory( id );
+		if (o.getParentModel() != null){
+			connectionCategory =  o.getParentModel().getPropertyCategory( id );
+		}
 		if(connectionCategory == null) {
 			connectionCategory = FACTORY.createModelPropertyCategory();
 			connectionCategory.setName( name );
 			connectionCategory.setDescription( description );
-			o.getParentModel().getPropertyCategories().add(connectionCategory);	
+			if(o.getParentModel() != null) {
+				o.getParentModel().getPropertyCategories().add(connectionCategory);	
+			}
 		}   
 		
 		return connectionCategory;
