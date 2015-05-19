@@ -16,16 +16,21 @@ import it.eng.spagobi.meta.model.ModelProperty;
 import it.eng.spagobi.meta.model.business.commands.edit.AbstractSpagoBIModelEditCommand;
 import it.eng.spagobi.meta.model.physical.PhysicalModel;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +54,30 @@ public class UpdatePhysicalModelCommand extends AbstractSpagoBIModelEditCommand 
 	@Override
 	public void execute() {
 		logger.debug("Executing UpdatePhysicalModelCommand");
-		showInformation("Info", "Executing UpdatePhysicalModelCommand ");
 
 		physicalModel = (PhysicalModel) parameter.getOwner();
 
-		updatePhysicalModel(physicalModel);
+		ProgressMonitorDialog dialog = new ProgressMonitorDialog(new Shell());
+		dialog.setCancelable(false);
+
+		try {
+			dialog.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) {
+					// Note: this is a non-UI Thread
+					monitor.beginTask("Updating Physical Model, please wait...", IProgressMonitor.UNKNOWN);
+					// doing task...
+					updatePhysicalModel(physicalModel);
+
+					monitor.done();
+				}
+			});
+		} catch (InvocationTargetException e1) {
+			e1.printStackTrace();
+		} catch (InterruptedException e1) {
+			e1.printStackTrace();
+		}
+		showInformation("Info", "Physical Model Updated ");
 
 	}
 
@@ -100,23 +124,9 @@ public class UpdatePhysicalModelCommand extends AbstractSpagoBIModelEditCommand 
 		// remove reference from the new physical model to the generic Model (automatically vice-versa)
 		updatedPhysicalModel.setParentModel(null);
 
-		// update original physical tables with new informations from
+		// update original physical tables with new informations from new model
 		PhysicalModel originalModelUpdated = physicalModelInitializer.updateModel(physicalModel, updatedPhysicalModel, tablesToAdd);
 
-		// *************************************
-		// Update Physical Model of Business Model (not the same instance)
-
-		// ModelSingleton singleton = ModelSingleton.getInstance();
-		// Model modelOfBM = singleton.getModel();
-		// BusinessModel bm = modelOfBM.getBusinessModels().get(0);
-		// PhysicalModel businessModelPhysicalModel = bm.getPhysicalModel();
-		//
-		// PhysicalModel updatedBusinessPhysicalModel = physicalModelInitializer.initialize(modelName + "_updated", connection, connectionName,
-		// connectionDriver,
-		// connectionUrl, connectionUsername, connectionPassword, connectionDatabaseName, catalog, schema);
-		// Model model2 = updatedBusinessPhysicalModel.getParentModel();
-		// PhysicalModel originalModelUpdated2 = physicalModelInitializer.updateModel(businessModelPhysicalModel, updatedBusinessPhysicalModel, tablesToAdd);
-		// *****************************************************
 		this.executed = true;
 
 	}

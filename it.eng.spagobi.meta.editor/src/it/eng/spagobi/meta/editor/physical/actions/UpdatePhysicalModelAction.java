@@ -14,8 +14,10 @@ import it.eng.spagobi.meta.model.physical.PhysicalModel;
 import it.eng.spagobi.meta.model.physical.commands.update.UpdatePhysicalModelCommand;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -62,11 +64,22 @@ public class UpdatePhysicalModelAction extends AbstractSpagoBIModelAction {
 				PhysicalModelInitializer physicalModelInitializer = new PhysicalModelInitializer();
 				List<String> missingTablesNames = physicalModelInitializer.getMissingTablesNames(connection, physicalModel);
 
-				UpdatePhysicalModelWizard wizard = new UpdatePhysicalModelWizard(physicalModel, connection, missingTablesNames, editingDomain,
-						(ISpagoBIModelCommand) command);
-				WizardDialog dialog = new WizardDialog(new Shell(), wizard);
-				dialog.create();
-				dialog.open();
+				// Open the Wizard for selecting tables to import only if there are missing tables in the current physical model
+				if (!missingTablesNames.isEmpty()) {
+					UpdatePhysicalModelWizard wizard = new UpdatePhysicalModelWizard(physicalModel, connection, missingTablesNames, editingDomain,
+							(ISpagoBIModelCommand) command);
+					WizardDialog dialog = new WizardDialog(new Shell(), wizard);
+					dialog.create();
+					dialog.open();
+				} else {
+					// just execute the command (for deleted tables ecc)
+					performFinishCommand.setParameter(new CommandParameter(physicalModel, null, connection, new ArrayList<Object>()));
+					// this guard is for extra security, but should not be necessary
+					if (editingDomain != null && performFinishCommand != null) {
+						// use up the command
+						editingDomain.getCommandStack().execute(performFinishCommand);
+					}
+				}
 
 				// Commented beheviour without table filter wizard
 				// Retrieve connection Name

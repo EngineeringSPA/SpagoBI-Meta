@@ -584,6 +584,7 @@ public class PhysicalModelInitializer {
 
 		// 1 - Find new tables and columns not present in the original Model
 		List<PhysicalTable> tablesToAdd = new ArrayList<PhysicalTable>();
+		List<PhysicalForeignKey> foreignKeysToAdd = new ArrayList<PhysicalForeignKey>();
 		for (PhysicalTable updatedTable : updatedTables) {
 			String updatedTableName = updatedTable.getName();
 			PhysicalTable tableFound = findTable(updatedTableName, originalTables);
@@ -593,7 +594,8 @@ public class PhysicalModelInitializer {
 				// Check also if the table was selected to be imported
 				if (selectedTables.contains(updatedTableName)) {
 					tablesToAdd.add(updatedTable);
-
+					// Save (if found) foreign keys of the new table
+					foreignKeysToAdd.addAll(updatedTable.getForeignKeys());
 					// Add also the primary keys related to this table
 					PhysicalPrimaryKey primaryKey = updatedTable.getPrimaryKey();
 					if (primaryKey != null) {
@@ -623,12 +625,11 @@ public class PhysicalModelInitializer {
 
 		}
 
-		int previousSize = originalModel.getTables().size();
 		// Add new Tables
 		originalModel.getTables().addAll(tablesToAdd);
 
 		// Add foreign keys for added tables
-		addForeignKeysForAddedTables(tablesToAdd);
+		addForeignKeysForAddedTables(foreignKeysToAdd, originalModel);
 
 		return originalModel;
 	}
@@ -642,25 +643,48 @@ public class PhysicalModelInitializer {
 		}
 	}
 
-	public void addUpdatedTables(PhysicalModel originalModel, List<PhysicalTable> physicalTables) {
-		for (PhysicalTable physicalTable : physicalTables) {
+	public void addForeignKeysForAddedTables(List<PhysicalForeignKey> physicalForeignKeys, PhysicalModel physicalModel) {
+		EList<PhysicalTable> physicalTables = physicalModel.getTables();
+		for (PhysicalForeignKey physicalForeignKey : physicalForeignKeys) {
+			// check foreign keys consistency
+			PhysicalTable sourceTable = physicalForeignKey.getSourceTable();
+			PhysicalTable searchedSourceTable = findTable(sourceTable.getName(), physicalTables);
+			if (searchedSourceTable != null) {
+				// check also if the columns are present and not marked deleted
+				if (!searchedSourceTable.containsAllNotDeleted(physicalForeignKey.getSourceColumns())) {
+					continue;
+				}
 
-		}
-	}
+				PhysicalTable destinationTable = physicalForeignKey.getDestinationTable();
+				PhysicalTable searchedDestinationTable = findTable(destinationTable.getName(), physicalTables);
+				if (searchedDestinationTable != null) {
+					// check also if the columns are present and not marked deleted
+					if (!searchedDestinationTable.containsAllNotDeleted(physicalForeignKey.getDestinationColumns())) {
+						continue;
+					} else {
+						// all right, add this fk to the model
+						physicalModel.getForeignKeys().add(physicalForeignKey);
+					}
 
-	public void addForeignKeysForAddedTables(List<PhysicalTable> physicalTables) {
-		for (PhysicalTable physicalTable : physicalTables) {
-			List<PhysicalForeignKey> foreignKeys = physicalTable.getForeignKeys();
-			if (!foreignKeys.isEmpty()) {
-				physicalTable.getModel().getForeignKeys().addAll(foreignKeys);
+				} else {
+					// skip, do not add this fk
+					continue;
+				}
+			} else {
+				// skip, do not add this fk
+				continue;
 			}
-
 		}
 
 	}
 
 	/**
-	 * Update originaTable with new columns information found in the updatedTable
+	 * Update originalTable with new columns information found in the updatedTable
+	 * 
+	 * @param originalTable
+	 *            table to update
+	 * @param updatedTable
+	 *            table used to extract new informations
 	 */
 	public PhysicalTable updateTable(PhysicalTable originalTable, PhysicalTable updatedTable) {
 		EList<PhysicalColumn> originalColumns = originalTable.getColumns();
@@ -677,6 +701,8 @@ public class PhysicalModelInitializer {
 				// Column already present
 
 				// TODO: check if the column has changed type (or something else?)
+				updateColumn(columnFound, updatedColumn);
+
 			}
 
 		}
@@ -695,6 +721,26 @@ public class PhysicalModelInitializer {
 		originalTable.getColumns().addAll(columnsToAdd);
 
 		return originalTable;
+
+	}
+
+	public PhysicalColumn updateColumn(PhysicalColumn originalPhysicalColumn, PhysicalColumn updatedPhysicalColumn) {
+		// check column type
+		String originalColumnDataType = originalPhysicalColumn.getDataType();
+		String updatedColumnDataType = updatedPhysicalColumn.getDataType();
+
+		if (!originalColumnDataType.equalsIgnoreCase(updatedColumnDataType)) {
+			// Column type is changed
+			// data type
+			originalPhysicalColumn.setDataType(updatedColumnDataType);
+			// type name
+			originalPhysicalColumn.setTypeName(updatedPhysicalColumn.getTypeName());
+		}
+
+		return originalPhysicalColumn;
+		// TODO: what else?
+		// 1- Check if column is already a part of a primary key
+		// 2- Foreign keys changes
 
 	}
 

@@ -6,7 +6,7 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this file,
  You can obtain one at http://mozilla.org/MPL/2.0/.
  
-**/
+ **/
 package it.eng.spagobi.meta.model.physical.impl;
 
 import it.eng.spagobi.meta.model.ModelPropertyType;
@@ -33,26 +33,23 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.ecore.util.InternalEList;
 
 /**
- * <!-- begin-user-doc -->
- * An implementation of the model object '<em><b>Physical Table</b></em>'.
- * <!-- end-user-doc -->
+ * <!-- begin-user-doc --> An implementation of the model object '<em><b>Physical Table</b></em>'. <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
  * <ul>
- *   <li>{@link it.eng.spagobi.meta.model.physical.impl.PhysicalTableImpl#getComment <em>Comment</em>}</li>
- *   <li>{@link it.eng.spagobi.meta.model.physical.impl.PhysicalTableImpl#getType <em>Type</em>}</li>
- *   <li>{@link it.eng.spagobi.meta.model.physical.impl.PhysicalTableImpl#getModel <em>Model</em>}</li>
- *   <li>{@link it.eng.spagobi.meta.model.physical.impl.PhysicalTableImpl#getColumns <em>Columns</em>}</li>
+ * <li>{@link it.eng.spagobi.meta.model.physical.impl.PhysicalTableImpl#getComment <em>Comment</em>}</li>
+ * <li>{@link it.eng.spagobi.meta.model.physical.impl.PhysicalTableImpl#getType <em>Type</em>}</li>
+ * <li>{@link it.eng.spagobi.meta.model.physical.impl.PhysicalTableImpl#getModel <em>Model</em>}</li>
+ * <li>{@link it.eng.spagobi.meta.model.physical.impl.PhysicalTableImpl#getColumns <em>Columns</em>}</li>
  * </ul>
  * </p>
- *
+ * 
  * @generated
  */
 public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable {
 	/**
-	 * The default value of the '{@link #getComment() <em>Comment</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * The default value of the '{@link #getComment() <em>Comment</em>}' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @see #getComment()
 	 * @generated
 	 * @ordered
@@ -60,9 +57,8 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	protected static final String COMMENT_EDEFAULT = null;
 
 	/**
-	 * The cached value of the '{@link #getComment() <em>Comment</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * The cached value of the '{@link #getComment() <em>Comment</em>}' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @see #getComment()
 	 * @generated
 	 * @ordered
@@ -70,9 +66,8 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	protected String comment = COMMENT_EDEFAULT;
 
 	/**
-	 * The default value of the '{@link #getType() <em>Type</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * The default value of the '{@link #getType() <em>Type</em>}' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @see #getType()
 	 * @generated
 	 * @ordered
@@ -80,9 +75,8 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	protected static final String TYPE_EDEFAULT = null;
 
 	/**
-	 * The cached value of the '{@link #getType() <em>Type</em>}' attribute.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * The cached value of the '{@link #getType() <em>Type</em>}' attribute. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @see #getType()
 	 * @generated
 	 * @ordered
@@ -90,9 +84,8 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	protected String type = TYPE_EDEFAULT;
 
 	/**
-	 * The cached value of the '{@link #getColumns() <em>Columns</em>}' containment reference list.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * The cached value of the '{@link #getColumns() <em>Columns</em>}' containment reference list. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @see #getColumns()
 	 * @generated
 	 * @ordered
@@ -100,8 +93,8 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	protected EList<PhysicalColumn> columns;
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected PhysicalTableImpl() {
@@ -109,8 +102,8 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
@@ -119,19 +112,21 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public String getComment() {
 		return comment;
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public void setComment(String newComment) {
 		String oldComment = comment;
 		comment = newComment;
@@ -140,19 +135,21 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public String getType() {
 		return type;
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public void setType(String newType) {
 		String oldType = type;
 		type = newType;
@@ -161,30 +158,33 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public PhysicalModel getModel() {
-		if (eContainerFeatureID() != PhysicalModelPackage.PHYSICAL_TABLE__MODEL) return null;
-		return (PhysicalModel)eContainer();
+		if (eContainerFeatureID() != PhysicalModelPackage.PHYSICAL_TABLE__MODEL)
+			return null;
+		return (PhysicalModel) eContainer();
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public NotificationChain basicSetModel(PhysicalModel newModel, NotificationChain msgs) {
-		msgs = eBasicSetContainer((InternalEObject)newModel, PhysicalModelPackage.PHYSICAL_TABLE__MODEL, msgs);
+		msgs = eBasicSetContainer((InternalEObject) newModel, PhysicalModelPackage.PHYSICAL_TABLE__MODEL, msgs);
 		return msgs;
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public void setModel(PhysicalModel newModel) {
 		if (newModel != eInternalContainer() || (eContainerFeatureID() != PhysicalModelPackage.PHYSICAL_TABLE__MODEL && newModel != null)) {
 			if (EcoreUtil.isAncestor(this, newModel))
@@ -193,173 +193,176 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 			if (eInternalContainer() != null)
 				msgs = eBasicRemoveFromContainer(msgs);
 			if (newModel != null)
-				msgs = ((InternalEObject)newModel).eInverseAdd(this, PhysicalModelPackage.PHYSICAL_MODEL__TABLES, PhysicalModel.class, msgs);
+				msgs = ((InternalEObject) newModel).eInverseAdd(this, PhysicalModelPackage.PHYSICAL_MODEL__TABLES, PhysicalModel.class, msgs);
 			msgs = basicSetModel(newModel, msgs);
-			if (msgs != null) msgs.dispatch();
-		}
-		else if (eNotificationRequired())
+			if (msgs != null)
+				msgs.dispatch();
+		} else if (eNotificationRequired())
 			eNotify(new ENotificationImpl(this, Notification.SET, PhysicalModelPackage.PHYSICAL_TABLE__MODEL, newModel, newModel));
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
+	@Override
 	public EList<PhysicalColumn> getColumns() {
 		if (columns == null) {
-			columns = new EObjectContainmentWithInverseEList<PhysicalColumn>(PhysicalColumn.class, this, PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS, PhysicalModelPackage.PHYSICAL_COLUMN__TABLE);
+			columns = new EObjectContainmentWithInverseEList<PhysicalColumn>(PhysicalColumn.class, this, PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS,
+					PhysicalModelPackage.PHYSICAL_COLUMN__TABLE);
 		}
 		return columns;
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public NotificationChain eInverseAdd(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
 		switch (featureID) {
-			case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
-				if (eInternalContainer() != null)
-					msgs = eBasicRemoveFromContainer(msgs);
-				return basicSetModel((PhysicalModel)otherEnd, msgs);
-			case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
-				return ((InternalEList<InternalEObject>)(InternalEList<?>)getColumns()).basicAdd(otherEnd, msgs);
+		case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
+			if (eInternalContainer() != null)
+				msgs = eBasicRemoveFromContainer(msgs);
+			return basicSetModel((PhysicalModel) otherEnd, msgs);
+		case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
+			return ((InternalEList<InternalEObject>) (InternalEList<?>) getColumns()).basicAdd(otherEnd, msgs);
 		}
 		return super.eInverseAdd(otherEnd, featureID, msgs);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	public NotificationChain eInverseRemove(InternalEObject otherEnd, int featureID, NotificationChain msgs) {
 		switch (featureID) {
-			case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
-				return basicSetModel(null, msgs);
-			case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
-				return ((InternalEList<?>)getColumns()).basicRemove(otherEnd, msgs);
+		case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
+			return basicSetModel(null, msgs);
+		case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
+			return ((InternalEList<?>) getColumns()).basicRemove(otherEnd, msgs);
 		}
 		return super.eInverseRemove(otherEnd, featureID, msgs);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	public NotificationChain eBasicRemoveFromContainerFeature(NotificationChain msgs) {
 		switch (eContainerFeatureID()) {
-			case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
-				return eInternalContainer().eInverseRemove(this, PhysicalModelPackage.PHYSICAL_MODEL__TABLES, PhysicalModel.class, msgs);
+		case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
+			return eInternalContainer().eInverseRemove(this, PhysicalModelPackage.PHYSICAL_MODEL__TABLES, PhysicalModel.class, msgs);
 		}
 		return super.eBasicRemoveFromContainerFeature(msgs);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	public Object eGet(int featureID, boolean resolve, boolean coreType) {
 		switch (featureID) {
-			case PhysicalModelPackage.PHYSICAL_TABLE__COMMENT:
-				return getComment();
-			case PhysicalModelPackage.PHYSICAL_TABLE__TYPE:
-				return getType();
-			case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
-				return getModel();
-			case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
-				return getColumns();
+		case PhysicalModelPackage.PHYSICAL_TABLE__COMMENT:
+			return getComment();
+		case PhysicalModelPackage.PHYSICAL_TABLE__TYPE:
+			return getType();
+		case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
+			return getModel();
+		case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
+			return getColumns();
 		}
 		return super.eGet(featureID, resolve, coreType);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public void eSet(int featureID, Object newValue) {
 		switch (featureID) {
-			case PhysicalModelPackage.PHYSICAL_TABLE__COMMENT:
-				setComment((String)newValue);
-				return;
-			case PhysicalModelPackage.PHYSICAL_TABLE__TYPE:
-				setType((String)newValue);
-				return;
-			case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
-				setModel((PhysicalModel)newValue);
-				return;
-			case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
-				getColumns().clear();
-				getColumns().addAll((Collection<? extends PhysicalColumn>)newValue);
-				return;
+		case PhysicalModelPackage.PHYSICAL_TABLE__COMMENT:
+			setComment((String) newValue);
+			return;
+		case PhysicalModelPackage.PHYSICAL_TABLE__TYPE:
+			setType((String) newValue);
+			return;
+		case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
+			setModel((PhysicalModel) newValue);
+			return;
+		case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
+			getColumns().clear();
+			getColumns().addAll((Collection<? extends PhysicalColumn>) newValue);
+			return;
 		}
 		super.eSet(featureID, newValue);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	public void eUnset(int featureID) {
 		switch (featureID) {
-			case PhysicalModelPackage.PHYSICAL_TABLE__COMMENT:
-				setComment(COMMENT_EDEFAULT);
-				return;
-			case PhysicalModelPackage.PHYSICAL_TABLE__TYPE:
-				setType(TYPE_EDEFAULT);
-				return;
-			case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
-				setModel((PhysicalModel)null);
-				return;
-			case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
-				getColumns().clear();
-				return;
+		case PhysicalModelPackage.PHYSICAL_TABLE__COMMENT:
+			setComment(COMMENT_EDEFAULT);
+			return;
+		case PhysicalModelPackage.PHYSICAL_TABLE__TYPE:
+			setType(TYPE_EDEFAULT);
+			return;
+		case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
+			setModel((PhysicalModel) null);
+			return;
+		case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
+			getColumns().clear();
+			return;
 		}
 		super.eUnset(featureID);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	public boolean eIsSet(int featureID) {
 		switch (featureID) {
-			case PhysicalModelPackage.PHYSICAL_TABLE__COMMENT:
-				return COMMENT_EDEFAULT == null ? comment != null : !COMMENT_EDEFAULT.equals(comment);
-			case PhysicalModelPackage.PHYSICAL_TABLE__TYPE:
-				return TYPE_EDEFAULT == null ? type != null : !TYPE_EDEFAULT.equals(type);
-			case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
-				return getModel() != null;
-			case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
-				return columns != null && !columns.isEmpty();
+		case PhysicalModelPackage.PHYSICAL_TABLE__COMMENT:
+			return COMMENT_EDEFAULT == null ? comment != null : !COMMENT_EDEFAULT.equals(comment);
+		case PhysicalModelPackage.PHYSICAL_TABLE__TYPE:
+			return TYPE_EDEFAULT == null ? type != null : !TYPE_EDEFAULT.equals(type);
+		case PhysicalModelPackage.PHYSICAL_TABLE__MODEL:
+			return getModel() != null;
+		case PhysicalModelPackage.PHYSICAL_TABLE__COLUMNS:
+			return columns != null && !columns.isEmpty();
 		}
 		return super.eIsSet(featureID);
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	public String toString() {
-		if (eIsProxy()) return super.toString();
+		if (eIsProxy())
+			return super.toString();
 
 		StringBuffer result = new StringBuffer(super.toString());
 		result.append(" (comment: ");
@@ -369,30 +372,31 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 		result.append(')');
 		return result.toString();
 	}
-	
+
 	// =========================================================================
 	// Utility methods
 	// =========================================================================
-	
+
 	@Override
 	public PhysicalPrimaryKey getPrimaryKey() {
-		return (getModel() != null)? getModel().getPrimaryKey(this): null;
+		return (getModel() != null) ? getModel().getPrimaryKey(this) : null;
 	}
-	
+
 	@Override
 	public PhysicalColumn getColumn(String name) {
 		PhysicalColumn column;
 		Iterator<PhysicalColumn> it = getColumns().iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			column = it.next();
-			if(name.equalsIgnoreCase(column.getName())) {
+			if (name.equalsIgnoreCase(column.getName())) {
 				return column;
 			}
 		}
 		return null;
 	}
-	
-	public List<PhysicalForeignKey> getForeignKeys(){
+
+	@Override
+	public List<PhysicalForeignKey> getForeignKeys() {
 		return getModel().getForeignKeys(this);
 	}
 
@@ -400,7 +404,7 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	public EList<ModelPropertyType> getPropertyTypes() {
 		return getModel().getParentModel().getPropertyTypes();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -418,8 +422,26 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 		return true;
 	}
 
-	
-	
-	
+	@Override
+	public boolean containsAllNotDeleted(List<PhysicalColumn> physicalColumnsToCheck) {
+		List<PhysicalColumn> columns = this.getColumns();
+		for (PhysicalColumn physicalColumnToCheck : physicalColumnsToCheck) {
+			boolean found = false;
+			for (PhysicalColumn column : columns) {
+				// first check column name
+				if (column.getName().equals(physicalColumnToCheck.getName())) {
+					// check that the column is not market as deleted
+					String isDeleted = column.getProperties().get("structural.deleted").getValue();
+					if (isDeleted.equalsIgnoreCase("false")) {
+						found = true;
+					}
+				}
+			}
+			if (!found) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-} //PhysicalTableImpl
+} // PhysicalTableImpl
