@@ -721,12 +721,48 @@ public class PhysicalModelInitializer {
 		}
 
 		// Add new columns
-		originalTable.getColumns().addAll(columnsToAdd);
+		// check also if new columns are part of Primary Key
+		for (PhysicalColumn columnToAdd : columnsToAdd) {
+			addPhysicalColumn(originalTable, columnToAdd);
+		}
 
 		// Foreign keys checking
 		checkForeignKeys(originalTable, updatedTable);
 
 		return originalTable;
+
+	}
+
+	/**
+	 * Add a column to the passed physical table, also check if the column is a primary key
+	 */
+	private void addPhysicalColumn(PhysicalTable physicalTable, PhysicalColumn updatedPhysicalColumn) {
+		boolean isPrimaryKey = updatedPhysicalColumn.isPrimaryKey();
+		physicalTable.getColumns().add(updatedPhysicalColumn);
+
+		PhysicalPrimaryKey primaryKey = physicalTable.getPrimaryKey();
+
+		if (isPrimaryKey) {
+			if (primaryKey != null) {
+				// update
+				primaryKey.getColumns().add(updatedPhysicalColumn);
+			} else {
+				// create new PK
+
+				PhysicalPrimaryKey newPrimaryKey = FACTORY.createPhysicalPrimaryKey();
+				String pkName = updatedPhysicalColumn.getTable().getPrimaryKey().getName();
+				newPrimaryKey.setName(pkName);
+
+				newPrimaryKey.setTable(physicalTable);
+				PhysicalModel originalPhysicalModel = physicalTable.getModel();
+				originalPhysicalModel.getPrimaryKeys().add(newPrimaryKey);
+
+				getPropertiesInitializer().addProperties(newPrimaryKey);
+
+				newPrimaryKey.getColumns().add(updatedPhysicalColumn);
+
+			}
+		}
 
 	}
 
@@ -751,7 +787,6 @@ public class PhysicalModelInitializer {
 				if (updatedPhysicalForeignKey.getSourceName().equals(originalPhysicalForeignKey.getSourceName())) {
 					// remove from the list of foreign keys to add
 					foreignKeysToAdd.remove(updatedPhysicalForeignKey);
-					// TODO: TEST THIS CASE!!!
 					// UPDATE FK
 					// check if the fk has changed
 					updateForeignKey(originalPhysicalForeignKey, updatedPhysicalForeignKey);
@@ -790,119 +825,72 @@ public class PhysicalModelInitializer {
 
 		PhysicalModel originalPhysicalModel = originalSourceTable.getModel();
 
-		PhysicalTable updatedSourceTable = updatedPhysicalForeignKey.getSourceTable();
 		PhysicalTable updatedDestinationTable = updatedPhysicalForeignKey.getDestinationTable();
 
 		// We skip the source tables because we call this method only in the checkForeignKeys() method
 		// so we assume that the source table is the same
 
 		// Check source Columns
-		List<PhysicalColumn> originalSourceColumns = originalPhysicalForeignKey.getSourceColumns();
 		List<PhysicalColumn> updatedSourceColumns = updatedPhysicalForeignKey.getSourceColumns();
-		checkSourceForeignKeysColumns(originalPhysicalForeignKey, updatedSourceColumns);
-
-		// Check Destination Tables
-		if (originalDestinationTable.getName().equals(updatedDestinationTable.getName())) {
-			// check destination columns
-			List<PhysicalColumn> updatedDestinationColumns = updatedPhysicalForeignKey.getDestinationColumns();
-			checkDestinationForeignKeysColumns(originalPhysicalForeignKey, updatedDestinationColumns);
-		} else {
-			// different destination tables
-			PhysicalTable newDestinationPhysicalTable = originalPhysicalModel.getTable(updatedDestinationTable.getName());
-			if (newDestinationPhysicalTable != null) {
-				// change the destination table
-				originalPhysicalForeignKey.setDestinationTable(newDestinationPhysicalTable);
-				// change the destination columns in the original fk
+		boolean resultSourceCheck = checkSourceForeignKeysColumns(originalPhysicalForeignKey, updatedSourceColumns);
+		if (resultSourceCheck) {
+			// Check Destination Tables
+			if (originalDestinationTable.getName().equals(updatedDestinationTable.getName())) {
+				// check destination columns
 				List<PhysicalColumn> updatedDestinationColumns = updatedPhysicalForeignKey.getDestinationColumns();
-				// check if all the destination columns are present in the original model, if false remove the whole fk
-				boolean result = changeDestinationForeignKeyColumns(originalPhysicalForeignKey, updatedDestinationColumns);
-				if (!result) {
+				boolean resultDestinationCheck = checkDestinationForeignKeyColumns(originalPhysicalForeignKey, updatedDestinationColumns);
+				if (!resultDestinationCheck) {
 					// remove whole fk for missing columns in the original model
 					originalPhysicalModel.getForeignKeys().remove(originalPhysicalForeignKey);
 				}
 			} else {
-				// destination table not found, remove the whole fk
-				originalPhysicalModel.getForeignKeys().remove(originalPhysicalForeignKey);
+				// different destination tables
+				PhysicalTable newDestinationPhysicalTable = originalPhysicalModel.getTable(updatedDestinationTable.getName());
+				if (newDestinationPhysicalTable != null) {
+					// change the destination table
+					originalPhysicalForeignKey.setDestinationTable(newDestinationPhysicalTable);
+					// change the destination columns in the original fk
+					List<PhysicalColumn> updatedDestinationColumns = updatedPhysicalForeignKey.getDestinationColumns();
+					// check if all the destination columns are present in the original model, if false remove the whole fk
+					boolean resultDestinationCheck = checkDestinationForeignKeyColumns(originalPhysicalForeignKey, updatedDestinationColumns);
+					if (!resultDestinationCheck) {
+						// remove whole fk for missing columns in the original model
+						originalPhysicalModel.getForeignKeys().remove(originalPhysicalForeignKey);
+					}
+				} else {
+					// destination table not found, remove the whole fk
+					originalPhysicalModel.getForeignKeys().remove(originalPhysicalForeignKey);
+				}
 			}
+		} else {
+			// Cannot find a column of the FK so we remove the whole FK
+			originalPhysicalModel.getForeignKeys().remove(originalPhysicalForeignKey);
 		}
 
 	}
 
-	private void checkSourceForeignKeysColumns(PhysicalForeignKey originalPhysicalForeignKey, List<PhysicalColumn> updatedSourceColumns) {
-		List<PhysicalColumn> originalSourceColumns = originalPhysicalForeignKey.getSourceColumns();
-		List<PhysicalColumn> originalSourceColumnsToRemove = new ArrayList<PhysicalColumn>();
-		List<PhysicalColumn> originalSourceColumnsToAdd = new ArrayList<PhysicalColumn>();
-		originalSourceColumnsToRemove.addAll(originalSourceColumns);
-
+	private boolean checkSourceForeignKeysColumns(PhysicalForeignKey originalPhysicalForeignKey, List<PhysicalColumn> updatedSourceColumns) {
 		PhysicalTable originalSourceTable = originalPhysicalForeignKey.getSourceTable();
 
+		// remove all the source columns
+		originalPhysicalForeignKey.getSourceColumns().clear();
 		Iterator<PhysicalColumn> iterator = updatedSourceColumns.iterator();
+
 		while (iterator.hasNext()) {
 			PhysicalColumn updatedPhysicalColumn = iterator.next();
-			boolean columnFound = false;
-			for (PhysicalColumn originalSourceColumn : originalSourceColumns) {
-				if (originalSourceColumn.getName().equals(updatedPhysicalColumn.getName())) {
-					// source column was already present in the original fk
-					columnFound = true;
-					// remove from the list of column to be removed from the fk
-					originalSourceColumnsToRemove.remove(originalSourceColumn);
-					break;
-				}
+			PhysicalColumn columnToAdd = originalSourceTable.getColumn(updatedPhysicalColumn.getName());
+			if (columnToAdd != null) {
+				originalPhysicalForeignKey.getSourceColumns().add(columnToAdd);
+			} else {
+				// source column not found in the original model
+				return false;
 			}
-			if (!columnFound) {
-				// column must be added to the original fk
-				PhysicalColumn columnToAdd = originalSourceTable.getColumn(updatedPhysicalColumn.getName());
-				if (columnToAdd != null) {
-					originalSourceColumnsToAdd.add(columnToAdd);
-				}
-			}
-
 		}
-		// add columns
-		originalPhysicalForeignKey.getSourceColumns().addAll(originalSourceColumnsToAdd);
-		// remove columns
-		originalPhysicalForeignKey.getSourceColumns().removeAll(originalSourceColumnsToRemove);
+		return true;
 
 	}
 
-	private void checkDestinationForeignKeysColumns(PhysicalForeignKey originalPhysicalForeignKey, List<PhysicalColumn> updatedDestinationColumns) {
-		List<PhysicalColumn> originalDestinationColumns = originalPhysicalForeignKey.getDestinationColumns();
-		List<PhysicalColumn> originalDestinationColumnsToRemove = new ArrayList<PhysicalColumn>();
-		List<PhysicalColumn> originalDestinationColumnsToAdd = new ArrayList<PhysicalColumn>();
-		originalDestinationColumnsToRemove.addAll(originalDestinationColumns);
-
-		PhysicalTable originalDestinationTable = originalPhysicalForeignKey.getDestinationTable();
-
-		Iterator<PhysicalColumn> iterator = updatedDestinationColumns.iterator();
-		while (iterator.hasNext()) {
-			PhysicalColumn updatedPhysicalColumn = iterator.next();
-			boolean columnFound = false;
-			for (PhysicalColumn originalDestinationColumn : originalDestinationColumns) {
-				if (originalDestinationColumn.getName().equals(updatedPhysicalColumn.getName())) {
-					// destination column was already present in the original fk
-					columnFound = true;
-					// remove from the list of column to be removed from the fk
-					originalDestinationColumnsToRemove.remove(originalDestinationColumn);
-					break;
-				}
-			}
-			if (!columnFound) {
-				// column must be added to the original fk
-				PhysicalColumn columnToAdd = originalDestinationTable.getColumn(updatedPhysicalColumn.getName());
-				if (columnToAdd != null) {
-					originalDestinationColumnsToAdd.add(columnToAdd);
-				}
-			}
-
-		}
-		// add columns
-		originalPhysicalForeignKey.getDestinationColumns().addAll(originalDestinationColumnsToAdd);
-		// remove columns
-		originalPhysicalForeignKey.getDestinationColumns().removeAll(originalDestinationColumnsToRemove);
-
-	}
-
-	private boolean changeDestinationForeignKeyColumns(PhysicalForeignKey originalPhysicalForeignKey, List<PhysicalColumn> updatedDestinationColumns) {
+	private boolean checkDestinationForeignKeyColumns(PhysicalForeignKey originalPhysicalForeignKey, List<PhysicalColumn> updatedDestinationColumns) {
 		PhysicalTable originalDestinationTable = originalPhysicalForeignKey.getDestinationTable();
 
 		// remove all destination columns
