@@ -61,6 +61,7 @@ import org.eclipse.emf.ecore.EValidator;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EContentAdapter;
+import org.eclipse.emf.ecore.util.ECrossReferenceAdapter;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.emf.edit.domain.EditingDomain;
@@ -838,24 +839,30 @@ public class PhysicalModelEditor extends MultiPageEditorPart implements IEditing
 			resourceToDiagnosticMap.put(resource, analyzeResourceProblems(resource, exception));
 		}
 		editingDomain.getResourceSet().eAdapters().add(problemIndicationAdapter);
+		// MC: added the ECrossReferenceAdapter for resolving inverse references
+		ECrossReferenceAdapter crossReferenceAdapter = new ECrossReferenceAdapter();
+		resource.getResourceSet().eAdapters().add(crossReferenceAdapter);
+		ModelSingleton modelSingleton = ModelSingleton.getInstance();
+		modelSingleton.setCrossReferenceAdapter(crossReferenceAdapter);
+		// ******
 	}
 
 	/**
 	 * Returns a diagnostic describing the errors and warnings listed in the resource and the specified exception (if any). <!-- begin-user-doc --> <!--
 	 * end-user-doc -->
 	 * 
-	 * @generated
+	 * 
 	 */
 	public Diagnostic analyzeResourceProblems(Resource resource, Exception exception) {
 		if (!resource.getErrors().isEmpty() || !resource.getWarnings().isEmpty()) {
 			BasicDiagnostic basicDiagnostic = new BasicDiagnostic(Diagnostic.ERROR, "it.eng.spagobi.meta.editor", 0, RL.getString(
-					"business.editor.diagnostic.createmodelerror.message", new Object[] { resource.getURI() }),
+					"business.editor.diagnostic.createmodelerror.message", new Object[] { resource.getURI().toFileString() }),
 					new Object[] { exception == null ? (Object) resource : exception });
 			basicDiagnostic.merge(EcoreUtil.computeDiagnostic(resource, true));
 			return basicDiagnostic;
 		} else if (exception != null) {
 			return new BasicDiagnostic(Diagnostic.ERROR, "it.eng.spagobi.meta.editor", 0, RL.getString("business.editor.diagnostic.createmodelerror.message",
-					new Object[] { resource.getURI() }), new Object[] { exception });
+					new Object[] { resource.getURI().toFileString() }), new Object[] { exception });
 		} else {
 			return Diagnostic.OK_INSTANCE;
 		}

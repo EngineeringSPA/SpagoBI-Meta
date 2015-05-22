@@ -13,6 +13,7 @@ import it.eng.spagobi.meta.initializer.properties.IPropertiesInitializer;
 import it.eng.spagobi.meta.initializer.properties.PhysicalModelPropertiesFromFileInitializer;
 import it.eng.spagobi.meta.model.Model;
 import it.eng.spagobi.meta.model.ModelProperty;
+import it.eng.spagobi.meta.model.business.BusinessRelationship;
 import it.eng.spagobi.meta.model.physical.PhysicalColumn;
 import it.eng.spagobi.meta.model.physical.PhysicalForeignKey;
 import it.eng.spagobi.meta.model.physical.PhysicalModel;
@@ -26,6 +27,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +36,9 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature.Setting;
+import org.eclipse.emf.ecore.util.ECrossReferenceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -797,7 +802,7 @@ public class PhysicalModelInitializer {
 			if (!fkFound) {
 				// REMOVE FK
 				// fk not found in the updated model, the foreign key was removed from the db
-				originalTable.getModel().getForeignKeys().remove(originalPhysicalForeignKey);
+				removePhysicalForeignKey(originalTable.getModel(), originalPhysicalForeignKey);
 			}
 
 		}
@@ -841,7 +846,8 @@ public class PhysicalModelInitializer {
 				boolean resultDestinationCheck = checkDestinationForeignKeyColumns(originalPhysicalForeignKey, updatedDestinationColumns);
 				if (!resultDestinationCheck) {
 					// remove whole fk for missing columns in the original model
-					originalPhysicalModel.getForeignKeys().remove(originalPhysicalForeignKey);
+					removePhysicalForeignKey(originalPhysicalModel, originalPhysicalForeignKey);
+
 				}
 			} else {
 				// different destination tables
@@ -855,16 +861,16 @@ public class PhysicalModelInitializer {
 					boolean resultDestinationCheck = checkDestinationForeignKeyColumns(originalPhysicalForeignKey, updatedDestinationColumns);
 					if (!resultDestinationCheck) {
 						// remove whole fk for missing columns in the original model
-						originalPhysicalModel.getForeignKeys().remove(originalPhysicalForeignKey);
+						removePhysicalForeignKey(originalPhysicalModel, originalPhysicalForeignKey);
 					}
 				} else {
 					// destination table not found, remove the whole fk
-					originalPhysicalModel.getForeignKeys().remove(originalPhysicalForeignKey);
+					removePhysicalForeignKey(originalPhysicalModel, originalPhysicalForeignKey);
 				}
 			}
 		} else {
 			// Cannot find a column of the FK so we remove the whole FK
-			originalPhysicalModel.getForeignKeys().remove(originalPhysicalForeignKey);
+			removePhysicalForeignKey(originalPhysicalModel, originalPhysicalForeignKey);
 		}
 
 	}
@@ -880,7 +886,11 @@ public class PhysicalModelInitializer {
 			PhysicalColumn updatedPhysicalColumn = iterator.next();
 			PhysicalColumn columnToAdd = originalSourceTable.getColumn(updatedPhysicalColumn.getName());
 			if (columnToAdd != null) {
-				originalPhysicalForeignKey.getSourceColumns().add(columnToAdd);
+				if (!columnToAdd.isMarkedDeleted()) {
+					originalPhysicalForeignKey.getSourceColumns().add(columnToAdd);
+				} else {
+					return false;
+				}
 			} else {
 				// source column not found in the original model
 				return false;
@@ -902,8 +912,13 @@ public class PhysicalModelInitializer {
 				// destination column not found in the original model
 				return false;
 			} else {
-				// add destination column
-				originalPhysicalForeignKey.getDestinationColumns().add(newDestColumn);
+				if (!newDestColumn.isMarkedDeleted()) {
+					// add destination column
+					originalPhysicalForeignKey.getDestinationColumns().add(newDestColumn);
+				} else {
+					return false;
+				}
+
 			}
 		}
 		return true;
@@ -1023,6 +1038,29 @@ public class PhysicalModelInitializer {
 	// --------------------------------------------------------
 	// Accessor methods
 	// --------------------------------------------------------
+
+	/**
+	 * Remove the physical foreign key from the Physical Model and also remove pending referencies (ex in BusinessRelationship)
+	 * 
+	 */
+	private void removePhysicalForeignKey(PhysicalModel physicalModel, PhysicalForeignKey physicalForeignKey) {
+		physicalModel.getForeignKeys().remove(physicalForeignKey);
+
+		// remove inverse references (if any)
+		ModelSingleton modelSingleton = ModelSingleton.getInstance();
+		ECrossReferenceAdapter adapter = modelSingleton.getCrossReferenceAdapter();
+		Collection<Setting> settings = adapter.getInverseReferences(physicalForeignKey, true);
+		for (Setting setting : settings) {
+			EObject eobject = setting.getEObject();
+			if (eobject instanceof BusinessRelationship) {
+				BusinessRelationship businessRelationship = (BusinessRelationship) eobject;
+				if (businessRelationship.getPhysicalForeignKey().equals(physicalForeignKey)) {
+					// remove reference
+					businessRelationship.setPhysicalForeignKey(null);
+				}
+			}
+		}
+	}
 
 	public PhysicalColumn findColumn(String columnName, EList<PhysicalColumn> physicalColumns) {
 

@@ -81,24 +81,6 @@ public class UpdatePhysicalModelAction extends AbstractSpagoBIModelAction {
 					}
 				}
 
-				// Commented beheviour without table filter wizard
-				// Retrieve connection Name
-				// CommandParameter parameter = performFinishCommand.getParameter();
-				//
-				//
-				// PhysicalRootItemProvider owner = (PhysicalRootItemProvider)parameter.getOwner();
-				// PhysicalModel physicalModel = (PhysicalModel) owner.getParentObject();
-				// String connectionName = physicalModel.getProperties().get(PhysicalModelPropertiesFromFileInitializer.CONNECTION_NAME).getValue();
-				// //Create connection using DSEBridge - using the same connection name retrieved from the physical model
-				// DSEBridge dseBridge = new DSEBridge();
-				// Connection connection = dseBridge.connect(connectionName);
-				// performFinishCommand.setParameter(new CommandParameter(owner, null,connection , new ArrayList<Object>()));
-				//
-				// // this guard is for extra security, but should not be necessary
-				// if (editingDomain != null && performFinishCommand != null) {
-				// // use up the command
-				// editingDomain.getCommandStack().execute(performFinishCommand);
-				// }
 			}
 		} catch (Throwable t) {
 			t.printStackTrace();
