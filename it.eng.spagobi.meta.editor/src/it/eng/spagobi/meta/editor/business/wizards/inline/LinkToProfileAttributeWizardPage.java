@@ -57,7 +57,7 @@ public class LinkToProfileAttributeWizardPage extends WizardPage {
 		try {
 			proxyServerObjects = new SpagoBIServerObjectsFactory(projectName);
 
-			ProfileAttribute[] attributes = proxyServerObjects.getServerDocuments().getAllAttributes(null);
+			ProfileAttribute[] attributes = proxyServerObjects.getServerBehavioural().getAttributes(null);
 
 			//Main composite
 			Composite composite = new Composite(parent, SWT.NULL);
