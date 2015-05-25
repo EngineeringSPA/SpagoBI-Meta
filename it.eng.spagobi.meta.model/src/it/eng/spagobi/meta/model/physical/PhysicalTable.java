@@ -142,4 +142,11 @@ public interface PhysicalTable extends ModelObject {
 
 	public boolean containsAllNotDeleted(List<PhysicalColumn> physicalColumns);
 
+	/**
+	 * Return foreign keys that have this table as source or destination table
+	 * 
+	 * @return
+	 */
+	public List<PhysicalForeignKey> getForeignKeysInvolvingTable();
+
 } // PhysicalTable

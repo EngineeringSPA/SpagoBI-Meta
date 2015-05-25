@@ -401,6 +401,11 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 	}
 
 	@Override
+	public List<PhysicalForeignKey> getForeignKeysInvolvingTable() {
+		return getModel().getForeignKeysInvolvingTable(this);
+	}
+
+	@Override
 	public EList<ModelPropertyType> getPropertyTypes() {
 		return getModel().getParentModel().getPropertyTypes();
 	}

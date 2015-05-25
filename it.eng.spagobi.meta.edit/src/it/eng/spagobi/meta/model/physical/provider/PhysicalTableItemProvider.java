@@ -14,6 +14,7 @@ import it.eng.spagobi.meta.model.physical.PhysicalForeignKey;
 import it.eng.spagobi.meta.model.physical.PhysicalModelFactory;
 import it.eng.spagobi.meta.model.physical.PhysicalModelPackage;
 import it.eng.spagobi.meta.model.physical.PhysicalTable;
+import it.eng.spagobi.meta.model.physical.commands.edit.table.DeletePhysicalTableCommand;
 import it.eng.spagobi.meta.model.provider.ModelObjectItemProvider;
 import it.eng.spagobi.meta.model.provider.SpagoBIMetaModelEditPlugin;
 
@@ -21,10 +22,13 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.eclipse.emf.common.command.Command;
 import org.eclipse.emf.common.notify.AdapterFactory;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.util.ResourceLocator;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.edit.command.CommandParameter;
+import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.emf.edit.provider.ComposeableAdapterFactory;
 import org.eclipse.emf.edit.provider.IEditingDomainItemProvider;
 import org.eclipse.emf.edit.provider.IItemLabelProvider;
@@ -236,6 +240,19 @@ public class PhysicalTableItemProvider extends ModelObjectItemProvider implement
 	@Override
 	public ResourceLocator getResourceLocator() {
 		return SpagoBIMetaModelEditPlugin.INSTANCE;
+	}
+
+	@Override
+	public Command createCustomCommand(Object object, EditingDomain domain, Class<? extends Command> commandClass, CommandParameter commandParameter) {
+		Command result;
+
+		result = null;
+
+		if (commandClass == DeletePhysicalTableCommand.class) {
+			result = new DeletePhysicalTableCommand(domain, commandParameter);
+		}
+
+		return result;
 	}
 
 }

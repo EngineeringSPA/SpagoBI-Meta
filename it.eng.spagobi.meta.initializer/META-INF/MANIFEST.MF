@@ -17,7 +17,8 @@ Bundle-ClassPath: libs/misc/commons-lang-2.5.jar,
 Export-Package: it.eng.spagobi.meta.initializer,
  it.eng.spagobi.meta.initializer.descriptor,
  it.eng.spagobi.meta.initializer.name,
- it.eng.spagobi.meta.initializer.properties
+ it.eng.spagobi.meta.initializer.properties,
+ it.eng.spagobi.meta.initializer.utils
 Import-Package: org.eclipse.core.runtime,
  org.eclipse.swt.custom,
  org.eclipse.swt.widgets,

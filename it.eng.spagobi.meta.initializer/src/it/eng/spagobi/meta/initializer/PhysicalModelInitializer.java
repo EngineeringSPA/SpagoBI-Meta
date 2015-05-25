@@ -1040,7 +1040,7 @@ public class PhysicalModelInitializer {
 	// --------------------------------------------------------
 
 	/**
-	 * Remove the physical foreign key from the Physical Model and also remove pending referencies (ex in BusinessRelationship)
+	 * Remove the physical foreign key from the Physical Model and also remove pending references (ex in BusinessRelationship)
 	 * 
 	 */
 	private void removePhysicalForeignKey(PhysicalModel physicalModel, PhysicalForeignKey physicalForeignKey) {
