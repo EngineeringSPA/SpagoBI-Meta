@@ -96,6 +96,9 @@
       description="The numeric format to use if the value is numeric"
       category="Structural" defaultValue="#,###" />
       
+      <type id="structural.attribute" name="Profile attribute"
+      description="A profile attribute used to filter"
+      category="Structural" defaultValue="" />
       
       <type id="structural.datatype" name="Data Type"
       description="The data type of the given column (VARCHAR, INTEGER, DOUBLE, ...)"
@@ -126,7 +129,7 @@
         <value>$#,##0.00</value>
         <value>€#,##0.00</value>
       </admissibleValuesOf>
-      
+            
       <admissibleValuesOf typeId="structural.aggtype">
         <value>COUNT</value>
         <value>SUM</value>
@@ -134,6 +137,12 @@
         <value>MAX</value>
         <value>MIN</value>
         <value>DISTINCT-COUNT</value>
+      </admissibleValuesOf>
+
+      <admissibleValuesOf typeId="structural.attribute">
+        <value>one</value>
+        <value>two</value>
+        <value>three</value>
       </admissibleValuesOf>
       
       <admissibleValuesOf typeId="structural.datatype">
