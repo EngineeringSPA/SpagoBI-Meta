@@ -670,6 +670,19 @@ public class PhysicalModelInitializer {
 					if (!searchedDestinationTable.containsAllNotDeleted(physicalForeignKey.getDestinationColumns())) {
 						continue;
 					} else {
+						// point to the corresponding destination table and columns in the original model
+						physicalForeignKey.setDestinationTable(searchedDestinationTable);
+
+						EList<PhysicalColumn> destinationColumns = physicalForeignKey.getDestinationColumns();
+						List<PhysicalColumn> searchedDestinationColumns = new ArrayList<PhysicalColumn>();
+						for (PhysicalColumn destinationColumn : destinationColumns) {
+							PhysicalColumn searchedColumn = findColumn(destinationColumn.getName(), searchedDestinationTable.getColumns());
+							searchedDestinationColumns.add(searchedColumn);
+						}
+
+						physicalForeignKey.getDestinationColumns().clear();
+						physicalForeignKey.getDestinationColumns().addAll(searchedDestinationColumns);
+
 						// all right, add this fk to the model
 						physicalModel.getForeignKeys().add(physicalForeignKey);
 					}

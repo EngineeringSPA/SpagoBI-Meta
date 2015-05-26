@@ -53,7 +53,7 @@ public class RemoveColumnsFromPhysicalTable extends AbstractSpagoBIModelEditComm
 
 	public RemoveColumnsFromPhysicalTable(EditingDomain domain, CommandParameter parameter) {
 		super("model.physical.commands.edit.table.removecolumns.label", "model.physical.commands.edit.table.removecolumns.description",
-				"model.physical.commands.edit.table.removecolumns", domain, parameter);
+				"model.business.commands.edit.table.removecolumns", domain, parameter);
 		initializer = new BusinessModelInitializer();
 	}
 
@@ -170,11 +170,11 @@ public class RemoveColumnsFromPhysicalTable extends AbstractSpagoBIModelEditComm
 
 	@Override
 	public Collection<?> getAffectedObjects() {
-		PhysicalTable businessTable = (PhysicalTable) parameter.getOwner();
+		PhysicalTable physicalTable = (PhysicalTable) parameter.getOwner();
 		Collection affectedObjects = Collections.EMPTY_LIST;
-		if (businessTable != null) {
+		if (physicalTable != null) {
 			affectedObjects = new ArrayList();
-			affectedObjects.add(businessTable);
+			affectedObjects.add(physicalTable);
 		}
 		return affectedObjects;
 	}

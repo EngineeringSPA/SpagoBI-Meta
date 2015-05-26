@@ -29,7 +29,6 @@ import org.eclipse.ui.dialogs.ListDialog;
 public class PhysicalObjectDeleteDialog extends ListDialog {
 
 	public PhysicalObjectDeleteDialog(List<ModelObject> businessObjectToDelete) {
-		// ListDialog dialog = new ListDialog(new Shell());
 		super(new Shell());
 		this.setContentProvider(new ArrayContentProvider());
 		this.setTitle("Delete Physical Object");
@@ -37,12 +36,6 @@ public class PhysicalObjectDeleteDialog extends ListDialog {
 
 		this.setLabelProvider(new ArrayLabelProvider());
 
-		/*
-		 * List<String> input = new ArrayList<String>(); input.add("Tom"); input.add("Jack"); input.add("Leo"); input.add("Tom"); input.add("Jack");
-		 * input.add("Leo"); input.add("Tom"); input.add("Jack"); input.add("Leo"); input.add("Tom"); input.add("Jack"); input.add("Leo"); input.add("Tom");
-		 * input.add("Jack"); input.add("Leo"); input.add("Tom"); input.add("Jack"); input.add("Leo"); input.add("Tom"); input.add("Jack"); input.add("Leo");
-		 * input.add("Tom"); input.add("Jack"); input.add("Leo"); input.add("Tom"); input.add("Jack"); input.add("Leo");
-		 */
 		this.setInput(businessObjectToDelete);
 	}
 

@@ -12,8 +12,11 @@ package it.eng.spagobi.meta.editor.physical.actions;
 import it.eng.spagobi.meta.editor.physical.dialogs.PhysicalObjectDeleteDialog;
 import it.eng.spagobi.meta.initializer.utils.PhysicalModelReferencesFinder;
 import it.eng.spagobi.meta.model.ModelObject;
+import it.eng.spagobi.meta.model.business.BusinessColumnSet;
 import it.eng.spagobi.meta.model.business.BusinessTable;
+import it.eng.spagobi.meta.model.business.SimpleBusinessColumn;
 import it.eng.spagobi.meta.model.business.commands.edit.table.DeleteBusinessTableCommand;
+import it.eng.spagobi.meta.model.business.commands.edit.table.RemoveColumnsFromBusinessTable;
 import it.eng.spagobi.meta.model.physical.PhysicalColumn;
 import it.eng.spagobi.meta.model.physical.PhysicalTable;
 import it.eng.spagobi.meta.model.physical.commands.edit.table.DeletePhysicalTableCommand;
@@ -87,10 +90,12 @@ public class DeletePhysicalModelObjectAction extends DeleteAction {
 					businessObjectsToDelete = referenceFinder.getBusinessObjects((ModelObject) o);
 
 				}
+				// remove physical table
 				if (o instanceof PhysicalTable) {
 					CommandParameter parameter = new CommandParameter(o);
 					removeCommand = new DeletePhysicalTableCommand(domain, parameter);
 					removeTableCommands.add(removeCommand);
+					// remove related business tables
 					for (ModelObject businessObjectToDelete : businessObjectsToDelete) {
 						if (businessObjectToDelete instanceof BusinessTable) {
 							CommandParameter commandParameter = new CommandParameter(businessObjectToDelete);
@@ -99,7 +104,9 @@ public class DeletePhysicalModelObjectAction extends DeleteAction {
 						}
 					}
 
-				} else if (o instanceof PhysicalColumn) {
+				}
+				// remove physical column
+				else if (o instanceof PhysicalColumn) {
 					PhysicalColumn physicalColumn = (PhysicalColumn) o;
 					PhysicalTable physicalTable = physicalColumn.getTable();
 					Collection<PhysicalColumn> physicalColumns = new ArrayList<PhysicalColumn>();
@@ -108,8 +115,18 @@ public class DeletePhysicalModelObjectAction extends DeleteAction {
 					removeCommand = new RemoveColumnsFromPhysicalTable(domain, parameter);
 					removeColumnCommands.add(removeCommand);
 
-					// TODO: add remove of business columns
-					// **** CONTINUARE DA QUI *********
+					// remove related business columns
+					for (ModelObject businessObjectToDelete : businessObjectsToDelete) {
+						if (businessObjectToDelete instanceof SimpleBusinessColumn) {
+							SimpleBusinessColumn businessColumn = (SimpleBusinessColumn) businessObjectToDelete;
+							BusinessColumnSet businessColumnSet = businessColumn.getTable();
+							Collection<PhysicalColumn> relatedPhysicalColumns = new ArrayList<PhysicalColumn>();
+							relatedPhysicalColumns.add(businessColumn.getPhysicalColumn());
+							CommandParameter commandParameter = new CommandParameter(businessColumnSet, null, relatedPhysicalColumns, null);
+							Command removeCommand = new RemoveColumnsFromBusinessTable(domain, commandParameter);
+							removeColumnCommands.add(removeCommand);
+						}
+					}
 
 				}
 			}
