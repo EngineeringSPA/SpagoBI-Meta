@@ -13,6 +13,7 @@ ${jpaTable.uniqueName}.position = $velocityCount
 #foreach ($jpaColumn in $jpaTable.getColumns())
 ${jpaColumn.uniqueName}.visible = $jpaColumn.getAttribute("structural.visible")
 ${jpaColumn.uniqueName}.type = $jpaColumn.getAttribute("structural.columntype")
+${jpaColumn.uniqueName}.attribute = $jpaColumn.getAttribute("structural.attribute")
 ${jpaColumn.uniqueName}.position = $velocityCount
 #end
 
