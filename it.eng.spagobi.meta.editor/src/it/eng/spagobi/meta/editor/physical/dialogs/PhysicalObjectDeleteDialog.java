@@ -11,7 +11,7 @@ import it.eng.spagobi.meta.model.business.BusinessView;
 import it.eng.spagobi.meta.model.provider.SpagoBIMetaModelEditPlugin;
 
 import java.net.URL;
-import java.util.List;
+import java.util.Set;
 
 import org.eclipse.emf.common.util.ResourceLocator;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -28,12 +28,12 @@ import org.eclipse.ui.dialogs.ListDialog;
  */
 public class PhysicalObjectDeleteDialog extends ListDialog {
 
-	public PhysicalObjectDeleteDialog(List<ModelObject> businessObjectToDelete) {
+	public PhysicalObjectDeleteDialog(Set<ModelObject> businessObjectToDelete) {
 		super(new Shell());
 		this.setContentProvider(new ArrayContentProvider());
 		this.setTitle("Delete Physical Object");
 		this.setMessage("Also the following items on the Business Model will be deleted. Delete this Physical Object?");
-
+		this.setHelpAvailable(false);
 		this.setLabelProvider(new ArrayLabelProvider());
 
 		this.setInput(businessObjectToDelete);

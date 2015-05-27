@@ -4,15 +4,20 @@
 package it.eng.spagobi.meta.initializer.utils;
 
 import it.eng.spagobi.meta.initializer.ModelSingleton;
+import it.eng.spagobi.meta.model.Model;
 import it.eng.spagobi.meta.model.ModelObject;
 import it.eng.spagobi.meta.model.business.BusinessColumn;
 import it.eng.spagobi.meta.model.business.BusinessColumnSet;
 import it.eng.spagobi.meta.model.business.BusinessRelationship;
 import it.eng.spagobi.meta.model.business.BusinessTable;
+import it.eng.spagobi.meta.model.business.BusinessView;
+import it.eng.spagobi.meta.model.validator.ModelExtractor;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature.Setting;
@@ -40,8 +45,29 @@ public class PhysicalModelReferencesFinder {
 		for (Setting setting : settings) {
 			EObject eobject = setting.getEObject();
 			if ((eobject instanceof BusinessRelationship) || (eobject instanceof BusinessTable) || (eobject instanceof BusinessColumn)
-					|| (eobject instanceof BusinessColumnSet)) {
-				businessObjects.add((ModelObject) eobject);
+					|| (eobject instanceof BusinessColumnSet) || (eobject instanceof BusinessView)) {
+				ModelObject modelObject = (ModelObject) eobject;
+				Model model = ModelExtractor.getModel(modelObject);
+				if (model != null) {
+					businessObjects.add((ModelObject) eobject);
+				}
+			}
+		}
+		return businessObjects;
+	}
+
+	public Set<ModelObject> getDistinctBusinessObjects(ModelObject physicalObject) {
+		Set<ModelObject> businessObjects = new LinkedHashSet<ModelObject>();
+		Collection<Setting> settings = crossReferenceAdapter.getInverseReferences(physicalObject);
+		for (Setting setting : settings) {
+			EObject eobject = setting.getEObject();
+			if ((eobject instanceof BusinessRelationship) || (eobject instanceof BusinessTable) || (eobject instanceof BusinessColumn)
+					|| (eobject instanceof BusinessColumnSet) || (eobject instanceof BusinessView)) {
+				ModelObject modelObject = (ModelObject) eobject;
+				Model model = ModelExtractor.getModel(modelObject);
+				if (model != null) {
+					businessObjects.add((ModelObject) eobject);
+				}
 			}
 		}
 		return businessObjects;

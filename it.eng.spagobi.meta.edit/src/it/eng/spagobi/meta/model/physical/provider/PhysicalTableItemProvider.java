@@ -175,7 +175,11 @@ public class PhysicalTableItemProvider extends ModelObjectItemProvider implement
 	public Object getImage(Object object) {
 		PhysicalTable physicalTable = (PhysicalTable) object;
 		if (Boolean.valueOf(physicalTable.getProperties().get("structural.deleted").getValue()) == true) {
+			// mark as deleted table
 			return overlayImage(object, getResourceLocator().getImage("full/obj16/PhysicalTableDeleted"));
+		} else if (!physicalTable.containsAllNotDeleted(physicalTable.getColumns())) {
+			// mark as table with deleted columns
+			return overlayImage(object, getResourceLocator().getImage("full/obj16/PhysicalTableModified"));
 		} else {
 			return overlayImage(object, getResourceLocator().getImage("full/obj16/PhysicalTable"));
 

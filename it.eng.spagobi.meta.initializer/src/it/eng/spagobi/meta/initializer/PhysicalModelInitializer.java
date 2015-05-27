@@ -633,11 +633,20 @@ public class PhysicalModelInitializer {
 
 		}
 
-		// Add new Tables
+		// 3- Add new Tables
 		originalModel.getTables().addAll(tablesToAdd);
 
-		// Add foreign keys for added tables
+		// 4- Add foreign keys for added tables
 		addForeignKeysForAddedTables(foreignKeysToAdd, originalModel);
+
+		// 5 - Check Foreign Keys for updated tables
+		for (PhysicalTable updatedTable : updatedTables) {
+			String updatedTableName = updatedTable.getName();
+			PhysicalTable tableFound = findTable(updatedTableName, originalTables);
+			if (tableFound != null) {
+				checkForeignKeys(tableFound, updatedTable);
+			}
+		}
 
 		return originalModel;
 	}
@@ -670,6 +679,18 @@ public class PhysicalModelInitializer {
 					if (!searchedDestinationTable.containsAllNotDeleted(physicalForeignKey.getDestinationColumns())) {
 						continue;
 					} else {
+						// point to the corresponding source table and columns in the original model
+						physicalForeignKey.setSourceTable(searchedSourceTable);
+
+						EList<PhysicalColumn> sourceColumns = physicalForeignKey.getSourceColumns();
+						List<PhysicalColumn> searchedSourceColumns = new ArrayList<PhysicalColumn>();
+						for (PhysicalColumn sourceColumn : sourceColumns) {
+							PhysicalColumn searchedColumn = findColumn(sourceColumn.getName(), searchedSourceTable.getColumns());
+							searchedSourceColumns.add(searchedColumn);
+						}
+						physicalForeignKey.getSourceColumns().clear();
+						physicalForeignKey.getSourceColumns().addAll(searchedSourceColumns);
+
 						// point to the corresponding destination table and columns in the original model
 						physicalForeignKey.setDestinationTable(searchedDestinationTable);
 
@@ -743,9 +764,6 @@ public class PhysicalModelInitializer {
 		for (PhysicalColumn columnToAdd : columnsToAdd) {
 			addPhysicalColumn(originalTable, columnToAdd);
 		}
-
-		// Foreign keys checking
-		checkForeignKeys(originalTable, updatedTable);
 
 		return originalTable;
 
