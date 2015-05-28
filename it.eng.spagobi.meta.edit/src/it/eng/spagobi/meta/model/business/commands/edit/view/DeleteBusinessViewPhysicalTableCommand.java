@@ -6,7 +6,7 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this file,
  You can obtain one at http://mozilla.org/MPL/2.0/.
  
-**/
+ **/
 package it.eng.spagobi.meta.model.business.commands.edit.view;
 
 import it.eng.spagobi.meta.initializer.BusinessModelInitializer;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Andrea Gioia (andrea.gioia@eng.it)
- *
+ * 
  */
 public class DeleteBusinessViewPhysicalTableCommand extends AbstractSpagoBIModelEditCommand {
 
@@ -44,7 +44,7 @@ public class DeleteBusinessViewPhysicalTableCommand extends AbstractSpagoBIModel
 	BusinessView businessView;
 	PhysicalTable physicalTable;
 	BusinessTable businessTable;
-	
+
 	BusinessIdentifier removedIdentifier;
 	List<BusinessRelationship> removedRelationships;
 	List<BusinessColumn> removedBusinessColumns;
@@ -52,30 +52,30 @@ public class DeleteBusinessViewPhysicalTableCommand extends AbstractSpagoBIModel
 	List<BusinessViewInnerJoinRelationship> removedJoinRelationships;
 	PhysicalTable removedPhysicalTable;
 	boolean downgraded = false;
-	
+
 	private static Logger logger = LoggerFactory.getLogger(DeleteBusinessViewPhysicalTableCommand.class);
-	
+
 	public DeleteBusinessViewPhysicalTableCommand(EditingDomain domain, CommandParameter parameter) {
-		super( "model.business.commands.edit.view.delete.label"
-			 , "model.business.commands.edit.view.delete.description"
-			 , "model.business.commands.edit.view.delete"
-			 , domain, parameter);
+		super("model.business.commands.edit.view.delete.label", "model.business.commands.edit.view.delete.description",
+				"model.business.commands.edit.view.delete", domain, parameter);
 	}
-	
+
 	public DeleteBusinessViewPhysicalTableCommand(EditingDomain domain) {
 		this(domain, null);
 	}
-	
+
 	protected BusinessView getBusinessView() {
-		if(businessView == null) businessView = (BusinessView)parameter.getOwner();
+		if (businessView == null)
+			businessView = (BusinessView) parameter.getOwner();
 		return businessView;
 	}
-	
-	protected PhysicalTable getPhysicalTable(){
-		if(physicalTable == null) physicalTable = (PhysicalTable)parameter.getValue();
+
+	protected PhysicalTable getPhysicalTable() {
+		if (physicalTable == null)
+			physicalTable = (PhysicalTable) parameter.getValue();
 		return physicalTable;
 	}
-	
+
 	@Override
 	public void execute() {
 		try {
@@ -86,94 +86,96 @@ public class DeleteBusinessViewPhysicalTableCommand extends AbstractSpagoBIModel
 			removedBusinessColumnsIdentifier = new ArrayList<BusinessColumn>();
 			removedJoinRelationships = new ArrayList<BusinessViewInnerJoinRelationship>();
 			removedRelationships = new ArrayList<BusinessRelationship>();
-			
+
 			List<SimpleBusinessColumn> businessColumns = getBusinessView().getSimpleBusinessColumns();
-			//search columns to remove
-			for (SimpleBusinessColumn businessColumn : businessColumns){
-				if (businessColumn.getPhysicalColumn().getTable().equals(removedPhysicalTable)){
+			// search columns to remove
+			for (SimpleBusinessColumn businessColumn : businessColumns) {
+				if (businessColumn.getPhysicalColumn().getTable().equals(removedPhysicalTable)) {
 					removedBusinessColumns.add(businessColumn);
-					if ( (businessColumn.isIdentifier()) || (businessColumn.isPartOfCompositeIdentifier()) ){
+					if ((businessColumn.isIdentifier()) || (businessColumn.isPartOfCompositeIdentifier())) {
 						removedBusinessColumnsIdentifier.add(businessColumn);
 					}
-				}						
+				}
 			}
-			//remove columns from business view
+			// remove columns from business view
 			getBusinessView().getColumns().removeAll(removedBusinessColumns);
-			
-			//remove columns from identifier
+
+			// remove columns from identifier
 			if (getBusinessView().getIdentifier() != null) {
 				getBusinessView().getIdentifier().getColumns().removeAll(removedBusinessColumnsIdentifier);
-				//remove identifier if empty
-				if (getBusinessView().getIdentifier().getColumns().isEmpty()){
+				// remove identifier if empty
+				if (getBusinessView().getIdentifier().getColumns().isEmpty()) {
 					removedIdentifier = getBusinessView().getIdentifier();
 					model.getIdentifiers().remove(removedIdentifier);
 				}
 			}
-			
-			
+
 			List<BusinessViewInnerJoinRelationship> joinRelationships = getBusinessView().getJoinRelationships();
-			//search Inner Join Relationships to remove
-			for (BusinessViewInnerJoinRelationship joinRelationship : joinRelationships){
-				if(  (joinRelationship.getSourceTable()== removedPhysicalTable) || 
-					 (joinRelationship.getDestinationTable()== removedPhysicalTable) ){
+			// search Inner Join Relationships to remove
+			for (BusinessViewInnerJoinRelationship joinRelationship : joinRelationships) {
+				if ((joinRelationship.getSourceTable() == removedPhysicalTable) || (joinRelationship.getDestinationTable() == removedPhysicalTable)) {
 					removedJoinRelationships.add(joinRelationship);
 				}
 			}
-			//remove Inner Join Relationships from view
+			// remove Inner Join Relationships from view
 			getBusinessView().getJoinRelationships().removeAll(removedJoinRelationships);
-			
-			
+
 			List<BusinessRelationship> businessRelationships = getBusinessView().getRelationships();
-			//search Business Relationships to remove
-			for (BusinessRelationship businessRelationship : businessRelationships){
+			// search Business Relationships to remove
+			for (BusinessRelationship businessRelationship : businessRelationships) {
 				List<BusinessColumn> sourceColumns = businessRelationship.getSourceColumns();
 				List<BusinessColumn> destinationColumns = businessRelationship.getDestinationColumns();
-				//search removed columns if used in business relationships
-				for (BusinessColumn removedColumn : removedBusinessColumns){
-					if ((sourceColumns.contains(removedColumn)) || (destinationColumns.contains(removedColumn)) ){
+				// search removed columns if used in business relationships
+				for (BusinessColumn removedColumn : removedBusinessColumns) {
+					if ((sourceColumns.contains(removedColumn)) || (destinationColumns.contains(removedColumn))) {
 						removedRelationships.add(businessRelationship);
 						break;
 					}
 				}
 			}
-			//remove Business Relationships from view and model
+			// remove Business Relationships from view and model
 			getBusinessView().getRelationships().removeAll(removedRelationships);
 			model.getRelationships().removeAll(removedRelationships);
-			
-			
-			//Downgrade the BusinessView to Business Table
-			if (getBusinessView().getPhysicalTables().size() == 1){
+
+			// remove Inner Join Relationships from Model
+			model.getJoinRelationships().removeAll(removedJoinRelationships);
+
+			// Downgrade the BusinessView to Business Table
+			if (getBusinessView().getPhysicalTables().size() == 1) {
 				businessTable = initializer.downgradeBusinessViewToBusinessTable(businessView);
 				downgraded = true;
 			}
 			executed = true;
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			t.printStackTrace();
-			if(t instanceof RuntimeException) throw (RuntimeException)t;
-			
+			if (t instanceof RuntimeException)
+				throw (RuntimeException) t;
+
 		}
 	}
-	
-	
+
 	@Override
-	public void undo() {		
-		if (downgraded){
-			//upgrade to BusinessView
+	public void undo() {
+		if (downgraded) {
+			// upgrade to BusinessView
 			BusinessModelInitializer initializer = new BusinessModelInitializer();
-			businessView = initializer.upgradeBusinessTableToBusinessView(businessTable);	
+			businessView = initializer.upgradeBusinessTableToBusinessView(businessTable);
 			downgraded = false;
-		} 
-		//re-add columns
+		}
+		// re-add columns
 		businessView.getColumns().addAll(removedBusinessColumns);
-		//re-add identifier
-		if(removedIdentifier != null) {
+		// re-add identifier
+		if (removedIdentifier != null) {
 			model.getIdentifiers().add(removedIdentifier);
 		}
 		getBusinessView().getIdentifier().getColumns().addAll(removedBusinessColumnsIdentifier);
-		//re-add join relationships
+		// re-add join relationships to model
+		model.getJoinRelationships().addAll(removedJoinRelationships);
+		// re-add join relationships
 		getBusinessView().getJoinRelationships().addAll(removedJoinRelationships);
-		//re-add relationships
+		// re-add relationships
 		model.getRelationships().addAll(removedRelationships);
+
 		getBusinessView().getRelationships().addAll(removedRelationships);
 
 	}
@@ -182,39 +184,41 @@ public class DeleteBusinessViewPhysicalTableCommand extends AbstractSpagoBIModel
 	public void redo() {
 		execute();
 	}
-	
+
 	@Override
 	public Collection<?> getAffectedObjects() {
 		Collection affectedObjects = Collections.EMPTY_LIST;
-		if(model != null) {
+		if (model != null) {
 			affectedObjects = new ArrayList();
 			affectedObjects.add(model);
 		}
-		
+
 		return affectedObjects;
 	}
-	
-	//-------------------------------------------------------------------------
-	//	Inner Classes
-	//-------------------------------------------------------------------------
-		
+
+	// -------------------------------------------------------------------------
+	// Inner Classes
+	// -------------------------------------------------------------------------
+
 	/*
 	 * Inner class that implements IModelObjectFilter
 	 */
-	private class PhysicalColumnFilter implements IModelObjectFilter{
+	private class PhysicalColumnFilter implements IModelObjectFilter {
 
 		Collection<PhysicalColumn> columnsTrue;
-		public PhysicalColumnFilter(Collection<PhysicalColumn> columnsToMantain){
+
+		public PhysicalColumnFilter(Collection<PhysicalColumn> columnsToMantain) {
 			columnsTrue = columnsToMantain;
 		}
+
 		@Override
 		public boolean filter(ModelObject o) {
-			if (columnsTrue.contains((PhysicalColumn)o))
+			if (columnsTrue.contains(o))
 				return false;
 			else
 				return true;
-		}		
+		}
 	}
-	//-------------------------------------------------------------------------
+	// -------------------------------------------------------------------------
 
 }

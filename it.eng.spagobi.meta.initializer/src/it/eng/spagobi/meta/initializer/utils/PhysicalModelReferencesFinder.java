@@ -11,6 +11,7 @@ import it.eng.spagobi.meta.model.business.BusinessColumnSet;
 import it.eng.spagobi.meta.model.business.BusinessRelationship;
 import it.eng.spagobi.meta.model.business.BusinessTable;
 import it.eng.spagobi.meta.model.business.BusinessView;
+import it.eng.spagobi.meta.model.business.BusinessViewInnerJoinRelationship;
 import it.eng.spagobi.meta.model.validator.ModelExtractor;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class PhysicalModelReferencesFinder {
 		Collection<Setting> settings = crossReferenceAdapter.getInverseReferences(physicalObject);
 		for (Setting setting : settings) {
 			EObject eobject = setting.getEObject();
+
 			if ((eobject instanceof BusinessRelationship) || (eobject instanceof BusinessTable) || (eobject instanceof BusinessColumn)
 					|| (eobject instanceof BusinessColumnSet) || (eobject instanceof BusinessView)) {
 				ModelObject modelObject = (ModelObject) eobject;
@@ -61,12 +63,28 @@ public class PhysicalModelReferencesFinder {
 		Collection<Setting> settings = crossReferenceAdapter.getInverseReferences(physicalObject);
 		for (Setting setting : settings) {
 			EObject eobject = setting.getEObject();
-			if ((eobject instanceof BusinessRelationship) || (eobject instanceof BusinessTable) || (eobject instanceof BusinessColumn)
+			if (eobject instanceof BusinessViewInnerJoinRelationship) {
+				BusinessViewInnerJoinRelationship businessViewInnerJoinRelationship = (BusinessViewInnerJoinRelationship) eobject;
+				Collection<Setting> bwSettings = crossReferenceAdapter.getInverseReferences(businessViewInnerJoinRelationship);
+				for (Setting bwSetting : bwSettings) {
+					EObject bwEobject = bwSetting.getEObject();
+					if (bwEobject instanceof BusinessView) {
+						ModelObject modelObject = (ModelObject) bwEobject;
+						Model model = ModelExtractor.getModel(modelObject);
+						if (model != null) {
+							businessObjects.add(modelObject);
+						}
+
+					}
+
+				}
+
+			} else if ((eobject instanceof BusinessRelationship) || (eobject instanceof BusinessTable) || (eobject instanceof BusinessColumn)
 					|| (eobject instanceof BusinessColumnSet) || (eobject instanceof BusinessView)) {
 				ModelObject modelObject = (ModelObject) eobject;
 				Model model = ModelExtractor.getModel(modelObject);
 				if (model != null) {
-					businessObjects.add((ModelObject) eobject);
+					businessObjects.add(modelObject);
 				}
 			}
 		}

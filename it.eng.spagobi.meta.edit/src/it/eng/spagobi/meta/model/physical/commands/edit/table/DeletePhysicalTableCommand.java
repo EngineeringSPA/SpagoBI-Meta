@@ -9,6 +9,7 @@
  **/
 package it.eng.spagobi.meta.model.physical.commands.edit.table;
 
+import it.eng.spagobi.meta.initializer.PhysicalModelInitializer;
 import it.eng.spagobi.meta.model.business.commands.edit.AbstractSpagoBIModelEditCommand;
 import it.eng.spagobi.meta.model.physical.PhysicalForeignKey;
 import it.eng.spagobi.meta.model.physical.PhysicalModel;
@@ -63,7 +64,11 @@ public class DeletePhysicalTableCommand extends AbstractSpagoBIModelEditCommand 
 			model.getPrimaryKeys().remove(removedPrimaryKey);
 		}
 		removedForeignKeys = getPhysicalTable().getForeignKeysInvolvingTable();
-		model.getForeignKeys().removeAll(removedForeignKeys);
+		// model.getForeignKeys().removeAll(removedForeignKeys);
+		PhysicalModelInitializer initializer = new PhysicalModelInitializer();
+		for (PhysicalForeignKey removedForeignKey : removedForeignKeys) {
+			initializer.removePhysicalForeignKey(physicalTable.getModel(), removedForeignKey);
+		}
 		model.getTables().remove(getPhysicalTable());
 
 		executed = true;

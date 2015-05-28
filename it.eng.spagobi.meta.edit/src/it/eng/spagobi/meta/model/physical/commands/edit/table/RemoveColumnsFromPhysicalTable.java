@@ -10,12 +10,10 @@
 package it.eng.spagobi.meta.model.physical.commands.edit.table;
 
 import it.eng.spagobi.meta.initializer.BusinessModelInitializer;
-import it.eng.spagobi.meta.initializer.ModelSingleton;
-import it.eng.spagobi.meta.model.business.BusinessRelationship;
+import it.eng.spagobi.meta.initializer.PhysicalModelInitializer;
 import it.eng.spagobi.meta.model.business.commands.edit.AbstractSpagoBIModelEditCommand;
 import it.eng.spagobi.meta.model.physical.PhysicalColumn;
 import it.eng.spagobi.meta.model.physical.PhysicalForeignKey;
-import it.eng.spagobi.meta.model.physical.PhysicalModel;
 import it.eng.spagobi.meta.model.physical.PhysicalPrimaryKey;
 import it.eng.spagobi.meta.model.physical.PhysicalTable;
 
@@ -24,9 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature.Setting;
-import org.eclipse.emf.ecore.util.ECrossReferenceAdapter;
 import org.eclipse.emf.edit.command.CommandParameter;
 import org.eclipse.emf.edit.domain.EditingDomain;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -164,35 +159,17 @@ public class RemoveColumnsFromPhysicalTable extends AbstractSpagoBIModelEditComm
 				removedForeignKeysAfterColumnDeletion.add(foreignKey);
 			}
 		}
-		// remove inconsistent relationships
+		// remove inconsistent foreign keys
 		removedForeignKeys.addAll(removedForeignKeysAfterColumnDeletion);
+		PhysicalModelInitializer initializer = new PhysicalModelInitializer();
 		for (PhysicalForeignKey removedForeignKey : removedForeignKeysAfterColumnDeletion) {
-			removePhysicalForeignKey(physicalTable.getModel(), removedForeignKey);
+			initializer.removePhysicalForeignKey(physicalTable.getModel(), removedForeignKey);
 		}
 	}
 
 	private void undoUpdateForeignKeys() {
 		physicalTable.getModel().getForeignKeys().addAll(removedForeignKeys);
 
-	}
-
-	private void removePhysicalForeignKey(PhysicalModel physicalModel, PhysicalForeignKey physicalForeignKey) {
-		physicalModel.getForeignKeys().remove(physicalForeignKey);
-
-		// remove inverse references (if any)
-		ModelSingleton modelSingleton = ModelSingleton.getInstance();
-		ECrossReferenceAdapter adapter = modelSingleton.getCrossReferenceAdapter();
-		Collection<Setting> settings = adapter.getInverseReferences(physicalForeignKey, true);
-		for (Setting setting : settings) {
-			EObject eobject = setting.getEObject();
-			if (eobject instanceof BusinessRelationship) {
-				BusinessRelationship businessRelationship = (BusinessRelationship) eobject;
-				if (businessRelationship.getPhysicalForeignKey().equals(physicalForeignKey)) {
-					// remove reference
-					businessRelationship.setPhysicalForeignKey(null);
-				}
-			}
-		}
 	}
 
 	@Override

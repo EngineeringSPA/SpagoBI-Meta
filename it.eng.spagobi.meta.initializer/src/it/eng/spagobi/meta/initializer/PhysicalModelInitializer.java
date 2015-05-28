@@ -1074,7 +1074,7 @@ public class PhysicalModelInitializer {
 	 * Remove the physical foreign key from the Physical Model and also remove pending references (ex in BusinessRelationship)
 	 * 
 	 */
-	private void removePhysicalForeignKey(PhysicalModel physicalModel, PhysicalForeignKey physicalForeignKey) {
+	public void removePhysicalForeignKey(PhysicalModel physicalModel, PhysicalForeignKey physicalForeignKey) {
 		physicalModel.getForeignKeys().remove(physicalForeignKey);
 
 		// remove inverse references (if any)

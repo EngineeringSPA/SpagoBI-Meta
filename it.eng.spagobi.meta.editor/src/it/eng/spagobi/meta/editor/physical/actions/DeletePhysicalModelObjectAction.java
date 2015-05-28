@@ -19,6 +19,7 @@ import it.eng.spagobi.meta.model.business.SimpleBusinessColumn;
 import it.eng.spagobi.meta.model.business.commands.edit.table.DeleteBusinessTableCommand;
 import it.eng.spagobi.meta.model.business.commands.edit.table.RemoveColumnsFromBusinessTable;
 import it.eng.spagobi.meta.model.business.commands.edit.view.DeleteBusinessViewCommand;
+import it.eng.spagobi.meta.model.business.commands.edit.view.DeleteBusinessViewPhysicalTableCommand;
 import it.eng.spagobi.meta.model.physical.PhysicalColumn;
 import it.eng.spagobi.meta.model.physical.PhysicalTable;
 import it.eng.spagobi.meta.model.physical.commands.edit.table.DeletePhysicalTableCommand;
@@ -65,7 +66,6 @@ public class DeletePhysicalModelObjectAction extends DeleteAction {
 	@Override
 	public void run() {
 		IStructuredSelection selection = this.getStructuredSelection();
-		// TODO: think about multi selection
 
 		// Create confirmation Dialog
 		PhysicalObjectDeleteDialog dialog = new PhysicalObjectDeleteDialog(businessObjectsToDelete);
@@ -108,10 +108,21 @@ public class DeletePhysicalModelObjectAction extends DeleteAction {
 							CommandParameter commandParameter = new CommandParameter(businessObjectToDelete);
 							Command removeCommand = new DeleteBusinessTableCommand(domain, commandParameter);
 							removeTableCommands.add(removeCommand);
-						} else if (o instanceof BusinessView) {
-							CommandParameter commandParameter = new CommandParameter(o);
-							removeCommand = new DeleteBusinessViewCommand(domain, commandParameter);
-							removeTableCommands.add(removeCommand);
+						} else if (businessObjectToDelete instanceof BusinessView) {
+
+							// Previous solution: delete whole BusinessView
+							// CommandParameter commandParameter = new CommandParameter(businessObjectToDelete);
+							// removeCommand = new DeleteBusinessViewCommand(domain, commandParameter);
+							// removeTableCommands.add(removeCommand);
+
+							PhysicalTable physicalTable = ((PhysicalTable) o);
+							BusinessView businessView = (BusinessView) businessObjectToDelete;
+							if (businessView.getPhysicalTables().contains(physicalTable)) {
+								CommandParameter commandParameter = new CommandParameter(businessView, null, physicalTable, null);
+								removeCommand = new DeleteBusinessViewPhysicalTableCommand(domain, commandParameter);
+								removeTableCommands.add(removeCommand);
+							}
+
 						}
 					}
 
@@ -131,11 +142,22 @@ public class DeletePhysicalModelObjectAction extends DeleteAction {
 						if (businessObjectToDelete instanceof SimpleBusinessColumn) {
 							SimpleBusinessColumn businessColumn = (SimpleBusinessColumn) businessObjectToDelete;
 							BusinessColumnSet businessColumnSet = businessColumn.getTable();
-							Collection<PhysicalColumn> relatedPhysicalColumns = new ArrayList<PhysicalColumn>();
-							relatedPhysicalColumns.add(businessColumn.getPhysicalColumn());
-							CommandParameter commandParameter = new CommandParameter(businessColumnSet, null, relatedPhysicalColumns, null);
-							Command removeCommand = new RemoveColumnsFromBusinessTable(domain, commandParameter);
-							removeColumnCommands.add(removeCommand);
+							if (!(businessColumnSet instanceof BusinessView)) {
+								Collection<PhysicalColumn> relatedPhysicalColumns = new ArrayList<PhysicalColumn>();
+								relatedPhysicalColumns.add(businessColumn.getPhysicalColumn());
+								CommandParameter commandParameter = new CommandParameter(businessColumnSet, null, relatedPhysicalColumns, null);
+								Command removeCommand = new RemoveColumnsFromBusinessTable(domain, commandParameter);
+								removeColumnCommands.add(removeCommand);
+							} else {
+								// TODO: check the delete of business column inside a BusinessView
+								// check if the columns is used in a BusinessViewInnerJoinRelationship, otherwise we can delete the column
+							}
+
+						} else if (businessObjectToDelete instanceof BusinessView) {
+							// TODO: check this condition
+							CommandParameter commandParameter = new CommandParameter(businessObjectToDelete);
+							removeCommand = new DeleteBusinessViewCommand(domain, commandParameter);
+							removeTableCommands.add(removeCommand);
 						}
 					}
 
