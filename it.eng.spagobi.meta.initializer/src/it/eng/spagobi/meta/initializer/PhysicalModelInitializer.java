@@ -583,6 +583,142 @@ public class PhysicalModelInitializer {
 	}
 
 	/**
+	 * Get columns names that are present in the database but not in the passed physical model
+	 * 
+	 * @param connection
+	 *            jdbc connection to the database
+	 * @param physicalModel
+	 *            physical model to check
+	 */
+	public List<String> getMissingColumnsNames(Connection connection, PhysicalModel physicalModel) {
+		try {
+			DatabaseMetaData dbMeta = connection.getMetaData();
+
+			List<String> tablesOnDatabase = new ArrayList<String>();
+			List<String> newColumnsNames = new ArrayList<String>();
+			ResultSet tableRs = dbMeta.getTables(physicalModel.getCatalog(), physicalModel.getSchema(), null, new String[] { "TABLE", "VIEW" });
+
+			while (tableRs.next()) {
+				String tableName = tableRs.getString("TABLE_NAME");
+				tablesOnDatabase.add(tableName);
+			}
+			tableRs.close();
+
+			EList<PhysicalTable> originalTables = physicalModel.getTables();
+			Iterator<String> tablesIterator = tablesOnDatabase.iterator();
+
+			// iterate for each table
+			while (tablesIterator.hasNext()) {
+				String tableName = tablesIterator.next();
+				PhysicalTable physicalTable = findTable(tableName, originalTables);
+				if (physicalTable != null) {
+					ResultSet rs = dbMeta.getColumns(physicalModel.getCatalog(), physicalModel.getSchema(), physicalTable.getName(), null);
+					while (rs.next()) {
+						String columnName = rs.getString("COLUMN_NAME");
+						// check if the column exists in the physicalModel
+						PhysicalColumn physicalColumn = findColumn(columnName, physicalTable.getColumns());
+						if (physicalColumn == null) {
+							// new column on database
+							newColumnsNames.add(tableName + "." + columnName);
+						}
+					}
+
+				}
+			}
+			return newColumnsNames;
+
+		} catch (SQLException e) {
+			throw new RuntimeException("Physical Model - Impossible to get missing tables names", e);
+
+		}
+	}
+
+	/**
+	 * Get tables and columns names that are present in the database but not in the passed physical model
+	 * 
+	 * @param connection
+	 *            jdbc connection to the database
+	 * @param physicalModel
+	 *            physical model to check
+	 */
+	public List<String> getRemovedTablesAndColumnsNames(Connection connection, PhysicalModel physicalModel) {
+		try {
+			DatabaseMetaData dbMeta = connection.getMetaData();
+
+			List<String> tablesOnDatabase = new ArrayList<String>();
+			List<String> tablesRemoved = new ArrayList<String>();
+			List<String> columnsRemoved = new ArrayList<String>();
+
+			ResultSet tableRs = dbMeta.getTables(physicalModel.getCatalog(), physicalModel.getSchema(), null, new String[] { "TABLE", "VIEW" });
+
+			while (tableRs.next()) {
+				String tableName = tableRs.getString("TABLE_NAME");
+				tablesOnDatabase.add(tableName);
+			}
+			tableRs.close();
+
+			EList<PhysicalTable> originalTables = physicalModel.getTables();
+			Iterator<String> tablesIterator = tablesOnDatabase.iterator();
+
+			Iterator<PhysicalTable> physicalTablesIterator = originalTables.iterator();
+			// 1- Check table existence
+			while (physicalTablesIterator.hasNext()) {
+				PhysicalTable originalTable = physicalTablesIterator.next();
+				String tableToFind = originalTable.getName();
+				if (!tablesOnDatabase.contains(tableToFind)) {
+					// tables not found on database -> removed
+					tablesRemoved.add(tableToFind);
+				} else {
+					// 2 - Check columns existence
+					List<PhysicalColumn> physicalColumns = originalTable.getColumns();
+					ResultSet rs = dbMeta.getColumns(physicalModel.getCatalog(), physicalModel.getSchema(), originalTable.getName(), null);
+					List<String> columnsNamesOnDb = new ArrayList<String>();
+					while (rs.next()) {
+						String columnName = rs.getString("COLUMN_NAME");
+						columnsNamesOnDb.add(columnName);
+					}
+					for (PhysicalColumn physicalColumn : physicalColumns) {
+						if (!columnsNamesOnDb.contains(physicalColumn.getName())) {
+							// column not found on database -> removed
+							columnsRemoved.add(originalTable.getName() + "." + physicalColumn.getName());
+						}
+					}
+
+				}
+			}
+
+			// merge two list
+			tablesRemoved.addAll(columnsRemoved);
+
+			return tablesRemoved;
+
+			// // iterate for each table
+			// while (tablesIterator.hasNext()) {
+			// String tableName = tablesIterator.next();
+			// PhysicalTable physicalTable = findTable(tableName, originalTables);
+			// if (physicalTable != null) {
+			// ResultSet rs = dbMeta.getColumns(physicalModel.getCatalog(), physicalModel.getSchema(), physicalTable.getName(), null);
+			// while (rs.next()) {
+			// String columnName = rs.getString("COLUMN_NAME");
+			// // check if the column exists in the physicalModel
+			// PhysicalColumn physicalColumn = findColumn(columnName, physicalTable.getColumns());
+			// if (physicalColumn == null) {
+			// // new column on database
+			// newColumnsNames.add(tableName + "." + columnName);
+			// }
+			// }
+			//
+			// }
+			// }
+			// return newColumnsNames;
+
+		} catch (SQLException e) {
+			throw new RuntimeException("Physical Model - Impossible to get missing tables names", e);
+
+		}
+	}
+
+	/**
 	 * Update originaModel with new tables and columns from updateModel, also mark as deleted the tables or columns not found in the updated model
 	 * 
 	 */

@@ -64,6 +64,27 @@ public class UpdatePhysicalModelAction extends AbstractSpagoBIModelAction {
 				PhysicalModelInitializer physicalModelInitializer = new PhysicalModelInitializer();
 				List<String> missingTablesNames = physicalModelInitializer.getMissingTablesNames(connection, physicalModel);
 
+				// ***** TODO: change from here ****
+
+				// Get List of new columns found in the database for the tables already in the physical model
+				List<String> missingColumnsNames = physicalModelInitializer.getMissingColumnsNames(connection, physicalModel);
+
+				// TODO: to remove, just for test
+				System.out.println("New columns: ");
+				for (String missingColumnName : missingColumnsNames) {
+					System.out.println(missingColumnName);
+				}
+				// Get List of new columns found in the database for the tables already in the physical model
+
+				List<String> removedElements = physicalModelInitializer.getRemovedTablesAndColumnsNames(connection, physicalModel);
+				// TODO: to remove, just for test
+				System.out.println("Removed Elements: ");
+				for (String removedElement : removedElements) {
+					System.out.println(removedElement);
+				}
+
+				// **** to here ****
+
 				// Open the Wizard for selecting tables to import only if there are missing tables in the current physical model
 				if (!missingTablesNames.isEmpty()) {
 					UpdatePhysicalModelWizard wizard = new UpdatePhysicalModelWizard(physicalModel, connection, missingTablesNames, editingDomain,

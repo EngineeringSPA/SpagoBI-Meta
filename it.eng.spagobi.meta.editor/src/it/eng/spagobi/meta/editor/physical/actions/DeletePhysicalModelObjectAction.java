@@ -15,10 +15,10 @@ import it.eng.spagobi.meta.model.ModelObject;
 import it.eng.spagobi.meta.model.business.BusinessColumnSet;
 import it.eng.spagobi.meta.model.business.BusinessTable;
 import it.eng.spagobi.meta.model.business.BusinessView;
+import it.eng.spagobi.meta.model.business.BusinessViewInnerJoinRelationship;
 import it.eng.spagobi.meta.model.business.SimpleBusinessColumn;
 import it.eng.spagobi.meta.model.business.commands.edit.table.DeleteBusinessTableCommand;
 import it.eng.spagobi.meta.model.business.commands.edit.table.RemoveColumnsFromBusinessTable;
-import it.eng.spagobi.meta.model.business.commands.edit.view.DeleteBusinessViewCommand;
 import it.eng.spagobi.meta.model.business.commands.edit.view.DeleteBusinessViewPhysicalTableCommand;
 import it.eng.spagobi.meta.model.physical.PhysicalColumn;
 import it.eng.spagobi.meta.model.physical.PhysicalTable;
@@ -109,12 +109,6 @@ public class DeletePhysicalModelObjectAction extends DeleteAction {
 							Command removeCommand = new DeleteBusinessTableCommand(domain, commandParameter);
 							removeTableCommands.add(removeCommand);
 						} else if (businessObjectToDelete instanceof BusinessView) {
-
-							// Previous solution: delete whole BusinessView
-							// CommandParameter commandParameter = new CommandParameter(businessObjectToDelete);
-							// removeCommand = new DeleteBusinessViewCommand(domain, commandParameter);
-							// removeTableCommands.add(removeCommand);
-
 							PhysicalTable physicalTable = ((PhysicalTable) o);
 							BusinessView businessView = (BusinessView) businessObjectToDelete;
 							if (businessView.getPhysicalTables().contains(physicalTable)) {
@@ -131,11 +125,6 @@ public class DeletePhysicalModelObjectAction extends DeleteAction {
 				else if (o instanceof PhysicalColumn) {
 					PhysicalColumn physicalColumn = (PhysicalColumn) o;
 					PhysicalTable physicalTable = physicalColumn.getTable();
-					Collection<PhysicalColumn> physicalColumns = new ArrayList<PhysicalColumn>();
-					physicalColumns.add(physicalColumn);
-					CommandParameter parameter = new CommandParameter(physicalTable, null, physicalColumns, null);
-					removeCommand = new RemoveColumnsFromPhysicalTable(domain, parameter);
-					removeColumnCommands.add(removeCommand);
 
 					// remove related business columns
 					for (ModelObject businessObjectToDelete : businessObjectsRelated) {
@@ -149,17 +138,47 @@ public class DeletePhysicalModelObjectAction extends DeleteAction {
 								Command removeCommand = new RemoveColumnsFromBusinessTable(domain, commandParameter);
 								removeColumnCommands.add(removeCommand);
 							} else {
-								// TODO: check the delete of business column inside a BusinessView
+								// check the delete of business column inside a BusinessView
 								// check if the columns is used in a BusinessViewInnerJoinRelationship, otherwise we can delete the column
+								BusinessView businessView = (BusinessView) businessColumnSet;
+								List<BusinessViewInnerJoinRelationship> innerRelationships = businessView.getJoinRelationships();
+								boolean canBeDeleted = true;
+								for (BusinessViewInnerJoinRelationship innerRelationship : innerRelationships) {
+									if (innerRelationship.getSourceColumns().contains(physicalColumn)
+											|| innerRelationship.getDestinationColumns().contains(physicalColumn)) {
+										canBeDeleted = false;
+										break;
+									}
+								}
+								if (canBeDeleted) {
+									// delete just the single business column from the business view
+									Collection<PhysicalColumn> relatedPhysicalColumns = new ArrayList<PhysicalColumn>();
+									relatedPhysicalColumns.add(businessColumn.getPhysicalColumn());
+									CommandParameter commandParameter = new CommandParameter(businessColumnSet, null, relatedPhysicalColumns, null);
+									Command removeCommand = new RemoveColumnsFromBusinessTable(domain, commandParameter);
+									removeColumnCommands.add(removeCommand);
+								} else {
+									// Business Column used in an inner join relationship
+									// remove the physical table corresponding to the business column
+									if (businessView.getPhysicalTables().contains(physicalTable)) {
+										PhysicalTable businessColumnPhysicalTable = businessColumn.getPhysicalColumn().getTable();
+										CommandParameter commandParameter = new CommandParameter(businessView, null, businessColumnPhysicalTable, null);
+										removeCommand = new DeleteBusinessViewPhysicalTableCommand(domain, commandParameter);
+										removeColumnCommands.add(removeCommand);
+									}
+								}
+
 							}
 
-						} else if (businessObjectToDelete instanceof BusinessView) {
-							// TODO: check this condition
-							CommandParameter commandParameter = new CommandParameter(businessObjectToDelete);
-							removeCommand = new DeleteBusinessViewCommand(domain, commandParameter);
-							removeTableCommands.add(removeCommand);
 						}
 					}
+					// The remove the physical Column
+
+					Collection<PhysicalColumn> physicalColumns = new ArrayList<PhysicalColumn>();
+					physicalColumns.add(physicalColumn);
+					CommandParameter parameter = new CommandParameter(physicalTable, null, physicalColumns, null);
+					removeCommand = new RemoveColumnsFromPhysicalTable(domain, parameter);
+					removeColumnCommands.add(removeCommand);
 
 				}
 			}
