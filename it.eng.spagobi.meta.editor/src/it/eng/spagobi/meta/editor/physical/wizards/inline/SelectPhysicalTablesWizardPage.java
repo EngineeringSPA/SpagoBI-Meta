@@ -37,6 +37,8 @@ public class SelectPhysicalTablesWizardPage extends WizardPage {
 	private TableItem[] tablesToImport;
 	private final PhysicalModel physicalModel;
 	private final List<String> missingTablesNames;
+	private Image physicalTableImage = null;
+	private Image dbTableImage = null;
 
 	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator();
 
@@ -47,6 +49,17 @@ public class SelectPhysicalTablesWizardPage extends WizardPage {
 		ImageDescriptor image = ImageDescriptor.createFromURL((URL) RL.getImage("it.eng.spagobi.meta.editor.physical.wizards.inline.updateModel"));
 		if (image != null)
 			setImageDescriptor(image);
+
+		ImageDescriptor physicalTableImageDescriptor = ImageDescriptor.createFromURL((URL) RL
+				.getImage("it.eng.spagobi.meta.editor.business.wizards.inline.PhysicalTable"));
+		if (physicalTableImageDescriptor != null) {
+			physicalTableImage = physicalTableImageDescriptor.createImage();
+		}
+		ImageDescriptor dbTableImageDescriptor = ImageDescriptor.createFromURL((URL) RL
+				.getImage("it.eng.spagobi.meta.editor.business.wizards.inline.DatabaseTable"));
+		if (dbTableImageDescriptor != null) {
+			dbTableImage = dbTableImageDescriptor.createImage();
+		}
 
 		this.physicalModel = physicalModel;
 		this.missingTablesNames = missingTablesNames;
@@ -146,6 +159,7 @@ public class SelectPhysicalTablesWizardPage extends WizardPage {
 					TableItem ti = new TableItem(importedTables, 0);
 					ti.setText(tiSel.getText());
 					ti.setData(tiSel.getData());
+					ti.setImage(physicalTableImage);
 					newTables.remove(newTables.getSelectionIndex());
 				}
 				if (tiMultiSel != null) {
@@ -153,6 +167,7 @@ public class SelectPhysicalTablesWizardPage extends WizardPage {
 						TableItem ti = new TableItem(importedTables, 0);
 						ti.setText(tiMultiSel[i].getText());
 						ti.setData(tiMultiSel[i].getData());
+						ti.setImage(physicalTableImage);
 					}
 					newTables.remove(newTables.getSelectionIndices());
 				}
@@ -181,6 +196,8 @@ public class SelectPhysicalTablesWizardPage extends WizardPage {
 					TableItem ti = new TableItem(newTables, 0);
 					ti.setText(tiSel.getText());
 					ti.setData(tiSel.getData());
+					ti.setImage(dbTableImage);
+
 					importedTables.remove(importedTables.getSelectionIndex());
 				}
 				if (tiMultiSel != null) {
@@ -188,6 +205,7 @@ public class SelectPhysicalTablesWizardPage extends WizardPage {
 						TableItem ti = new TableItem(newTables, 0);
 						ti.setText(tiMultiSel[i].getText());
 						ti.setData(tiMultiSel[i].getData());
+						ti.setImage(dbTableImage);
 					}
 					importedTables.remove(importedTables.getSelectionIndices());
 				}
@@ -208,6 +226,8 @@ public class SelectPhysicalTablesWizardPage extends WizardPage {
 					TableItem ti = new TableItem(importedTables, 0);
 					ti.setText(columnToAdd[i].getText());
 					ti.setData(columnToAdd[i].getData());
+					ti.setImage(physicalTableImage);
+
 				}
 				// Remove tables from new Physical Tables panel
 				newTables.removeAll();
@@ -223,11 +243,12 @@ public class SelectPhysicalTablesWizardPage extends WizardPage {
 				TableItem[] fieldsToRemove = null;
 				fieldsToRemove = importedTables.getItems();
 
-				// add Tales to new Physical Tablse panel
+				// add Tables to new Physical Tables panel
 				for (int i = 0; i < fieldsToRemove.length; i++) {
 					TableItem ti = new TableItem(newTables, 0);
 					ti.setText(fieldsToRemove[i].getText());
 					ti.setData(fieldsToRemove[i].getData());
+					ti.setImage(dbTableImage);
 				}
 				// Remove tables from Imported Tables panel
 				importedTables.removeAll();
@@ -259,6 +280,8 @@ public class SelectPhysicalTablesWizardPage extends WizardPage {
 				TableItem ti = new TableItem(newTables, 0);
 				ti.setData(missingTableName);
 				ti.setText(missingTableName);
+				ti.setImage(dbTableImage);
+
 			}
 		}
 

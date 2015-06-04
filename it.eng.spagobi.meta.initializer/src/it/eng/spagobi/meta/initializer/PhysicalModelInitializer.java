@@ -12,6 +12,7 @@ package it.eng.spagobi.meta.initializer;
 import it.eng.spagobi.meta.initializer.properties.IPropertiesInitializer;
 import it.eng.spagobi.meta.initializer.properties.PhysicalModelPropertiesFromFileInitializer;
 import it.eng.spagobi.meta.model.Model;
+import it.eng.spagobi.meta.model.ModelObject;
 import it.eng.spagobi.meta.model.ModelProperty;
 import it.eng.spagobi.meta.model.business.BusinessRelationship;
 import it.eng.spagobi.meta.model.physical.PhysicalColumn;
@@ -658,7 +659,6 @@ public class PhysicalModelInitializer {
 			tableRs.close();
 
 			EList<PhysicalTable> originalTables = physicalModel.getTables();
-			Iterator<String> tablesIterator = tablesOnDatabase.iterator();
 
 			Iterator<PhysicalTable> physicalTablesIterator = originalTables.iterator();
 			// 1- Check table existence
@@ -691,26 +691,6 @@ public class PhysicalModelInitializer {
 			tablesRemoved.addAll(columnsRemoved);
 
 			return tablesRemoved;
-
-			// // iterate for each table
-			// while (tablesIterator.hasNext()) {
-			// String tableName = tablesIterator.next();
-			// PhysicalTable physicalTable = findTable(tableName, originalTables);
-			// if (physicalTable != null) {
-			// ResultSet rs = dbMeta.getColumns(physicalModel.getCatalog(), physicalModel.getSchema(), physicalTable.getName(), null);
-			// while (rs.next()) {
-			// String columnName = rs.getString("COLUMN_NAME");
-			// // check if the column exists in the physicalModel
-			// PhysicalColumn physicalColumn = findColumn(columnName, physicalTable.getColumns());
-			// if (physicalColumn == null) {
-			// // new column on database
-			// newColumnsNames.add(tableName + "." + columnName);
-			// }
-			// }
-			//
-			// }
-			// }
-			// return newColumnsNames;
 
 		} catch (SQLException e) {
 			throw new RuntimeException("Physical Model - Impossible to get missing tables names", e);
@@ -1202,6 +1182,34 @@ public class PhysicalModelInitializer {
 
 	}
 
+	/**
+	 * Return a collection of elements (tables and columns) that are marked as deleted in the passed physical model
+	 * 
+	 * @param physicalModel
+	 * @return markedElements elements marked as deleted (tables and columns)
+	 */
+	public List<ModelObject> getElementsMarkedAsDeleted(PhysicalModel physicalModel) {
+		List<PhysicalTable> physicalTables = physicalModel.getTables();
+		List<ModelObject> markedElements = new ArrayList<ModelObject>();
+		for (PhysicalTable physicalTable : physicalTables) {
+			// check table
+			String isDeleted = getProperty(physicalTable, PhysicalModelPropertiesFromFileInitializer.IS_DELETED);
+			if (isDeleted.equalsIgnoreCase("true")) {
+				markedElements.add(physicalTable);
+			} else {
+				// check columns
+				List<PhysicalColumn> physicalColumns = physicalTable.getColumns();
+				for (PhysicalColumn physicalColumn : physicalColumns) {
+					String columnIsDeleted = getProperty(physicalColumn, PhysicalModelPropertiesFromFileInitializer.IS_DELETED);
+					if (columnIsDeleted.equalsIgnoreCase("true")) {
+						markedElements.add(physicalColumn);
+					}
+				}
+			}
+		}
+		return markedElements;
+	}
+
 	// --------------------------------------------------------
 	// Accessor methods
 	// --------------------------------------------------------
@@ -1251,6 +1259,11 @@ public class PhysicalModelInitializer {
 
 	private String getProperty(PhysicalTable physicalTable, String propertyName) {
 		ModelProperty property = physicalTable.getProperties().get(propertyName);
+		return property != null ? property.getValue() : null;
+	}
+
+	private String getProperty(PhysicalColumn physicalColumn, String propertyName) {
+		ModelProperty property = physicalColumn.getProperties().get(propertyName);
 		return property != null ? property.getValue() : null;
 	}
 

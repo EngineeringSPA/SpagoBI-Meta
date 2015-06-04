@@ -27,30 +27,44 @@ public class UpdatePhysicalModelWizard extends AbstractSpagoBIModelWizard {
 	PhysicalModel physicalModel;
 	Connection connection;
 	List<String> missingTablesNames;
-	IWizardPage pageOne;
+	List<String> missingColumnsNames;
+	List<String> removedElements;
 
-	public UpdatePhysicalModelWizard(PhysicalModel physicalModel, Connection connection, List<String> missingTablesNames, EditingDomain editingDomain,
-			ISpagoBIModelCommand command) {
+	IWizardPage pageTablesSelection, pageNewColumns, pageRemovedElements;
+
+	public UpdatePhysicalModelWizard(PhysicalModel physicalModel, Connection connection, List<String> missingColumnsNames, List<String> missingTablesNames,
+			List<String> removedElements, EditingDomain editingDomain, ISpagoBIModelCommand command) {
 		super(editingDomain, command);
 		this.setWindowTitle("Physical Model Update");
 		this.setHelpAvailable(false);
 		this.physicalModel = physicalModel;
 		this.connection = connection;
 		this.missingTablesNames = missingTablesNames;
+		this.missingColumnsNames = missingColumnsNames;
+		this.removedElements = removedElements;
+
 	}
 
 	@Override
 	public void addPages() {
 
-		pageOne = new SelectPhysicalTablesWizardPage("Physical Model update page one", physicalModel, missingTablesNames);
-		addPage(pageOne);
+		pageNewColumns = new NewColumnsWizardPage("Physical Model update - new columns", missingColumnsNames);
+
+		pageTablesSelection = new SelectPhysicalTablesWizardPage("Physical Model update - tables selection", physicalModel, missingTablesNames);
+
+		pageRemovedElements = new RemovedElementsWizardPage("Physical Model update - removed elements", removedElements);
+
+		addPage(pageNewColumns);
+		addPage(pageTablesSelection);
+		addPage(pageRemovedElements);
+
 	}
 
 	@Override
 	public CommandParameter getCommandInputParameter() {
-		SelectPhysicalTablesWizardPage wizardPage = (SelectPhysicalTablesWizardPage) pageOne;
+		SelectPhysicalTablesWizardPage tablesSelectionWizardPage = (SelectPhysicalTablesWizardPage) pageTablesSelection;
 
-		TableItem[] tablesToImport = wizardPage.getImportedTables().getItems();
+		TableItem[] tablesToImport = tablesSelectionWizardPage.getImportedTables().getItems();
 		int numCol = tablesToImport.length;
 		List<String> tablesList = new ArrayList<String>();
 		for (int i = 0; i < numCol; i++) {
@@ -59,6 +73,12 @@ public class UpdatePhysicalModelWizard extends AbstractSpagoBIModelWizard {
 		}
 
 		return new CommandParameter(physicalModel, null, connection, tablesList);
+	}
+
+	public boolean isAutomaticDeleteSelected() {
+		RemovedElementsWizardPage removedElementsWizardPage = (RemovedElementsWizardPage) pageRemovedElements;
+		boolean automaticDelete = removedElementsWizardPage.isAutomaticDelete();
+		return automaticDelete;
 	}
 
 	@Override

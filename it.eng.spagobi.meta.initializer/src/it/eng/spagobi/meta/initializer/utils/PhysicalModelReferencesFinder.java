@@ -14,10 +14,8 @@ import it.eng.spagobi.meta.model.business.BusinessView;
 import it.eng.spagobi.meta.model.business.BusinessViewInnerJoinRelationship;
 import it.eng.spagobi.meta.model.validator.ModelExtractor;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
@@ -38,24 +36,6 @@ public class PhysicalModelReferencesFinder {
 		modelSingleton = ModelSingleton.getInstance();
 		crossReferenceAdapter = modelSingleton.getCrossReferenceAdapter();
 
-	}
-
-	public List<ModelObject> getBusinessObjects(ModelObject physicalObject) {
-		List<ModelObject> businessObjects = new ArrayList<ModelObject>();
-		Collection<Setting> settings = crossReferenceAdapter.getInverseReferences(physicalObject);
-		for (Setting setting : settings) {
-			EObject eobject = setting.getEObject();
-
-			if ((eobject instanceof BusinessRelationship) || (eobject instanceof BusinessTable) || (eobject instanceof BusinessColumn)
-					|| (eobject instanceof BusinessColumnSet) || (eobject instanceof BusinessView)) {
-				ModelObject modelObject = (ModelObject) eobject;
-				Model model = ModelExtractor.getModel(modelObject);
-				if (model != null) {
-					businessObjects.add((ModelObject) eobject);
-				}
-			}
-		}
-		return businessObjects;
 	}
 
 	public Set<ModelObject> getDistinctBusinessObjects(ModelObject physicalObject) {
