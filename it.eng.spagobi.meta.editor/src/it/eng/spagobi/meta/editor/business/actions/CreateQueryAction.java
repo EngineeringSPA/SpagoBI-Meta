@@ -9,12 +9,16 @@
  **/
 package it.eng.spagobi.meta.editor.business.actions;
 
+import it.eng.spagobi.meta.editor.business.dialogs.BusinessModelRelationshipsCheckWarningDialog;
 import it.eng.spagobi.meta.editor.business.wizards.inline.NewQueryFileWizard;
 import it.eng.spagobi.meta.editor.physical.actions.DeletePhysicalModelObjectAction;
 import it.eng.spagobi.meta.editor.physical.dialogs.DeleteElementsWarningDialog;
+import it.eng.spagobi.meta.initializer.BusinessModelInitializer;
 import it.eng.spagobi.meta.initializer.PhysicalModelInitializer;
+import it.eng.spagobi.meta.initializer.utils.Pair;
 import it.eng.spagobi.meta.model.ModelObject;
 import it.eng.spagobi.meta.model.business.BusinessModel;
+import it.eng.spagobi.meta.model.business.BusinessRelationship;
 import it.eng.spagobi.meta.model.business.commands.ISpagoBIModelCommand;
 import it.eng.spagobi.meta.model.business.commands.generate.CreateQueryCommand;
 import it.eng.spagobi.meta.model.phantom.provider.BusinessRootItemProvider;
@@ -101,12 +105,26 @@ public class CreateQueryAction extends AbstractSpagoBIModelAction {
 			}
 
 			if (markedElements.isEmpty() || returnCode != Window.CANCEL) {
-				// CreateQueryWizard wizard = new CreateQueryWizard(businessModel, editingDomain, (AbstractSpagoBIModelCommand)command );
-				NewQueryFileWizard wizard = new NewQueryFileWizard(businessModel, editingDomain, (ISpagoBIModelCommand) command);
-				wizard.init(PlatformUI.getWorkbench(), new StructuredSelection());
-				WizardDialog dialog = new WizardDialog(wizard.getShell(), wizard);
-				dialog.create();
-				dialog.open();
+				// check the constraints for hibernate mappings
+				BusinessModelInitializer businessModelInitializer = new BusinessModelInitializer();
+				List<Pair<BusinessRelationship, Integer>> incorrectRelationships = businessModelInitializer.checkRelationshipsConstraints(businessModel);
+				int relationshipsWarningReturnCode = Window.CANCEL;
+				if (!incorrectRelationships.isEmpty()) {
+					BusinessModelRelationshipsCheckWarningDialog warningDialog = new BusinessModelRelationshipsCheckWarningDialog(incorrectRelationships);
+					warningDialog.create();
+					warningDialog.setBlockOnOpen(true);
+					relationshipsWarningReturnCode = warningDialog.open();
+				}
+
+				if (incorrectRelationships.isEmpty() || relationshipsWarningReturnCode == Window.OK) {
+					// CreateQueryWizard wizard = new CreateQueryWizard(businessModel, editingDomain, (AbstractSpagoBIModelCommand)command );
+					NewQueryFileWizard wizard = new NewQueryFileWizard(businessModel, editingDomain, (ISpagoBIModelCommand) command);
+					wizard.init(PlatformUI.getWorkbench(), new StructuredSelection());
+					WizardDialog dialog = new WizardDialog(wizard.getShell(), wizard);
+					dialog.create();
+					dialog.open();
+				}
+
 			}
 
 		} catch (Throwable t) {
