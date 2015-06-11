@@ -10,7 +10,7 @@
     <append>false</append>
     <File>./log/spagobi/querybuilder.log</File>
     <encoder>
-      <pattern>%date{dd MMM yyyy;HH:mm:ss.SSS}%5p %c.%M:%L - %m%n</pattern>
+      <pattern>%d %5p %c.%M:%L - %m%n</pattern>
     </encoder>
     <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
       <maxIndex>0</maxIndex>
@@ -23,7 +23,7 @@
   
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%c.%M:%L - %m%n</pattern>
+      <pattern>%d %c.%M:%L - %m%n</pattern>
     </encoder>
   </appender>
   

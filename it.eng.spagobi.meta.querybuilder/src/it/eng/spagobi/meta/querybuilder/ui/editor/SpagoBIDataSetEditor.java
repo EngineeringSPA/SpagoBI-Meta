@@ -158,7 +158,7 @@ public class SpagoBIDataSetEditor extends MultiPageEditorPart implements IResour
 			t.printStackTrace(new PrintWriter(errors));
 			logger.error("Query editor cannot be opened:" + errors.toString());
 			throw new PartInitException("Impossible to initialize editor [" + this.getClass().getName() + "]: " + t.getCause().getMessage()
-					+ "\nStack Trace:\n" + errors.toString());
+					+ "\nStack Trace:\n" + errors.toString(), t);
 		} finally {
 			logger.trace("OUT");
 		}
