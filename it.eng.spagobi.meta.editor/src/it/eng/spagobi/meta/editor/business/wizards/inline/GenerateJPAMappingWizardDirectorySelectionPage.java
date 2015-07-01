@@ -6,7 +6,7 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this file,
  You can obtain one at http://mozilla.org/MPL/2.0/.
  
-**/
+ **/
 package it.eng.spagobi.meta.editor.business.wizards.inline;
 
 import it.eng.spagobi.commons.resource.IResourceLocator;
@@ -32,86 +32,115 @@ import org.eclipse.swt.widgets.Text;
 
 /**
  * @author cortella
- *
+ * 
  */
 public class GenerateJPAMappingWizardDirectorySelectionPage extends WizardPage {
 
-	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator(); 
-	
-	Text textDirectory;
+	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator();
+
+	private Text textDirectory;
+	private Text txtSchemaName;
+
+	private String schemaName;
+	private final String oldSchemaName;
+
 	/**
 	 * @param pageName
 	 */
-	protected GenerateJPAMappingWizardDirectorySelectionPage(String pageName) {
+	protected GenerateJPAMappingWizardDirectorySelectionPage(String pageName, String oldSchemaName) {
 		super(pageName);
 		setTitle(RL.getString("business.editor.wizard.generatemapping.title"));
 		setDescription(RL.getString("business.editor.wizard.generatemapping.description"));
-		ImageDescriptor image = ImageDescriptor.createFromURL( (URL)RL.getImage("it.eng.spagobi.meta.editor.business.wizards.inline.createBC") );
-	    if (image!=null) setImageDescriptor(image);	
-	    
+		ImageDescriptor image = ImageDescriptor.createFromURL((URL) RL.getImage("it.eng.spagobi.meta.editor.business.wizards.inline.createBC"));
+		if (image != null)
+			setImageDescriptor(image);
+		this.oldSchemaName = oldSchemaName;
 	}
-
 
 	@Override
 	public void createControl(Composite parent) {
 		Composite container = new Composite(parent, SWT.NULL);
 		setControl(container);
 		container.setLayout(new GridLayout(6, false));
-		
+
 		Label lblDirectory = new Label(container, SWT.NONE);
 		lblDirectory.setText(RL.getString("business.editor.wizard.generatemapping.label"));
-		
-	    // Input text box
-	    textDirectory = new Text(container, SWT.BORDER);
-	    GridData gd_textDirectory = new GridData(GridData.FILL_HORIZONTAL);
-	    gd_textDirectory.horizontalSpan = 4;
-	    textDirectory.setLayoutData(gd_textDirectory);
-	    Location location = Platform.getInstanceLocation();
-	    if (location != null){
-	    	textDirectory.setText(location.getURL().getPath().substring(1));
-	    }
-	    else
-	    	textDirectory.setText("D:\\Programmi\\eclipse\\helios-eclipse-3.6.0\\runtime-EclipseApplication\\TestOda\\mappings");
-	    
-	    // Browse button to select directory
-	    Button buttonBrowse = new Button(container, SWT.PUSH);
-	    buttonBrowse.setText(RL.getString("business.editor.wizard.generatemapping.browsebutton"));
-	    buttonBrowse.addSelectionListener(new SelectionAdapter() {
-	      public void widgetSelected(SelectionEvent event) {
-	        DirectoryDialog dlg = new DirectoryDialog(new Shell());
 
-	        // Set the initial filter path according
-	        // to anything they've selected or typed in
-	        dlg.setFilterPath(textDirectory.getText());
+		// Input text box
+		textDirectory = new Text(container, SWT.BORDER);
+		GridData gd_textDirectory = new GridData(GridData.FILL_HORIZONTAL);
+		gd_textDirectory.horizontalSpan = 4;
+		textDirectory.setLayoutData(gd_textDirectory);
+		Location location = Platform.getInstanceLocation();
+		if (location != null) {
+			textDirectory.setText(location.getURL().getPath().substring(1));
+		} else
+			textDirectory.setText("D:\\Programmi\\eclipse\\helios-eclipse-3.6.0\\runtime-EclipseApplication\\TestOda\\mappings");
 
-	        dlg.setText(RL.getString("business.editor.wizard.generatemapping.directoryselection"));
-	        dlg.setMessage(RL.getString("business.editor.wizard.generatemapping.directoryselection"));
+		// Browse button to select directory
+		Button buttonBrowse = new Button(container, SWT.PUSH);
+		buttonBrowse.setText(RL.getString("business.editor.wizard.generatemapping.browsebutton"));
+		buttonBrowse.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				DirectoryDialog dlg = new DirectoryDialog(new Shell());
 
-	        // Calling open() will open and run the dialog.
-	        // It will return the selected directory, or
-	        // null if user cancels
-	        String dir = dlg.open();
-	        if (dir != null) {
-	          // Set the text box to the new selection
-	          textDirectory.setText(dir);
-	        }
-	        
-	        checkPageComplete();
-	      }
-	    });
+				// Set the initial filter path according
+				// to anything they've selected or typed in
+				dlg.setFilterPath(textDirectory.getText());
+
+				dlg.setText(RL.getString("business.editor.wizard.generatemapping.directoryselection"));
+				dlg.setMessage(RL.getString("business.editor.wizard.generatemapping.directoryselection"));
+
+				// Calling open() will open and run the dialog.
+				// It will return the selected directory, or
+				// null if user cancels
+				String dir = dlg.open();
+				if (dir != null) {
+					// Set the text box to the new selection
+					textDirectory.setText(dir);
+				}
+
+				checkPageComplete();
+			}
+		});
+
+		createSchemaName(container);
 
 	}
-	
-	private void checkPageComplete(){
-		if (textDirectory.getText().length() > 0){
+
+	private void createSchemaName(Composite container) {
+
+		Label lbtFirstName = new Label(container, SWT.NONE);
+		lbtFirstName.setText("Schema Name");
+
+		GridData dataFirstName = new GridData();
+		dataFirstName.grabExcessHorizontalSpace = true;
+		dataFirstName.horizontalAlignment = GridData.FILL;
+
+		txtSchemaName = new Text(container, SWT.BORDER);
+		txtSchemaName.setLayoutData(dataFirstName);
+		if (oldSchemaName != null) {
+			txtSchemaName.setText(oldSchemaName);
+		} else {
+			txtSchemaName.setEnabled(false);
+		}
+	}
+
+	private void checkPageComplete() {
+		if (textDirectory.getText().length() > 0) {
 			this.setPageComplete(true);
 		} else {
 			this.setPageComplete(false);
-		}	
+		}
 	}
-	
-	public String getSelectedDirectory(){
+
+	public String getSelectedDirectory() {
 		return textDirectory.getText();
+	}
+
+	public String getSchemaName() {
+		return txtSchemaName.getText();
 	}
 
 }

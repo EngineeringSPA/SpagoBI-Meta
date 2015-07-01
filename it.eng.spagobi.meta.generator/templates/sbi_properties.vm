@@ -21,6 +21,8 @@ ${jpaColumn.uniqueName}.position = $velocityCount
 
 #end
 
+
+
 # ==================================================================
 # VIEWS
 # ==================================================================
@@ -31,6 +33,13 @@ ${jpaColumn.uniqueName}.position = $velocityCount
 
 ${jpaView.uniqueName}.visible = $jpaView.getAttribute("structural.visible")
 ${jpaView.uniqueName}.type = $jpaView.getAttribute("structural.tabletype")
+
+# view columns (positions)
+#foreach ($jpaColumn in $jpaView.getColumns())
+${jpaColumn.uniqueName}.visible = $jpaColumn.getAttribute("structural.visible")
+${jpaColumn.uniqueName}.type = $jpaColumn.getAttribute("structural.columntype")
+${jpaColumn.uniqueName}.position = $velocityCount
+#end
 
 
 #foreach ($jpaTable in $jpaView.innerTables)
