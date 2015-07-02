@@ -14,6 +14,8 @@ ${jpaTable.uniqueName}.position = $velocityCount
 ${jpaColumn.uniqueName}.visible = $jpaColumn.getAttribute("structural.visible")
 ${jpaColumn.uniqueName}.type = $jpaColumn.getAttribute("structural.columntype")
 ${jpaColumn.uniqueName}.attribute = $jpaColumn.getAttribute("structural.attribute")
+${jpaColumn.uniqueName}.datatype = $jpaColumn.getAttribute("structural.datatype")
+${jpaColumn.uniqueName}.format = $jpaColumn.getAttribute("structural.format")
 ${jpaColumn.uniqueName}.position = $velocityCount
 #end
 
@@ -38,6 +40,8 @@ ${jpaView.uniqueName}.type = $jpaView.getAttribute("structural.tabletype")
 #foreach ($jpaColumn in $jpaView.getColumns())
 ${jpaColumn.uniqueName}.visible = $jpaColumn.getAttribute("structural.visible")
 ${jpaColumn.uniqueName}.type = $jpaColumn.getAttribute("structural.columntype")
+${jpaColumn.uniqueName}.datatype = $jpaColumn.getAttribute("structural.datatype")
+${jpaColumn.uniqueName}.format = $jpaColumn.getAttribute("structural.format")
 ${jpaColumn.uniqueName}.position = $velocityCount
 #end
 
@@ -52,6 +56,8 @@ ${jpaTable.uniqueName}.type = dimension
 #foreach ($jpaColumn in $jpaTable.columns)
 ${jpaView.uniqueName}/${jpaColumn.uniqueName}.visible = $jpaColumn.getAttribute("structural.visible")
 ${jpaView.uniqueName}/${jpaColumn.uniqueName}.type = $jpaColumn.getAttribute("structural.columntype")
+${jpaView.uniqueName}/${jpaColumn.uniqueName}.datatype = $jpaColumn.getAttribute("structural.datatype")
+${jpaView.uniqueName}/${jpaColumn.uniqueName}.format = $jpaColumn.getAttribute("structural.format")
 #end
 
 #end
