@@ -54,11 +54,24 @@ public class GenerateJPAMappingCommand extends AbstractSpagoBIModelGenerateComma
 		BusinessModel businessModel;
 		businessModel = (BusinessModel) parameter.getOwner();
 		String directory = (String) parameter.getValue();
-		String schemaName = (String) parameter.getFeature();
+
+		JPAMappingOptionsDescriptor optionsDescriptor = (JPAMappingOptionsDescriptor) parameter.getFeature();
+		String schemaName = optionsDescriptor.getSchemaName();
+		String catalogName = optionsDescriptor.getCatalogName();
+		String modelName = optionsDescriptor.getModelName();
+
 		String originalSchemaName = getSchemaName(businessModel);
+		String originalCatalogName = getCatalogName(businessModel);
+		String originalModelName = getModelName(businessModel);
+
+		// set specified model name
+		setModelName(businessModel, modelName);
 
 		// set specified schema name for generation
 		setSchemaName(businessModel, schemaName);
+
+		// set specified catalog name for generation
+		setCatalogName(businessModel, catalogName);
 
 		// Call JPA Mapping generator
 		executed = true;
@@ -79,8 +92,14 @@ public class GenerateJPAMappingCommand extends AbstractSpagoBIModelGenerateComma
 				generator.hideTechnicalResources();
 			}
 
+			// restore model name to original name
+			setModelName(businessModel, originalModelName);
+
 			// restore schema name to original name
 			setSchemaName(businessModel, originalSchemaName);
+
+			// restore catalog name to original name
+			setCatalogName(businessModel, originalCatalogName);
 
 		}
 
@@ -95,7 +114,7 @@ public class GenerateJPAMappingCommand extends AbstractSpagoBIModelGenerateComma
 	}
 
 	private void setSchemaName(BusinessModel businessModel, String schemaName) {
-		if (schemaName != null) {
+		if ((schemaName != null) && (schemaName.length() > 0)) {
 			PhysicalModel physicalModel = businessModel.getPhysicalModel();
 			physicalModel.setSchema(schemaName);
 		}
@@ -106,6 +125,30 @@ public class GenerateJPAMappingCommand extends AbstractSpagoBIModelGenerateComma
 		PhysicalModel physicalModel = businessModel.getPhysicalModel();
 		String schemaName = physicalModel.getSchema();
 		return schemaName;
+	}
+
+	private String getCatalogName(BusinessModel businessModel) {
+		PhysicalModel physicalModel = businessModel.getPhysicalModel();
+		String catalogName = physicalModel.getCatalog();
+		return catalogName;
+	}
+
+	private void setCatalogName(BusinessModel businessModel, String catalogName) {
+		if ((catalogName != null) && (catalogName.length() > 0)) {
+			PhysicalModel physicalModel = businessModel.getPhysicalModel();
+			physicalModel.setCatalog(catalogName);
+		}
+	}
+
+	private String getModelName(BusinessModel businessModel) {
+		String modelName = businessModel.getName();
+		return modelName;
+	}
+
+	private void setModelName(BusinessModel businessModel, String modelName) {
+		if ((modelName != null) && (modelName.length() > 0)) {
+			businessModel.setName(modelName);
+		}
 	}
 
 	/**

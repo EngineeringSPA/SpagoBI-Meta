@@ -40,21 +40,30 @@ public class GenerateJPAMappingWizardDirectorySelectionPage extends WizardPage {
 
 	private Text textDirectory;
 	private Text txtSchemaName;
+	private Text txtCatalogName;
+	private Text txtModelName;
 
 	private String schemaName;
+	private String catalogName;
+	private String modelName;
+
 	private final String oldSchemaName;
+	private final String oldCatalogName;
+	private final String oldModelName;
 
 	/**
 	 * @param pageName
 	 */
-	protected GenerateJPAMappingWizardDirectorySelectionPage(String pageName, String oldSchemaName) {
+	protected GenerateJPAMappingWizardDirectorySelectionPage(String pageName, String oldSchemaName, String oldCatalogName, String oldModelName) {
 		super(pageName);
 		setTitle(RL.getString("business.editor.wizard.generatemapping.title"));
 		setDescription(RL.getString("business.editor.wizard.generatemapping.description"));
-		ImageDescriptor image = ImageDescriptor.createFromURL((URL) RL.getImage("it.eng.spagobi.meta.editor.business.wizards.inline.createBC"));
+		ImageDescriptor image = ImageDescriptor.createFromURL((URL) RL.getImage("it.eng.spagobi.meta.editor.business.wizards.inline.createDatamart"));
 		if (image != null)
 			setImageDescriptor(image);
 		this.oldSchemaName = oldSchemaName;
+		this.oldModelName = oldModelName;
+		this.oldCatalogName = oldCatalogName;
 	}
 
 	@Override
@@ -105,14 +114,40 @@ public class GenerateJPAMappingWizardDirectorySelectionPage extends WizardPage {
 			}
 		});
 
+		createModelName(container);
 		createSchemaName(container);
+		createCatalogName(container);
 
+	}
+
+	private void createModelName(Composite container) {
+
+		Label lbtModelName = new Label(container, SWT.NONE);
+		lbtModelName.setText("Model Name");
+
+		GridData dataModelName = new GridData();
+		dataModelName.grabExcessHorizontalSpace = true;
+		dataModelName.horizontalAlignment = GridData.FILL;
+
+		txtModelName = new Text(container, SWT.BORDER);
+		txtModelName.setLayoutData(dataModelName);
+		if (oldModelName != null) {
+			txtModelName.setText(oldModelName);
+		} else {
+			txtModelName.setEnabled(false);
+		}
+
+		// empty labels to fill
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
 	}
 
 	private void createSchemaName(Composite container) {
 
-		Label lbtFirstName = new Label(container, SWT.NONE);
-		lbtFirstName.setText("Schema Name");
+		Label lbtSchemaName = new Label(container, SWT.NONE);
+		lbtSchemaName.setText("Schema Name");
 
 		GridData dataFirstName = new GridData();
 		dataFirstName.grabExcessHorizontalSpace = true;
@@ -125,6 +160,36 @@ public class GenerateJPAMappingWizardDirectorySelectionPage extends WizardPage {
 		} else {
 			txtSchemaName.setEnabled(false);
 		}
+
+		// empty labels to fill
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+	}
+
+	private void createCatalogName(Composite container) {
+
+		Label lbtCatalogName = new Label(container, SWT.NONE);
+		lbtCatalogName.setText("Catalog Name");
+
+		GridData dataCatalogName = new GridData();
+		dataCatalogName.grabExcessHorizontalSpace = true;
+		dataCatalogName.horizontalAlignment = GridData.FILL;
+
+		txtCatalogName = new Text(container, SWT.BORDER);
+		txtCatalogName.setLayoutData(dataCatalogName);
+		if (oldCatalogName != null) {
+			txtCatalogName.setText(oldCatalogName);
+		} else {
+			txtCatalogName.setEnabled(false);
+		}
+
+		// empty labels to fill
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
 	}
 
 	private void checkPageComplete() {
@@ -141,6 +206,14 @@ public class GenerateJPAMappingWizardDirectorySelectionPage extends WizardPage {
 
 	public String getSchemaName() {
 		return txtSchemaName.getText();
+	}
+
+	public String getCatalogName() {
+		return txtCatalogName.getText();
+	}
+
+	public String getModelName() {
+		return txtModelName.getText();
 	}
 
 }

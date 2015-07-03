@@ -14,6 +14,7 @@ import it.eng.spagobi.meta.editor.SpagoBIMetaEditorPlugin;
 import it.eng.spagobi.meta.editor.business.wizards.AbstractSpagoBIModelWizard;
 import it.eng.spagobi.meta.model.business.BusinessModel;
 import it.eng.spagobi.meta.model.business.commands.ISpagoBIModelCommand;
+import it.eng.spagobi.meta.model.business.commands.generate.JPAMappingOptionsDescriptor;
 import it.eng.spagobi.meta.model.physical.PhysicalModel;
 
 import java.util.ArrayList;
@@ -44,7 +45,8 @@ public class GenerateJPAMappingWizard extends AbstractSpagoBIModelWizard {
 
 	@Override
 	public void addPages() {
-		IWizardPage pageOne = new GenerateJPAMappingWizardDirectorySelectionPage("Directory Selection", getSchemaName(businessModel));
+		IWizardPage pageOne = new GenerateJPAMappingWizardDirectorySelectionPage("Directory Selection", getSchemaName(businessModel),
+				getCatalogName(businessModel), getModelName(businessModel));
 		addPage(pageOne);
 	}
 
@@ -53,8 +55,12 @@ public class GenerateJPAMappingWizard extends AbstractSpagoBIModelWizard {
 		GenerateJPAMappingWizardDirectorySelectionPage wizardPage = (GenerateJPAMappingWizardDirectorySelectionPage) this.getStartingPage();
 		String directory = wizardPage.getSelectedDirectory();
 		String schemaName = wizardPage.getSchemaName();
+		String catalogName = wizardPage.getCatalogName();
+		String modelName = wizardPage.getModelName();
 
-		return new CommandParameter(businessModel, schemaName, directory, new ArrayList<Object>());
+		JPAMappingOptionsDescriptor optionsDescriptor = new JPAMappingOptionsDescriptor(modelName, catalogName, schemaName);
+
+		return new CommandParameter(businessModel, optionsDescriptor, directory, new ArrayList<Object>());
 	}
 
 	@Override
@@ -66,6 +72,17 @@ public class GenerateJPAMappingWizard extends AbstractSpagoBIModelWizard {
 		PhysicalModel physicalModel = businessModel.getPhysicalModel();
 		String schemaName = physicalModel.getSchema();
 		return schemaName;
+	}
+
+	private String getCatalogName(BusinessModel businessModel) {
+		PhysicalModel physicalModel = businessModel.getPhysicalModel();
+		String catalogName = physicalModel.getCatalog();
+		return catalogName;
+	}
+
+	private String getModelName(BusinessModel businessModel) {
+		String modelName = businessModel.getName();
+		return modelName;
 	}
 
 }

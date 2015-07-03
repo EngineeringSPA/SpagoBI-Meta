@@ -433,7 +433,7 @@ public class JpaMappingCodeGenerator implements IGenerator {
 
 			List<IJpaTable> tables = new ArrayList<IJpaTable>();
 			tables.addAll(model.getTables());
-			// TODO: commented for test
+			// old implementation
 			// for (IJpaView jpaView : model.getViews()) {
 			// tables.addAll(jpaView.getInnerTables());
 			// }
