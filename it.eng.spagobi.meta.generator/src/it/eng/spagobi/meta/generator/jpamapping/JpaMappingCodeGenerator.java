@@ -172,6 +172,11 @@ public class JpaMappingCodeGenerator implements IGenerator {
 
 	@Override
 	public void generate(ModelObject o, String outputDir) {
+		generate(o, outputDir, false);
+	}
+
+	@Override
+	public void generate(ModelObject o, String outputDir, boolean isUpdatableMapping) {
 		BusinessModel model;
 
 		logger.trace("IN");
@@ -196,7 +201,7 @@ public class JpaMappingCodeGenerator implements IGenerator {
 					logger.debug("Created directory [{}]", distDir);
 				}
 
-				generateJpaMapping(model);
+				generateJpaMapping(model, isUpdatableMapping);
 
 				logger.info("Jpa mapping code generated succesfully");
 			} catch (Exception e) {
@@ -243,17 +248,17 @@ public class JpaMappingCodeGenerator implements IGenerator {
 	 * @param outputFile
 	 *            File
 	 */
-	public void generateJpaMapping(BusinessModel model) throws Exception {
+	public void generateJpaMapping(BusinessModel model, boolean isUpdatableMapping) throws Exception {
 
 		logger.trace("IN");
 
 		Velocity.setProperty("file.resource.loader.path", getTemplateDir().getAbsolutePath());
 
 		JpaModel jpaModel = new JpaModel(model);
-		generateBusinessTableMappings(jpaModel.getTables());
+		generateBusinessTableMappings(jpaModel.getTables(), isUpdatableMapping);
 		logger.info("Java files for tables of model [{}] succesfully created", model.getName());
 
-		generateBusinessViewMappings(jpaModel.getViews());
+		generateBusinessViewMappings(jpaModel.getViews(), isUpdatableMapping);
 		logger.info("Java files for views of model [{}] succesfully created", model.getName());
 
 		createLabelsFile(labelsTemplate, jpaModel);
@@ -274,14 +279,14 @@ public class JpaMappingCodeGenerator implements IGenerator {
 		logger.trace("OUT");
 	}
 
-	public void generateBusinessTableMappings(List<IJpaTable> jpaTables) throws Exception {
+	public void generateBusinessTableMappings(List<IJpaTable> jpaTables, boolean isUpdatableMapping) throws Exception {
 		// logger.debug("Creating mapping for business class [{}]", table.getName());
 
 		for (IJpaTable jpaTable : jpaTables) {
-			createJavaFile(tableTemplate, jpaTable, jpaTable.getClassName());
+			createJavaFile(tableTemplate, jpaTable, jpaTable.getClassName(), isUpdatableMapping);
 			logger.debug("Mapping for table [" + jpaTable.getName() + "] succesfully created");
 			if (jpaTable.hasCompositeKey()) {
-				createJavaFile(keyTemplate, jpaTable, jpaTable.getCompositeKeyClassName());
+				createJavaFile(keyTemplate, jpaTable, jpaTable.getCompositeKeyClassName(), isUpdatableMapping);
 				logger.debug("Mapping for composite PK of business table [{}] succesfully", jpaTable.getName());
 			}
 		}
@@ -289,9 +294,9 @@ public class JpaMappingCodeGenerator implements IGenerator {
 		// logger.debug("Mapping for business class [{}] created succesfully", table.getName());
 	}
 
-	public void generateBusinessViewMappings(List<IJpaView> jpaViews) throws Exception {
+	public void generateBusinessViewMappings(List<IJpaView> jpaViews, boolean isUpdatableMapping) throws Exception {
 		for (IJpaView jpaView : jpaViews) {
-			generateBusinessTableMappings(jpaView.getInnerTables());
+			generateBusinessTableMappings(jpaView.getInnerTables(), isUpdatableMapping);
 		}
 		createViewsFile(jpaViews);
 	}
@@ -308,12 +313,13 @@ public class JpaMappingCodeGenerator implements IGenerator {
 	 * @param businessTable
 	 * @param jpaTable
 	 */
-	private void createJavaFile(File templateFile, IJpaTable jpaTable, String className) {
+	private void createJavaFile(File templateFile, IJpaTable jpaTable, String className, boolean isUpdatableMapping) {
 
 		VelocityContext velocityContext;
 
 		velocityContext = new VelocityContext();
 		velocityContext.put("jpaTable", jpaTable); //$NON-NLS-1$
+		velocityContext.put("isUpdatable", isUpdatableMapping); //$NON-NLS-1$
 
 		File outputDir = new File(srcDir, StringUtils.strReplaceAll(jpaTable.getPackage(), ".", "/"));
 		outputDir.mkdirs();

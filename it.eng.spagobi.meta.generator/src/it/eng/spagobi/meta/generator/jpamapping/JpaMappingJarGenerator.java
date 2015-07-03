@@ -6,7 +6,7 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this file,
  You can obtain one at http://mozilla.org/MPL/2.0/.
  
-**/
+ **/
 package it.eng.spagobi.meta.generator.jpamapping;
 
 import it.eng.spagobi.meta.generator.GenerationException;
@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Andrea Gioia (andrea.gioia@eng.it)
- *
+ * 
  */
 public class JpaMappingJarGenerator extends JpaMappingClassesGenerator {
 
@@ -42,96 +42,98 @@ public class JpaMappingJarGenerator extends JpaMappingClassesGenerator {
 	public JpaMappingJarGenerator() {
 		super();
 	}
-	
+
 	@Override
-	public void generate(ModelObject o, String outputDir)  {
+	public void generate(ModelObject o, String outputDir) {
+		generate(o, outputDir, false);
+	}
+
+	@Override
+	public void generate(ModelObject o, String outputDir, boolean isUpdatableMapping) {
 		logger.trace("IN");
 
 		try {
-			//The output dir is the model directory plus the business model name
-			outputDir = outputDir+File.separator+o.getName();
-			super.generate(o, outputDir);
+			// The output dir is the model directory plus the business model name
+			outputDir = outputDir + File.separator + o.getName();
+			super.generate(o, outputDir, isUpdatableMapping);
 
-			distDir = (distDir == null)? new File(baseOutputDir, DEFAULT_DIST_DIR): distDir;
-			jarFileName = (jarFileName == null)? DEFAULT_JAR_FILE_NAME : jarFileName;
+			distDir = (distDir == null) ? new File(baseOutputDir, DEFAULT_DIST_DIR) : distDir;
+			jarFileName = (jarFileName == null) ? DEFAULT_JAR_FILE_NAME : jarFileName;
 
-			// if model file is selected copy model file inside bin folder so that it will be included in jar 
-			if(getModelFile() != null){
-				File javaFile = getModelFile().getRawLocation().toFile();	
+			// if model file is selected copy model file inside bin folder so that it will be included in jar
+			if (getModelFile() != null) {
+				File javaFile = getModelFile().getRawLocation().toFile();
 				FileUtilities.copyFile(javaFile, getBinDir());
 			}
 			// zip bin folder into jar
 			Zipper zipper = new Zipper();
 			zipper.compressToJar(getBinDir(), getJarFile());
 
-			
-			
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 			logger.error("An error occur while generating JPA jar", t);
 			throw new GenerationException("An error occur while generating JPA jar", t);
-		} finally {		
+		} finally {
 			logger.trace("OUT");
 		}
 	}
 
+	@Override
+	public void hideTechnicalResources() {
+		logger.debug("IN");
+		super.hideTechnicalResources();
 
-@Override
-public void hideTechnicalResources() {
-	logger.debug("IN");
-	super.hideTechnicalResources();
-
-	File baseOutputDir = getBaseOutputDir();
-	File distDir = getDistDir();
-	IWorkspace workspace = ResourcesPlugin.getWorkspace();
-	try{
-		if(baseOutputDir != null && baseOutputDir.exists()){
-			IProject proj = workspace.getRoot().getProject(baseOutputDir.getParentFile().getParentFile().getName());
-			IFolder iFolder = proj.getFolder(baseOutputDir.getParentFile().getName()+"\\"+baseOutputDir.getName()) ;
-			if(iFolder.exists()){
-				iFolder.setHidden(true);
-				iFolder.setTeamPrivateMember(true);
-				iFolder.setDerived(true, null);
-			}
-			if(distDir != null && distDir.exists()){
-				IFolder iFolderDist = proj.getFolder(baseOutputDir.getParentFile().getName()+"\\"+baseOutputDir.getName()+"\\"+distDir.getName()) ;
-				if(iFolderDist.exists()){
-					iFolderDist.setHidden(true);
-					iFolderDist.setDerived(true, null);
-					IFolder iFolderSource = proj.getFolder(baseOutputDir.getParentFile().getName()+"\\"+baseOutputDir.getName()+"\\"+JpaMappingCodeGenerator.DEFAULT_SRC_DIR) ;
-					iFolderSource.setHidden(true);
-					iFolderSource.setDerived(true, null);
-				}		
-				if(iFolder.exists() || iFolderDist.exists()){
-					workspace.getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
-					proj.refreshLocal(IResource.DEPTH_INFINITE, null);
+		File baseOutputDir = getBaseOutputDir();
+		File distDir = getDistDir();
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		try {
+			if (baseOutputDir != null && baseOutputDir.exists()) {
+				IProject proj = workspace.getRoot().getProject(baseOutputDir.getParentFile().getParentFile().getName());
+				IFolder iFolder = proj.getFolder(baseOutputDir.getParentFile().getName() + "\\" + baseOutputDir.getName());
+				if (iFolder.exists()) {
+					iFolder.setHidden(true);
+					iFolder.setTeamPrivateMember(true);
+					iFolder.setDerived(true, null);
 				}
-			}
-			else{
-				logger.warn("Exception occurred before creating distDir: no resource to hide");
+				if (distDir != null && distDir.exists()) {
+					IFolder iFolderDist = proj.getFolder(baseOutputDir.getParentFile().getName() + "\\" + baseOutputDir.getName() + "\\" + distDir.getName());
+					if (iFolderDist.exists()) {
+						iFolderDist.setHidden(true);
+						iFolderDist.setDerived(true, null);
+						IFolder iFolderSource = proj.getFolder(baseOutputDir.getParentFile().getName() + "\\" + baseOutputDir.getName() + "\\"
+								+ JpaMappingCodeGenerator.DEFAULT_SRC_DIR);
+						iFolderSource.setHidden(true);
+						iFolderSource.setDerived(true, null);
+					}
+					if (iFolder.exists() || iFolderDist.exists()) {
+						workspace.getRoot().refreshLocal(IResource.DEPTH_INFINITE, null);
+						proj.refreshLocal(IResource.DEPTH_INFINITE, null);
+					}
+				} else {
+					logger.warn("Exception occurred before creating distDir: no resource to hide");
+				}
+
+			} else {
+				logger.warn("Exception occurred before creating baseoutputDir: no resource to hide");
 			}
 
+		} catch (CoreException e) {
+			logger.error("Error in hiding technical model folders ", e);
+			throw new GenerationException("Error in hiding technical model folders", e);
 		}
-		else{
-			logger.warn("Exception occurred before creating baseoutputDir: no resource to hide");
-		}
-		
+		logger.debug("OUT");
+
 	}
-	catch (CoreException e) {
-		logger.error("Error in hiding technical model folders ",e);
-		throw new GenerationException("Error in hiding technical model folders", e);
-	}
-	logger.debug("OUT");
-	
-}
 
 	// =======================================================================
 	// ACCESSOR METHODS
 	// =======================================================================
 
+	@Override
 	public File getDistDir() {
 		return distDir;
 	}
 
+	@Override
 	public void setDistDir(File distDir) {
 		this.distDir = distDir;
 	}
@@ -155,6 +157,5 @@ public void hideTechnicalResources() {
 	public void setModelFile(org.eclipse.core.internal.resources.File modelFile) {
 		this.modelFile = modelFile;
 	}
-	
-	
+
 }

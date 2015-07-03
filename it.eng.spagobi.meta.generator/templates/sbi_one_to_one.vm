@@ -16,11 +16,11 @@
 		#if ($jpaRelationship.isMultipleRelationship())
 		@JoinColumns({
 			#foreach ($relationship in $jpaRelationship.relationshipColumnsNames)
-				@JoinColumn( name=$relationship.sourceColumnName, referencedColumnName=$relationship.destinationColumnName, insertable = false, updatable = false),
+				@JoinColumn( name=$relationship.sourceColumnName, referencedColumnName=$relationship.destinationColumnName, insertable = $isUpdatable, updatable = $isUpdatable),
 			#end
 			})
 		#else
-		@JoinColumn( name=$jpaRelationship.getSimpleSourceColumnName(), insertable = false, updatable = false)
+		@JoinColumn( name=$jpaRelationship.getSimpleSourceColumnName(), insertable = $isUpdatable, updatable = $isUpdatable)
 		#end		
 		##
 	#end 

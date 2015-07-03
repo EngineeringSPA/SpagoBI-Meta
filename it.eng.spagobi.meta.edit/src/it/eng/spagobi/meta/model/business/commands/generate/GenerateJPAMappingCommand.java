@@ -60,6 +60,8 @@ public class GenerateJPAMappingCommand extends AbstractSpagoBIModelGenerateComma
 		String catalogName = optionsDescriptor.getCatalogName();
 		String modelName = optionsDescriptor.getModelName();
 
+		boolean isUpdatable = optionsDescriptor.isUpdatable();
+
 		String originalSchemaName = getSchemaName(businessModel);
 		String originalCatalogName = getCatalogName(businessModel);
 		String originalModelName = getModelName(businessModel);
@@ -80,7 +82,7 @@ public class GenerateJPAMappingCommand extends AbstractSpagoBIModelGenerateComma
 		try {
 			generator = (JpaMappingJarGenerator) descriptor.getGenerator();
 			generator.setLibDir(new File("plugins"));
-			generator.generate(businessModel, directory);
+			generator.generate(businessModel, directory, isUpdatable);
 		} catch (Exception e) {
 			logger.error("An error occurred while executing command [{}]:", ModifyBusinessTableColumnsCommand.class.getName(), e);
 			showInformation("Error in JPAMappingGenerator", "Cannot create JPA Mapping classes");

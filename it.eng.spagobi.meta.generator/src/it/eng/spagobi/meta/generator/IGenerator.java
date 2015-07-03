@@ -6,16 +6,25 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this file,
  You can obtain one at http://mozilla.org/MPL/2.0/.
  
-**/
+ **/
 package it.eng.spagobi.meta.generator;
 
 import it.eng.spagobi.meta.model.ModelObject;
 
 /**
  * @author Andrea Gioia (andrea.gioia@eng.it)
- *
+ * 
  */
 public interface IGenerator {
-	void generate(ModelObject o, String outputFile);
-	void hideTechnicalResources();	
+
+	void hideTechnicalResources();
+
+	/**
+	 * @param o
+	 * @param outputDir
+	 * @param isUpdatableMapping
+	 */
+	void generate(ModelObject o, String outputDir, boolean isUpdatableMapping);
+
+	void generate(ModelObject o, String outputDir);
 }

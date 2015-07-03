@@ -47,6 +47,8 @@ public class GenerateJPAMappingWizardDirectorySelectionPage extends WizardPage {
 	private String catalogName;
 	private String modelName;
 
+	private boolean isUpdatable;
+
 	private final String oldSchemaName;
 	private final String oldCatalogName;
 	private final String oldModelName;
@@ -117,6 +119,7 @@ public class GenerateJPAMappingWizardDirectorySelectionPage extends WizardPage {
 		createModelName(container);
 		createSchemaName(container);
 		createCatalogName(container);
+		createCheckBoxUpdatableMapping(container);
 
 	}
 
@@ -192,6 +195,27 @@ public class GenerateJPAMappingWizardDirectorySelectionPage extends WizardPage {
 		new Label(container, SWT.NONE);
 	}
 
+	private void createCheckBoxUpdatableMapping(Composite container) {
+
+		Label lbtGenerateRegistry = new Label(container, SWT.NONE);
+		lbtGenerateRegistry.setText("Generate for Registry");
+
+		Button isUpdatableCheckbox = new Button(container, SWT.CHECK);
+
+		isUpdatableCheckbox.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				if (((Button) event.widget).getSelection()) {
+					// checked
+					isUpdatable = true;
+				} else {
+					// unchecked
+					isUpdatable = false;
+				}
+			}
+		});
+	}
+
 	private void checkPageComplete() {
 		if (textDirectory.getText().length() > 0) {
 			this.setPageComplete(true);
@@ -214,6 +238,10 @@ public class GenerateJPAMappingWizardDirectorySelectionPage extends WizardPage {
 
 	public String getModelName() {
 		return txtModelName.getText();
+	}
+
+	public boolean isUpdatable() {
+		return isUpdatable;
 	}
 
 }

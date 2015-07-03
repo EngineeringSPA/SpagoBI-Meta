@@ -12,17 +12,19 @@ public class JPAMappingOptionsDescriptor {
 	String modelName;
 	String catalogName;
 	String schemaName;
+	boolean isUpdatable;
 
 	/**
 	 * @param modelName
 	 * @param catalogName
 	 * @param schemaName
 	 */
-	public JPAMappingOptionsDescriptor(String modelName, String catalogName, String schemaName) {
+	public JPAMappingOptionsDescriptor(String modelName, String catalogName, String schemaName, boolean isUpdatable) {
 		super();
 		this.modelName = modelName;
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;
+		this.isUpdatable = isUpdatable;
 	}
 
 	/**
@@ -68,6 +70,21 @@ public class JPAMappingOptionsDescriptor {
 	 */
 	public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
+	}
+
+	/**
+	 * @return the isUpdatable
+	 */
+	public boolean isUpdatable() {
+		return isUpdatable;
+	}
+
+	/**
+	 * @param isUpdatable
+	 *            the isUpdatable to set
+	 */
+	public void setUpdatable(boolean isUpdatable) {
+		this.isUpdatable = isUpdatable;
 	}
 
 }

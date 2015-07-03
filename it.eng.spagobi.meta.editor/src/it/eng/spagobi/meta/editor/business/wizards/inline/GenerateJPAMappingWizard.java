@@ -57,8 +57,9 @@ public class GenerateJPAMappingWizard extends AbstractSpagoBIModelWizard {
 		String schemaName = wizardPage.getSchemaName();
 		String catalogName = wizardPage.getCatalogName();
 		String modelName = wizardPage.getModelName();
+		boolean isUpdatable = wizardPage.isUpdatable();
 
-		JPAMappingOptionsDescriptor optionsDescriptor = new JPAMappingOptionsDescriptor(modelName, catalogName, schemaName);
+		JPAMappingOptionsDescriptor optionsDescriptor = new JPAMappingOptionsDescriptor(modelName, catalogName, schemaName, isUpdatable);
 
 		return new CommandParameter(businessModel, optionsDescriptor, directory, new ArrayList<Object>());
 	}
