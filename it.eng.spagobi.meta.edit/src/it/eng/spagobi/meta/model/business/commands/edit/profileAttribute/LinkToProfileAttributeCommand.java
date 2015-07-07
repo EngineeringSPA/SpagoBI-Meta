@@ -6,7 +6,7 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this file,
  You can obtain one at http://mozilla.org/MPL/2.0/.
  
-**/
+ **/
 package it.eng.spagobi.meta.model.business.commands.edit.profileAttribute;
 
 import it.eng.spagobi.meta.model.business.BusinessColumn;
@@ -23,45 +23,44 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author Giulo Gavardi (giulio.gavardi@eng.it)
- *
+ * 
  */
 public class LinkToProfileAttributeCommand extends AbstractSpagoBIModelEditCommand {
 
 	BusinessColumn businessColumn;
-	
+
 	private static Logger logger = LoggerFactory.getLogger(LinkToProfileAttributeCommand.class);
-	
-	
+
 	public LinkToProfileAttributeCommand(EditingDomain domain, CommandParameter parameter) {
-		super("model.business.commands.edit.identifier.linktoprofileattribute.label"
-			 , "model.business.commands.edit.identifier.linktoprofileattribute.description"
-			 , "model.business.commands.edit.identifier.linktoprofileattribute"
-			 , domain, parameter);
+		super("model.business.commands.edit.identifier.linktoprofileattribute.label",
+				"model.business.commands.edit.identifier.linktoprofileattribute.description", "model.business.commands.edit.identifier.linktoprofileattribute",
+				domain, parameter);
 	}
-	
+
 	public LinkToProfileAttributeCommand(EditingDomain domain) {
 		this(domain, null);
 	}
-	
+
 	@Override
 	public void execute() {
-		businessColumn = (BusinessColumn)parameter.getOwner();
+		businessColumn = (BusinessColumn) parameter.getOwner();
 		String valueSelected = null;
-		if(parameter.getValue() != null){
+		if (parameter.getValue() != null) {
 			valueSelected = (String) parameter.getValue();
 		}
-		businessColumn.getProperties().get("structural.attribute").setValue(valueSelected);
-		
+		// check for retrocompatibility, before 5.2
+		if (businessColumn.getProperties().get("structural.attribute") != null) {
+			businessColumn.getProperties().get("structural.attribute").setValue(valueSelected);
+		}
+
 		this.executed = true;
 		logger.debug("Command [{}] executed succesfully", LinkToProfileAttributeCommand.class.getName());
 	}
-	
-	
-	
+
 	@Override
 	public Collection<?> getAffectedObjects() {
 		Collection affectedObjects = Collections.EMPTY_LIST;
-		if(businessColumn != null) {
+		if (businessColumn != null) {
 			affectedObjects = new ArrayList();
 			affectedObjects.add(businessColumn.getTable());
 		}
@@ -72,7 +71,5 @@ public class LinkToProfileAttributeCommand extends AbstractSpagoBIModelEditComma
 	public boolean canUndo() {
 		return false;
 	}
-	
-	
-	
+
 }
