@@ -772,7 +772,9 @@ public class PhysicalModelInitializer {
 		Iterator<PhysicalColumn> iterator = physicalColumns.iterator();
 		while (iterator.hasNext()) {
 			PhysicalColumn physicalColumn = iterator.next();
-			physicalColumn.getProperties().get(PhysicalModelPropertiesFromFileInitializer.IS_DELETED).setValue("true");
+			if (physicalColumn.getProperties().get(PhysicalModelPropertiesFromFileInitializer.IS_DELETED) != null) {
+				physicalColumn.getProperties().get(PhysicalModelPropertiesFromFileInitializer.IS_DELETED).setValue("true");
+			}
 		}
 	}
 
@@ -1194,14 +1196,14 @@ public class PhysicalModelInitializer {
 		for (PhysicalTable physicalTable : physicalTables) {
 			// check table
 			String isDeleted = getProperty(physicalTable, PhysicalModelPropertiesFromFileInitializer.IS_DELETED);
-			if (isDeleted.equalsIgnoreCase("true")) {
+			if ((isDeleted != null) && (isDeleted.equalsIgnoreCase("true"))) {
 				markedElements.add(physicalTable);
 			} else {
 				// check columns
 				List<PhysicalColumn> physicalColumns = physicalTable.getColumns();
 				for (PhysicalColumn physicalColumn : physicalColumns) {
 					String columnIsDeleted = getProperty(physicalColumn, PhysicalModelPropertiesFromFileInitializer.IS_DELETED);
-					if (columnIsDeleted.equalsIgnoreCase("true")) {
+					if ((columnIsDeleted != null) && (columnIsDeleted.equalsIgnoreCase("true"))) {
 						markedElements.add(physicalColumn);
 					}
 				}

@@ -44,6 +44,7 @@ Export-Package: it.eng.spagobi.meta.editor.business.actions;
    it.eng.spagobi.meta.model.business.commands,
    org.eclipse.emf.common.command,
    org.eclipse.emf.edit.domain",
+ it.eng.spagobi.meta.editor.business.dialogs,
  it.eng.spagobi.meta.editor.multi.wizards;
   uses:="org.eclipse.jface.wizard,
    org.eclipse.core.runtime,
@@ -56,6 +57,8 @@ Export-Package: it.eng.spagobi.meta.editor.business.actions;
    org.eclipse.jface.viewers,
    org.eclipse.ui.dialogs,
    org.eclipse.swt.widgets",
+ it.eng.spagobi.meta.editor.physical.actions,
+ it.eng.spagobi.meta.editor.physical.dialogs,
  it.eng.spagobi.meta.editor.popup.actions;
   uses:="org.eclipse.jface.action,
    org.eclipse.ui,

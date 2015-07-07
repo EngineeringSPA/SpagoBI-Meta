@@ -174,7 +174,8 @@ public class PhysicalTableItemProvider extends ModelObjectItemProvider implement
 	@Override
 	public Object getImage(Object object) {
 		PhysicalTable physicalTable = (PhysicalTable) object;
-		if (Boolean.valueOf(physicalTable.getProperties().get("structural.deleted").getValue()) == true) {
+		if ((physicalTable.getProperties().get("structural.deleted") != null)
+				&& (Boolean.valueOf(physicalTable.getProperties().get("structural.deleted").getValue()) == true)) {
 			// mark as deleted table
 			return overlayImage(object, getResourceLocator().getImage("full/obj16/PhysicalTableDeleted"));
 		} else if (!physicalTable.containsAllNotDeleted(physicalTable.getColumns())) {
@@ -184,6 +185,7 @@ public class PhysicalTableItemProvider extends ModelObjectItemProvider implement
 			return overlayImage(object, getResourceLocator().getImage("full/obj16/PhysicalTable"));
 
 		}
+
 	}
 
 	/**

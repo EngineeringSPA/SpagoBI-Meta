@@ -273,7 +273,8 @@ public class PhysicalColumnItemProvider extends ModelObjectItemProvider implemen
 	public Object getImage(Object object) {
 		PhysicalColumn physicalColumn = ((PhysicalColumn) object);
 
-		if (Boolean.valueOf(physicalColumn.getProperties().get(PhysicalModelPropertiesFromFileInitializer.IS_DELETED).getValue()) == true) {
+		if ((physicalColumn.getProperties().get(PhysicalModelPropertiesFromFileInitializer.IS_DELETED) != null)
+				&& (Boolean.valueOf(physicalColumn.getProperties().get(PhysicalModelPropertiesFromFileInitializer.IS_DELETED).getValue()) == true)) {
 			return overlayImage(object, getResourceLocator().getImage("full/obj16/PhysicalColumnDeleted"));
 		} else {
 			// if the column is a identifier display the appropriate icon

@@ -436,10 +436,16 @@ public class PhysicalTableImpl extends ModelObjectImpl implements PhysicalTable 
 				// first check column name
 				if (column.getName().equals(physicalColumnToCheck.getName())) {
 					// check that the column is not market as deleted
-					String isDeleted = column.getProperties().get("structural.deleted").getValue();
-					if (isDeleted.equalsIgnoreCase("false")) {
+					if (column.getProperties().get("structural.deleted") != null) {
+						String isDeleted = column.getProperties().get("structural.deleted").getValue();
+						if (isDeleted.equalsIgnoreCase("false")) {
+							found = true;
+						}
+					} else {
+						// for retrocompatibility before 5.2
 						found = true;
 					}
+
 				}
 			}
 			if (!found) {

@@ -10,6 +10,7 @@
 
 package it.eng.spagobi.meta.editor.multi;
 
+import it.eng.spagobi.commons.exception.SpagoBIPluginException;
 import it.eng.spagobi.meta.model.physical.PhysicalModel;
 
 import java.io.PrintWriter;
@@ -28,6 +29,8 @@ import org.eclipse.datatools.modelbase.sql.schema.Schema;
 import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.datatools.modelbase.sql.tables.Table;
 import org.eclipse.emf.common.util.EList;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +58,14 @@ public class DSEBridge {
 	}
 
 	public IConnectionProfile getConnectionProfile(String connectionName) {
-		return ProfileManager.getInstance().getProfileByName(connectionName);
+		IConnectionProfile connectionProfile = ProfileManager.getInstance().getProfileByName(connectionName);
+		if (connectionProfile != null) {
+			return ProfileManager.getInstance().getProfileByName(connectionName);
+		} else {
+			logger.error("Cannot find connection profile named [" + connectionName + "]");
+			showError("Cannot find connection", "Cannot find connection profile named [" + connectionName + "]");
+			throw new SpagoBIPluginException("Cannot find connection profile named [" + connectionName + "]");
+		}
 	}
 
 	public Connection connect(String connectionName) {
@@ -171,5 +181,14 @@ public class DSEBridge {
 	 */
 	public String getConnectionDatabaseName() {
 		return connectionDatabaseName;
+	}
+
+	public void showError(final String title, final String message) {
+		Display.getDefault().asyncExec(new Runnable() {
+			@Override
+			public void run() {
+				MessageDialog.openError(null, title, message);
+			}
+		});
 	}
 }

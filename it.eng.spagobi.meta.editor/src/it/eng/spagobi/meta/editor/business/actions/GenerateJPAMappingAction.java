@@ -9,12 +9,16 @@
  **/
 package it.eng.spagobi.meta.editor.business.actions;
 
+import it.eng.spagobi.meta.editor.business.dialogs.BusinessModelRelationshipsCheckWarningDialog;
 import it.eng.spagobi.meta.editor.business.wizards.inline.GenerateJPAMappingWizard;
 import it.eng.spagobi.meta.editor.physical.actions.DeletePhysicalModelObjectAction;
 import it.eng.spagobi.meta.editor.physical.dialogs.DeleteElementsWarningDialog;
+import it.eng.spagobi.meta.initializer.BusinessModelInitializer;
 import it.eng.spagobi.meta.initializer.PhysicalModelInitializer;
+import it.eng.spagobi.meta.initializer.utils.Pair;
 import it.eng.spagobi.meta.model.ModelObject;
 import it.eng.spagobi.meta.model.business.BusinessModel;
+import it.eng.spagobi.meta.model.business.BusinessRelationship;
 import it.eng.spagobi.meta.model.business.commands.ISpagoBIModelCommand;
 import it.eng.spagobi.meta.model.business.commands.generate.GenerateJPAMappingCommand;
 import it.eng.spagobi.meta.model.phantom.provider.BusinessRootItemProvider;
@@ -102,10 +106,24 @@ public class GenerateJPAMappingAction extends AbstractSpagoBIModelAction {
 			}
 
 			if (markedElements.isEmpty() || returnCode != Window.CANCEL) {
-				GenerateJPAMappingWizard wizard = new GenerateJPAMappingWizard(businessModel, editingDomain, (ISpagoBIModelCommand) command);
-				WizardDialog dialog = new WizardDialog(new Shell(), wizard);
-				dialog.create();
-				dialog.open();
+				// check the constraints for hibernate mappings
+				BusinessModelInitializer businessModelInitializer = new BusinessModelInitializer();
+				List<Pair<BusinessRelationship, Integer>> incorrectRelationships = businessModelInitializer.checkRelationshipsConstraints(businessModel);
+				int relationshipsWarningReturnCode = Window.CANCEL;
+				if (!incorrectRelationships.isEmpty()) {
+					BusinessModelRelationshipsCheckWarningDialog warningDialog = new BusinessModelRelationshipsCheckWarningDialog(incorrectRelationships);
+					warningDialog.create();
+					warningDialog.setBlockOnOpen(true);
+					relationshipsWarningReturnCode = warningDialog.open();
+				}
+
+				if (incorrectRelationships.isEmpty() || relationshipsWarningReturnCode == Window.OK) {
+					GenerateJPAMappingWizard wizard = new GenerateJPAMappingWizard(businessModel, editingDomain, (ISpagoBIModelCommand) command);
+					WizardDialog dialog = new WizardDialog(new Shell(), wizard);
+					dialog.create();
+					dialog.open();
+				}
+
 			}
 
 		} catch (Throwable t) {
