@@ -120,8 +120,10 @@ public class SpagoBIDataSetEditor extends MultiPageEditorPart implements IResour
 			modelManager.validateModel();
 			logger.debug("Model [" + modelManager.getBusinessModel().getName() + "] sucesfully valideated");
 
+			String persistenceName = modelManager.discoverPersistenceUnitName();
+
 			IFile modelFile = getModelFile(modelPath);
-			if (isMappingDirty(modelFile)) {
+			if (isMappingDirty(modelFile) || persistenceName == null) {
 				logger.debug("Mappings are not uptodate with the model. The will be regenerated");
 				persistenceUnitName = modelManager.generateMapping(true);
 				dataSource = modelManager.createDataSource(persistenceUnitName);

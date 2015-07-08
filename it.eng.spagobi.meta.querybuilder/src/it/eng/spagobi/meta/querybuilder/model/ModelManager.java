@@ -177,7 +177,7 @@ public class ModelManager {
 		return OdaStructureBuilder.getDataSourceSingleModel(persistenceUnitNames, dataSourceProperties, new File(mappingDistFolder, "datamart.jar"));
 	}
 
-	private String discoverPersistenceUnitName() {
+	public String discoverPersistenceUnitName() {
 
 		File mappingSrcFolder = new File(getModelMappingFolder(), "src");
 		File mappingMetaInfFolder = new File(mappingSrcFolder, "META-INF");
