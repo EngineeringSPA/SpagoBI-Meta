@@ -15,6 +15,7 @@ import it.eng.spagobi.meta.initializer.descriptor.BusinessRelationshipDescriptor
 import it.eng.spagobi.meta.model.business.BusinessColumn;
 import it.eng.spagobi.meta.model.business.BusinessColumnSet;
 import it.eng.spagobi.meta.model.business.BusinessModel;
+import it.eng.spagobi.meta.model.business.BusinessRelationship;
 import it.eng.spagobi.meta.model.business.SimpleBusinessColumn;
 
 import java.net.URL;
@@ -490,7 +491,24 @@ public class AddBusinessRelationshipWizardPage extends WizardPage {
 	// check if the right conditions to go forward occurred
 	private void checkPageComplete() {
 		if (columnCorrelationList.getItemCount() > 0) {
-			setPageComplete(true);
+
+			boolean nameAlreadyUsed = false;
+
+			// check if the relationship name is already used
+			String newRelationshipName = getBusinessRelationshipName();
+			java.util.List<BusinessRelationship> relationships = sourceTable.getRelationships();
+			for (BusinessRelationship relationship : relationships) {
+				String relationshipName = relationship.getName();
+				if (relationshipName.equalsIgnoreCase(newRelationshipName)) {
+					setErrorMessage(RL.getString("business.editor.wizard.addbusinessrelationship.name.error"));
+					setPageComplete(false);
+					nameAlreadyUsed = true;
+					break;
+				}
+			}
+			if (!nameAlreadyUsed) {
+				setPageComplete(true);
+			}
 		} else {
 			setPageComplete(false);
 		}
