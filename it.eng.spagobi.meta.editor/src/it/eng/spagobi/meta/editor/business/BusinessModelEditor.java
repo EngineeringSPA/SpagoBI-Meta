@@ -19,7 +19,10 @@ import it.eng.spagobi.meta.editor.properties.CustomizedPropertySheetSorter;
 import it.eng.spagobi.meta.initializer.BusinessModelInitializer;
 import it.eng.spagobi.meta.initializer.ModelSingleton;
 import it.eng.spagobi.meta.initializer.OlapModelInitializer;
+import it.eng.spagobi.meta.initializer.PhysicalModelInitializer;
+import it.eng.spagobi.meta.initializer.properties.PhysicalModelPropertiesFromFileInitializer;
 import it.eng.spagobi.meta.model.Model;
+import it.eng.spagobi.meta.model.ModelProperty;
 import it.eng.spagobi.meta.model.analytical.provider.AnalyticalModelItemProviderAdapterFactory;
 import it.eng.spagobi.meta.model.behavioural.provider.BehaviouralModelItemProviderAdapterFactory;
 import it.eng.spagobi.meta.model.business.BusinessColumn;
@@ -27,6 +30,9 @@ import it.eng.spagobi.meta.model.business.BusinessModel;
 import it.eng.spagobi.meta.model.business.BusinessTable;
 import it.eng.spagobi.meta.model.business.provider.BusinessModelItemProviderAdapterFactory;
 import it.eng.spagobi.meta.model.olap.provider.OlapModelItemProviderAdapterFactory;
+import it.eng.spagobi.meta.model.physical.PhysicalColumn;
+import it.eng.spagobi.meta.model.physical.PhysicalModel;
+import it.eng.spagobi.meta.model.physical.PhysicalTable;
 import it.eng.spagobi.meta.model.physical.provider.PhysicalModelItemProviderAdapterFactory;
 import it.eng.spagobi.meta.model.provider.ModelItemProviderAdapterFactory;
 import it.eng.spagobi.meta.model.validator.ModelValidator;
@@ -120,7 +126,7 @@ public class BusinessModelEditor extends MultiPageEditorPart implements IEditing
 	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator();
 
 	String projectName;
-	
+
 	public static final String EDITOR_ID = BusinessModelEditor.class.getName();
 
 	// ================================================================================
@@ -573,25 +579,23 @@ public class BusinessModelEditor extends MultiPageEditorPart implements IEditing
 		this.isDirty = isDirty;
 	}
 
-	
-	public void getProjectNameIfNull(URI resourceURI){
-		// when 
-	    //Force Workspace refresh
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();    
-		IPath location= Path.fromOSString(resourceURI.devicePath()); 
-		IFile ifile= workspace.getRoot().getFileForLocation(location);
-        try {
-        	ifile.refreshLocal(IResource.DEPTH_ZERO, null);
-        	projectName = ifile.getProject().getName();
-			logger.debug("Refresh Local workspace on [{}]",ifile.getRawLocation().toOSString());
+	public void getProjectNameIfNull(URI resourceURI) {
+		// when
+		// Force Workspace refresh
+		IWorkspace workspace = ResourcesPlugin.getWorkspace();
+		IPath location = Path.fromOSString(resourceURI.devicePath());
+		IFile ifile = workspace.getRoot().getFileForLocation(location);
+		try {
+			ifile.refreshLocal(IResource.DEPTH_ZERO, null);
+			projectName = ifile.getProject().getName();
+			logger.debug("Refresh Local workspace on [{}]", ifile.getRawLocation().toOSString());
 
 		} catch (CoreException e) {
-			logger.error("Refresh Local workspace error [{}]",e);
+			logger.error("Refresh Local workspace error [{}]", e);
 			e.printStackTrace();
 		}
 	}
-	
-	
+
 	/**
 	 * This is the method called to load a resource into the editing domain's resource set based on the editor's input.
 	 */
@@ -601,10 +605,10 @@ public class BusinessModelEditor extends MultiPageEditorPart implements IEditing
 
 			// in case editor is opening after model creation launcher is not run, than
 			// retrieve here project name
-			if(projectName == null){
-				getProjectNameIfNull(resourceURI);	
+			if (projectName == null) {
+				getProjectNameIfNull(resourceURI);
 			}
-			
+
 			Resource resource = editingDomain.getResourceSet().getResource(resourceURI, true);
 			List<EObject> eObjects = resource.getContents();
 			Model model = (Model) eObjects.get(0);
@@ -644,6 +648,30 @@ public class BusinessModelEditor extends MultiPageEditorPart implements IEditing
 
 			}
 			// ************************************************************************************
+
+			// ********************* For Backward compatibility (versions previous than 5.2) *********************
+			// check of the "is deleted" property for physical tables and columns
+			PhysicalModel physicalModel = model.getPhysicalModels().get(0);
+			List<PhysicalTable> physicalTables = physicalModel.getTables();
+			PhysicalModelInitializer physicalModelInitializer = new PhysicalModelInitializer();
+
+			for (PhysicalTable physicalTable : physicalTables) {
+				String property = this.getProperty(physicalTable, PhysicalModelPropertiesFromFileInitializer.IS_DELETED);
+				if (property != null) {
+					// no need to continue the check because property is already present in this model
+					break;
+				} else {
+					// model from a old version, we need to inject new properties
+					// physical table properties
+					physicalModelInitializer.getPropertiesInitializer().addProperties(physicalTable);
+					for (PhysicalColumn physicalColumn : physicalTable.getColumns()) {
+						// physical columns properties
+						physicalModelInitializer.getPropertiesInitializer().addProperties(physicalColumn);
+					}
+				}
+			}
+			// *********************************************************************************************
+
 		} catch (Throwable t) {
 			showError("Impossible to load model", "An eror occurred while loading model: \n" + t.getMessage());
 			t.printStackTrace();
@@ -1071,6 +1099,11 @@ public class BusinessModelEditor extends MultiPageEditorPart implements IEditing
 	public void setProjectName(String projectName) {
 		this.projectName = projectName;
 	}
-	  
-	  
+
+	// **** Utilities Methods ******************
+	private String getProperty(PhysicalTable physicalTable, String propertyName) {
+		ModelProperty property = physicalTable.getProperties().get(propertyName);
+		return property != null ? property.getValue() : null;
+	}
+
 }
