@@ -62,6 +62,12 @@
 
     </types>
     
+    <types>
+      <type id="structural.leveltype" name="Level Type"
+      description="Type of the level"
+      category="Structural" defaultValue="none" />
+    </types>    
+    
     <typesValues>
       <admissibleValuesOf typeId="structural.uniquemembers">
         <value>true</value>

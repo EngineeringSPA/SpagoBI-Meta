@@ -30,6 +30,8 @@ import it.eng.spagobi.meta.editor.olap.actions.SetCubeAction;
 import it.eng.spagobi.meta.editor.olap.actions.SetDimensionAction;
 import it.eng.spagobi.meta.editor.olap.actions.SetGenericAction;
 import it.eng.spagobi.meta.editor.olap.actions.SetMeasureAction;
+import it.eng.spagobi.meta.editor.olap.actions.SetTemporalDimensionAction;
+import it.eng.spagobi.meta.editor.olap.actions.SetTimeDimensionAction;
 import it.eng.spagobi.meta.initializer.OlapModelInitializer;
 import it.eng.spagobi.meta.model.business.BusinessColumn;
 import it.eng.spagobi.meta.model.business.BusinessColumnSet;
@@ -88,11 +90,16 @@ public class BusinessModelMenuActionFactory {
 				if (tableType.equals(("generic"))) {
 					olapActions.add(new SetCubeAction(activeEditorPart, selection));
 					olapActions.add(new SetDimensionAction(activeEditorPart, selection));
+					olapActions.add(new SetTemporalDimensionAction(activeEditorPart, selection));
+					olapActions.add(new SetTimeDimensionAction(activeEditorPart, selection));
+
 				} else if (tableType.equals(("cube"))) {
 					olapActions.add(new SetDimensionAction(activeEditorPart, selection));
 					olapActions.add(new SetGenericAction(activeEditorPart, selection));
+					olapActions.add(new SetTemporalDimensionAction(activeEditorPart, selection));
+					olapActions.add(new SetTimeDimensionAction(activeEditorPart, selection));
 
-				} else if (tableType.equals(("dimension"))) {
+				} else if (tableType.contains(("dimension"))) {
 					olapActions.add(new SetCubeAction(activeEditorPart, selection));
 					olapActions.add(new SetGenericAction(activeEditorPart, selection));
 					olapActions.add(new EditHierarchiesAction(activeEditorPart, selection));

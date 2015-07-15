@@ -6,9 +6,8 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this file,
  You can obtain one at http://mozilla.org/MPL/2.0/.
  
-**/
+ **/
 package it.eng.spagobi.meta.model.business.provider;
-
 
 import it.eng.spagobi.meta.initializer.OlapModelInitializer;
 import it.eng.spagobi.meta.model.business.BusinessModelPackage;
@@ -24,6 +23,8 @@ import it.eng.spagobi.meta.model.olap.Cube;
 import it.eng.spagobi.meta.model.olap.Dimension;
 import it.eng.spagobi.meta.model.olap.commands.edit.cube.CreateCubeCommand;
 import it.eng.spagobi.meta.model.olap.commands.edit.dimension.CreateDimensionCommand;
+import it.eng.spagobi.meta.model.olap.commands.edit.dimension.CreateTemporalDimensionCommand;
+import it.eng.spagobi.meta.model.olap.commands.edit.dimension.CreateTimeDimensionCommand;
 import it.eng.spagobi.meta.model.olap.commands.edit.dimension.EditHierarchiesCommand;
 import it.eng.spagobi.meta.model.olap.commands.edit.generic.SetGenericCommand;
 import it.eng.spagobi.meta.model.phantom.provider.BusinessColumnFolderItemProvider;
@@ -53,26 +54,19 @@ import org.eclipse.emf.edit.provider.IStructuredItemContentProvider;
 import org.eclipse.emf.edit.provider.ITreeItemContentProvider;
 import org.eclipse.emf.edit.provider.IUpdateableItemText;
 
-
 /**
- * This is the item provider adapter for a {@link it.eng.spagobi.meta.model.business.BusinessTable} object.
- * <!-- begin-user-doc -->
- * <!-- end-user-doc -->
+ * This is the item provider adapter for a {@link it.eng.spagobi.meta.model.business.BusinessTable} object. <!-- begin-user-doc --> <!-- end-user-doc -->
+ * 
  * @generated
  */
-public class BusinessTableItemProvider
-	extends BusinessColumnSetItemProvider
-	implements
-		IEditingDomainItemProvider, IStructuredItemContentProvider, ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource,
-		IUpdateableItemText {
-	
-	 private OlapModelInitializer olapModelInitializer = new OlapModelInitializer();
+public class BusinessTableItemProvider extends BusinessColumnSetItemProvider implements IEditingDomainItemProvider, IStructuredItemContentProvider,
+		ITreeItemContentProvider, IItemLabelProvider, IItemPropertySource, IUpdateableItemText {
 
-	
+	private final OlapModelInitializer olapModelInitializer = new OlapModelInitializer();
+
 	/**
-	 * This constructs an instance from a factory and a notifier.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This constructs an instance from a factory and a notifier. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	public BusinessTableItemProvider(AdapterFactory adapterFactory) {
@@ -80,9 +74,8 @@ public class BusinessTableItemProvider
 	}
 
 	/**
-	 * This returns the property descriptors for the adapted class.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This returns the property descriptors for the adapted class. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
@@ -96,33 +89,22 @@ public class BusinessTableItemProvider
 	}
 
 	/**
-	 * This adds a property descriptor for the Physical Table feature.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This adds a property descriptor for the Physical Table feature. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	protected void addPhysicalTablePropertyDescriptor(Object object) {
-		itemPropertyDescriptors.add
-			(createItemPropertyDescriptor
-				(((ComposeableAdapterFactory)adapterFactory).getRootAdapterFactory(),
-				 getResourceLocator(),
-				 getString("_UI_BusinessTable_physicalTable_feature"),
-				 getString("_UI_PropertyDescriptor_description", "_UI_BusinessTable_physicalTable_feature", "_UI_BusinessTable_type"),
-				 BusinessModelPackage.Literals.BUSINESS_TABLE__PHYSICAL_TABLE,
-				 true,
-				 false,
-				 true,
-				 null,
-				 null,
-				 null));
+		itemPropertyDescriptors.add(createItemPropertyDescriptor(((ComposeableAdapterFactory) adapterFactory).getRootAdapterFactory(), getResourceLocator(),
+				getString("_UI_BusinessTable_physicalTable_feature"),
+				getString("_UI_PropertyDescriptor_description", "_UI_BusinessTable_physicalTable_feature", "_UI_BusinessTable_type"),
+				BusinessModelPackage.Literals.BUSINESS_TABLE__PHYSICAL_TABLE, true, false, true, null, null, null));
 	}
 
 	/**
-	 * This specifies how to implement {@link #getChildren} and is used to deduce an appropriate feature for an
-	 * {@link org.eclipse.emf.edit.command.AddCommand}, {@link org.eclipse.emf.edit.command.RemoveCommand} or
-	 * {@link org.eclipse.emf.edit.command.MoveCommand} in {@link #createCommand}.
-	 * <!-- begin-user-doc -->
+	 * This specifies how to implement {@link #getChildren} and is used to deduce an appropriate feature for an {@link org.eclipse.emf.edit.command.AddCommand},
+	 * {@link org.eclipse.emf.edit.command.RemoveCommand} or {@link org.eclipse.emf.edit.command.MoveCommand} in {@link #createCommand}. <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
@@ -135,8 +117,8 @@ public class BusinessTableItemProvider
 	}
 
 	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
@@ -148,111 +130,99 @@ public class BusinessTableItemProvider
 	}
 
 	protected Collection children = null;
-	
+
 	@Override
 	public Collection<?> getChildren(Object object) {
-			BusinessTable businessTable;
-			PhysicalTable physicalTable;
-			BusinessColumnFolderItemProvider folderItemProvider;
-			InboundRelationshipFolderItemProvider folderItemProviderInRel = null;
-			OutboundRelationshipFolderItemProvider folderItemProviderOutRel = null;
-			FolderItemProvider physicalTableReferenceItemProvider = null;
-			List<BusinessRelationship> businessRelationships;
-			List<BusinessRelationship> inboundBusinessRelationships = new ArrayList<BusinessRelationship>();
-			List<BusinessRelationship> outboundBusinessRelationships = new ArrayList<BusinessRelationship>();
-			
-			
-			businessTable = (BusinessTable)object;
-			//group columns
-			folderItemProvider = new BusinessColumnFolderItemProvider(adapterFactory, businessTable, businessTable.getColumns());
-			folderItemProvider.setText("Attributes ("+folderItemProvider.getChildrenNumber()+")");
-			if (folderItemProvider.getChildrenNumber() == 0)
-				folderItemProvider.setImage("full/obj16/EmptyFolder");
-			
-			//getting inbound and outbound relationships
-			businessRelationships = businessTable.getRelationships();
-			
-			for( BusinessRelationship relationship : businessRelationships){
-				if (relationship.getDestinationTable() == businessTable){
-					inboundBusinessRelationships.add(relationship);
-				}
-				else if (relationship.getSourceTable() == businessTable){
-					outboundBusinessRelationships.add(relationship);
-				}
-			}
-			//group inbound relationship	
-			folderItemProviderInRel = new InboundRelationshipFolderItemProvider(adapterFactory, businessTable,inboundBusinessRelationships);
-			folderItemProviderInRel.setText("Inbound Relationships ("+folderItemProviderInRel.getChildrenNumber()+")");
-			if (folderItemProviderInRel.getChildrenNumber() == 0)
-				folderItemProviderInRel.setImage("full/obj16/EmptyFolder");
-			
-			//group outbound relationship	
-			folderItemProviderOutRel = new OutboundRelationshipFolderItemProvider(adapterFactory, businessTable,outboundBusinessRelationships);
-			folderItemProviderOutRel.setText("Outbound Relationships ("+folderItemProviderOutRel.getChildrenNumber()+")");
-			if (folderItemProviderOutRel.getChildrenNumber() == 0)
-				folderItemProviderOutRel.setImage("full/obj16/EmptyFolder");
-			
-			//getting physical table reference
-			physicalTable = businessTable.getPhysicalTable();
-			
-			children = new LinkedHashSet();
-			//children.addAll(  getChildrenFeatures(object) );
-			children.add( folderItemProvider );
-			children.add( folderItemProviderInRel );
-			children.add( folderItemProviderOutRel );
+		BusinessTable businessTable;
+		PhysicalTable physicalTable;
+		BusinessColumnFolderItemProvider folderItemProvider;
+		InboundRelationshipFolderItemProvider folderItemProviderInRel = null;
+		OutboundRelationshipFolderItemProvider folderItemProviderOutRel = null;
+		FolderItemProvider physicalTableReferenceItemProvider = null;
+		List<BusinessRelationship> businessRelationships;
+		List<BusinessRelationship> inboundBusinessRelationships = new ArrayList<BusinessRelationship>();
+		List<BusinessRelationship> outboundBusinessRelationships = new ArrayList<BusinessRelationship>();
 
-			if (physicalTable != null){
-				physicalTableReferenceItemProvider = new FolderItemProvider(adapterFactory, physicalTable, null);
-				physicalTableReferenceItemProvider.setText("Physical Table -> "+physicalTable.getName());
-				physicalTableReferenceItemProvider.setImage("full/obj16/PhysicalTable");
-				children.add(physicalTableReferenceItemProvider);
+		businessTable = (BusinessTable) object;
+		// group columns
+		folderItemProvider = new BusinessColumnFolderItemProvider(adapterFactory, businessTable, businessTable.getColumns());
+		folderItemProvider.setText("Attributes (" + folderItemProvider.getChildrenNumber() + ")");
+		if (folderItemProvider.getChildrenNumber() == 0)
+			folderItemProvider.setImage("full/obj16/EmptyFolder");
+
+		// getting inbound and outbound relationships
+		businessRelationships = businessTable.getRelationships();
+
+		for (BusinessRelationship relationship : businessRelationships) {
+			if (relationship.getDestinationTable() == businessTable) {
+				inboundBusinessRelationships.add(relationship);
+			} else if (relationship.getSourceTable() == businessTable) {
+				outboundBusinessRelationships.add(relationship);
 			}
-		
+		}
+		// group inbound relationship
+		folderItemProviderInRel = new InboundRelationshipFolderItemProvider(adapterFactory, businessTable, inboundBusinessRelationships);
+		folderItemProviderInRel.setText("Inbound Relationships (" + folderItemProviderInRel.getChildrenNumber() + ")");
+		if (folderItemProviderInRel.getChildrenNumber() == 0)
+			folderItemProviderInRel.setImage("full/obj16/EmptyFolder");
+
+		// group outbound relationship
+		folderItemProviderOutRel = new OutboundRelationshipFolderItemProvider(adapterFactory, businessTable, outboundBusinessRelationships);
+		folderItemProviderOutRel.setText("Outbound Relationships (" + folderItemProviderOutRel.getChildrenNumber() + ")");
+		if (folderItemProviderOutRel.getChildrenNumber() == 0)
+			folderItemProviderOutRel.setImage("full/obj16/EmptyFolder");
+
+		// getting physical table reference
+		physicalTable = businessTable.getPhysicalTable();
+
+		children = new LinkedHashSet();
+		// children.addAll( getChildrenFeatures(object) );
+		children.add(folderItemProvider);
+		children.add(folderItemProviderInRel);
+		children.add(folderItemProviderOutRel);
+
+		if (physicalTable != null) {
+			physicalTableReferenceItemProvider = new FolderItemProvider(adapterFactory, physicalTable, null);
+			physicalTableReferenceItemProvider.setText("Physical Table -> " + physicalTable.getName());
+			physicalTableReferenceItemProvider.setImage("full/obj16/PhysicalTable");
+			children.add(physicalTableReferenceItemProvider);
+		}
+
 		return children;
 	}
-	
-	
+
 	/**
-	 * This returns BusinessTable.gif.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This returns BusinessTable.gif. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 */
 	@Override
 	public Object getImage(Object object) {
-		 if (olapModelInitializer.getCube((BusinessTable)object) != null){
-				return overlayImage(object, getResourceLocator().getImage("full/obj16/Cube"));
-		 }
-		 if (olapModelInitializer.getDimension((BusinessTable)object) != null){
-				return overlayImage(object, getResourceLocator().getImage("full/obj16/Dimension"));
-		 }
+		if (olapModelInitializer.getCube((BusinessTable) object) != null) {
+			return overlayImage(object, getResourceLocator().getImage("full/obj16/Cube"));
+		}
+		if (olapModelInitializer.getDimension((BusinessTable) object) != null) {
+			return overlayImage(object, getResourceLocator().getImage("full/obj16/Dimension"));
+		}
 
 		return overlayImage(object, getResourceLocator().getImage("full/obj16/BusinessTable"));
 	}
 
 	/**
-	 * This returns the label text for the adapted class.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This returns the label text for the adapted class. <!-- begin-user-doc --> <!-- end-user-doc -->
 	 */
 	@Override
 	public String getText(Object object) {
 		/*
-		String label = ((BusinessTable)object).getName();
-		return label == null || label.length() == 0 ?
-			getString("_UI_BusinessTable_type") :
-			getString("_UI_BusinessTable_type") + " " + label;
-		*/	
-		String label = ((BusinessTable)object).getName();
-		return label == null || label.length() == 0 ?
-			getString("_UI_BusinessTable_type") :
-			label;
+		 * String label = ((BusinessTable)object).getName(); return label == null || label.length() == 0 ? getString("_UI_BusinessTable_type") :
+		 * getString("_UI_BusinessTable_type") + " " + label;
+		 */
+		String label = ((BusinessTable) object).getName();
+		return label == null || label.length() == 0 ? getString("_UI_BusinessTable_type") : label;
 	}
 
 	/**
-	 * This handles model notifications by calling {@link #updateChildren} to update any cached
-	 * children and by creating a viewer notification, which it passes to {@link #fireNotifyChanged}.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
+	 * This handles model notifications by calling {@link #updateChildren} to update any cached children and by creating a viewer notification, which it passes
+	 * to {@link #fireNotifyChanged}. <!-- begin-user-doc --> <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
@@ -262,76 +232,75 @@ public class BusinessTableItemProvider
 	}
 
 	/**
-	 * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children
-	 * that can be created under this object.
-	 * <!-- begin-user-doc -->
+	 * This adds {@link org.eclipse.emf.edit.command.CommandParameter}s describing the children that can be created under this object. <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * 
 	 * @generated
 	 */
 	@Override
 	protected void collectNewChildDescriptors(Collection<Object> newChildDescriptors, Object object) {
 		super.collectNewChildDescriptors(newChildDescriptors, object);
 
-		newChildDescriptors.add
-			(createChildParameter
-				(BusinessModelPackage.Literals.BUSINESS_TABLE__PHYSICAL_TABLE,
-				 PhysicalModelFactory.eINSTANCE.createPhysicalTable()));
-	}
-
-	public Command createCustomCommand(Object object, EditingDomain domain, Class<? extends Command> commandClass, CommandParameter commandParameter) {
-		 Command result;
-		 
-		 result = null;
-		 
-		 if(commandClass == ModifyBusinessTableColumnsCommand.class) {
-		    	result = new ModifyBusinessTableColumnsCommand(domain, commandParameter);
-		    } else if(commandClass == AddBusinessRelationshipCommand.class) {
-		    	result = new AddBusinessRelationshipCommand(domain, commandParameter);
-		    } else if(commandClass == CreateIdentifierCommand.class) {
-		    	result = new CreateIdentifierCommand(domain, commandParameter);
-		    } else if(commandClass == AddPhysicalTableToBusinessViewCommand.class) {
-		    	result = new AddPhysicalTableToBusinessViewCommand(domain, commandParameter);
-		    }  else if(commandClass == DeleteBusinessTableCommand.class) {
-		    	result = new DeleteBusinessTableCommand(domain, commandParameter);
-		    }  else if(commandClass == AddCalculatedFieldCommand.class) {
-		    	result = new AddCalculatedFieldCommand(domain, commandParameter);
-		    }
-		 	//OLAP Commands
-		    else if(commandClass == CreateCubeCommand.class) {
-		    	result = new CreateCubeCommand(domain, commandParameter);
-		    }
-		    else if(commandClass == CreateDimensionCommand.class) {
-		    	result = new CreateDimensionCommand(domain, commandParameter);
-		    }
-		    else if(commandClass == SetGenericCommand.class) {
-		    	result = new SetGenericCommand(domain, commandParameter);
-		    }
-		    else if(commandClass == EditHierarchiesCommand.class) {
-		    	result = new EditHierarchiesCommand(domain, commandParameter);
-		    }
-		 
-		 return result;
+		newChildDescriptors.add(createChildParameter(BusinessModelPackage.Literals.BUSINESS_TABLE__PHYSICAL_TABLE,
+				PhysicalModelFactory.eINSTANCE.createPhysicalTable()));
 	}
 
 	@Override
-	
+	public Command createCustomCommand(Object object, EditingDomain domain, Class<? extends Command> commandClass, CommandParameter commandParameter) {
+		Command result;
+
+		result = null;
+
+		if (commandClass == ModifyBusinessTableColumnsCommand.class) {
+			result = new ModifyBusinessTableColumnsCommand(domain, commandParameter);
+		} else if (commandClass == AddBusinessRelationshipCommand.class) {
+			result = new AddBusinessRelationshipCommand(domain, commandParameter);
+		} else if (commandClass == CreateIdentifierCommand.class) {
+			result = new CreateIdentifierCommand(domain, commandParameter);
+		} else if (commandClass == AddPhysicalTableToBusinessViewCommand.class) {
+			result = new AddPhysicalTableToBusinessViewCommand(domain, commandParameter);
+		} else if (commandClass == DeleteBusinessTableCommand.class) {
+			result = new DeleteBusinessTableCommand(domain, commandParameter);
+		} else if (commandClass == AddCalculatedFieldCommand.class) {
+			result = new AddCalculatedFieldCommand(domain, commandParameter);
+		}
+		// OLAP Commands
+		else if (commandClass == CreateCubeCommand.class) {
+			result = new CreateCubeCommand(domain, commandParameter);
+		} else if (commandClass == CreateDimensionCommand.class) {
+			result = new CreateDimensionCommand(domain, commandParameter);
+		} else if (commandClass == CreateTemporalDimensionCommand.class) {
+			result = new CreateTemporalDimensionCommand(domain, commandParameter);
+		} else if (commandClass == CreateTimeDimensionCommand.class) {
+			result = new CreateTimeDimensionCommand(domain, commandParameter);
+		} else if (commandClass == CreateDimensionCommand.class) {
+			result = new CreateDimensionCommand(domain, commandParameter);
+		} else if (commandClass == SetGenericCommand.class) {
+			result = new SetGenericCommand(domain, commandParameter);
+		} else if (commandClass == EditHierarchiesCommand.class) {
+			result = new EditHierarchiesCommand(domain, commandParameter);
+		}
+
+		return result;
+	}
+
+	@Override
 	public void setText(Object object, String text) {
-		//ModelObject modelObject = (ModelObject)object;
-		//modelObject.setName(text);
+		// ModelObject modelObject = (ModelObject)object;
+		// modelObject.setName(text);
 		setPropertyValue(object, "name", text);
-		
-		//change also the cube or dimension name corresponding to this Business Table
-		Cube cube = olapModelInitializer.getCube((BusinessTable)object);
-		if (cube != null){
+
+		// change also the cube or dimension name corresponding to this Business Table
+		Cube cube = olapModelInitializer.getCube((BusinessTable) object);
+		if (cube != null) {
 			cube.setName(text);
 		} else {
-			Dimension dimension = olapModelInitializer.getDimension((BusinessTable)object) ;
-			if (dimension != null){
+			Dimension dimension = olapModelInitializer.getDimension((BusinessTable) object);
+			if (dimension != null) {
 				dimension.setName(text);
 			}
 		}
 
-		
 	}
 
 }

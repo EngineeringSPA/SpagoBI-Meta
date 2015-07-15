@@ -64,6 +64,9 @@
         <value>generic</value>      
         <value>cube</value>
         <value>dimension</value>
+        <value>temporal dimension</value>
+        <value>time dimension</value>
+        
       </admissibleValuesOf>
     </typesValues>
   

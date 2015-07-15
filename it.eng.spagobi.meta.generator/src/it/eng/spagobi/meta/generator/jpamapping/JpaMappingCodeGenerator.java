@@ -17,9 +17,13 @@ import it.eng.spagobi.meta.generator.SpagoBIMetaGeneratorPlugin;
 import it.eng.spagobi.meta.generator.jpamapping.wrappers.IJpaTable;
 import it.eng.spagobi.meta.generator.jpamapping.wrappers.IJpaView;
 import it.eng.spagobi.meta.generator.jpamapping.wrappers.impl.JpaModel;
+import it.eng.spagobi.meta.generator.mondrianschema.wrappers.IMondrianDimension;
+import it.eng.spagobi.meta.generator.mondrianschema.wrappers.MondrianModel;
 import it.eng.spagobi.meta.generator.utils.StringUtils;
+import it.eng.spagobi.meta.model.Model;
 import it.eng.spagobi.meta.model.ModelObject;
 import it.eng.spagobi.meta.model.business.BusinessModel;
+import it.eng.spagobi.meta.model.olap.OlapModel;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -107,6 +111,11 @@ public class JpaMappingCodeGenerator implements IGenerator {
 	 */
 	private File relationshipsTemplate;
 
+	/**
+	 * The template used to generate hierarchies.properties file
+	 */
+	private File hierarchiesTemplate;
+
 	// -- STATICS --------------------------------------------------
 
 	public static String defaultTemplateFolderPath = "templates";
@@ -160,6 +169,10 @@ public class JpaMappingCodeGenerator implements IGenerator {
 
 			relationshipsTemplate = new File(templateDir, "sbi_relationships.vm");
 			logger.trace("[Relationships] template file is equal to [{}]", relationshipsTemplate);
+			Assert.assertTrue("[Relationships] template file [" + relationshipsTemplate + "] does not exist", relationshipsTemplate.exists());
+
+			hierarchiesTemplate = new File(templateDir, "hierarchies.vm");
+			logger.trace("[Hierarchies] template file is equal to [{}]", relationshipsTemplate);
 			Assert.assertTrue("[Relationships] template file [" + relationshipsTemplate + "] does not exist", relationshipsTemplate.exists());
 
 		} catch (Throwable t) {
@@ -271,10 +284,13 @@ public class JpaMappingCodeGenerator implements IGenerator {
 		logger.info("Persistence unit for model [{}] succesfully created", model.getName());
 
 		createCfieldsFile(cfieldsTemplate, jpaModel);
-		logger.info("Properties file for model [{}] succesfully created", model.getName());
+		logger.info("Calculated fields file for model [{}] succesfully created", model.getName());
 
 		createRelationshipFile(relationshipsTemplate, jpaModel);
-		logger.info("Properties file for model [{}] succesfully created", model.getName());
+		logger.info("Relationships file for model [{}] succesfully created", model.getName());
+
+		generateHierarchiesFile(hierarchiesTemplate, model);
+		logger.info("Hierarchies file for model [{}] succesfully created", model.getName());
 
 		logger.trace("OUT");
 	}
@@ -530,6 +546,36 @@ public class JpaMappingCodeGenerator implements IGenerator {
 		} catch (IOException e) {
 			logger.error("Impossible to generate output file from template file [" + templateFile + "]", e);
 			throw new GenerationException("Impossible to generate output file from template file [" + templateFile + "]");
+		}
+	}
+
+	private void generateHierarchiesFile(File templateFile, BusinessModel businessModel) {
+		VelocityContext context;
+		Model model = businessModel.getParentModel();
+		if (model.getOlapModels() != null) {
+			OlapModel olapModel = model.getOlapModels().get(0);
+
+			logger.trace("IN");
+
+			try {
+				logger.debug("Create hierarchies.properties");
+				MondrianModel mondrianModel = new MondrianModel(olapModel);
+
+				List<IMondrianDimension> dimensions = new ArrayList<IMondrianDimension>();
+				dimensions.addAll(mondrianModel.getDimensions());
+
+				context = new VelocityContext();
+				context.put("model", mondrianModel); //$NON-NLS-1$
+				context.put("dimensions", dimensions); //$NON-NLS-1$
+
+				File outputFile = new File(srcDir, "hierarchies.properties");
+
+				createFile(templateFile, outputFile, context);
+			} catch (Throwable t) {
+				logger.error("Impossible to create hierarchies.properties", t);
+			} finally {
+				logger.trace("OUT");
+			}
 		}
 	}
 

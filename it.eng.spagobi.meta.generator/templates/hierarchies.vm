@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<Dimensions>
+#foreach ($dimension in $dimensions)
+#if (!($dimension.isSimpleDimension()))
+<Dimension name="${dimension.name}">
+<Hierarchies>
+#foreach ($hierarchy in $dimension.getHierarchies())
+<Hierarchy name = "${hierarchy.name}" table = "${hierarchy.tableName}">
+#foreach ($level in $hierarchy.getLevels())
+<Level name = "${level.name}" column = "${level.column}" type = "${level.levelType}"/>
+#end
+</Hierarchy>
+#end
+</Hierarchies>
+</Dimension>
+#end
+#end
+</Dimensions>
