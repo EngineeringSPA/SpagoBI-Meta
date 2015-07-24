@@ -21,9 +21,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  **/
 package it.eng.spagobi.meta.generator.mondrianschema.wrappers.impl;
 
+import it.eng.spagobi.meta.generator.jpamapping.wrappers.JpaProperties;
 import it.eng.spagobi.meta.generator.mondrianschema.wrappers.IMondrianDimension;
 import it.eng.spagobi.meta.generator.mondrianschema.wrappers.IMondrianHierarchy;
+import it.eng.spagobi.meta.generator.utils.JavaKeywordsUtils;
+import it.eng.spagobi.meta.model.ModelProperty;
 import it.eng.spagobi.meta.model.business.BusinessColumnSet;
+import it.eng.spagobi.meta.model.business.BusinessModel;
 import it.eng.spagobi.meta.model.olap.Dimension;
 import it.eng.spagobi.meta.model.olap.Hierarchy;
 
@@ -75,6 +79,7 @@ public class MondrianDimension implements IMondrianDimension {
 	 * 
 	 * @return true if the dimension is not of a specific type
 	 */
+	@Override
 	public boolean isSimpleDimension() {
 		BusinessColumnSet businessColumnSet = dimension.getTable();
 		if (businessColumnSet.getProperties().get("structural.tabletype") != null) {
@@ -85,6 +90,39 @@ public class MondrianDimension implements IMondrianDimension {
 		}
 		return false;
 
+	}
+
+	/**
+	 * @returns the generated java class name (not qualified).
+	 */
+
+	public String getClassName() {
+		String name;
+		name = JavaKeywordsUtils.transformToJavaClassName(dimension.getTable().getUniqueName());
+		return name;
+	}
+
+	@Override
+	public String getQualifiedClassName() {
+		return getPackage() + "." + getClassName();
+	}
+
+	public String getPackage() {
+		String packageName;
+		ModelProperty packageProperty;
+
+		BusinessModel model = dimension.getTable().getModel();
+
+		packageProperty = model.getProperties().get(JpaProperties.MODEL_PACKAGE);
+
+		// check if property is setted, else get default value
+		if (packageProperty.getValue() != null) {
+			packageName = packageProperty.getValue();
+		} else {
+			packageName = packageProperty.getPropertyType().getDefaultValue();
+		}
+
+		return packageName;
 	}
 
 }

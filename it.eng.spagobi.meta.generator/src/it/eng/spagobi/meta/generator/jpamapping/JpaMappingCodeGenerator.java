@@ -335,7 +335,11 @@ public class JpaMappingCodeGenerator implements IGenerator {
 
 		velocityContext = new VelocityContext();
 		velocityContext.put("jpaTable", jpaTable); //$NON-NLS-1$
-		velocityContext.put("isUpdatable", isUpdatableMapping); //$NON-NLS-1$
+		if (jpaTable.getPhysicalType().equalsIgnoreCase("View")) {
+			velocityContext.put("isUpdatable", false); //$NON-NLS-1$
+		} else {
+			velocityContext.put("isUpdatable", isUpdatableMapping); //$NON-NLS-1$
+		}
 
 		File outputDir = new File(srcDir, StringUtils.strReplaceAll(jpaTable.getPackage(), ".", "/"));
 		outputDir.mkdirs();
@@ -558,7 +562,7 @@ public class JpaMappingCodeGenerator implements IGenerator {
 			logger.trace("IN");
 
 			try {
-				logger.debug("Create hierarchies.properties");
+				logger.debug("Create hierarchies.xml");
 				MondrianModel mondrianModel = new MondrianModel(olapModel);
 
 				List<IMondrianDimension> dimensions = new ArrayList<IMondrianDimension>();
@@ -568,11 +572,11 @@ public class JpaMappingCodeGenerator implements IGenerator {
 				context.put("model", mondrianModel); //$NON-NLS-1$
 				context.put("dimensions", dimensions); //$NON-NLS-1$
 
-				File outputFile = new File(srcDir, "hierarchies.properties");
+				File outputFile = new File(srcDir, "hierarchies.xml");
 
 				createFile(templateFile, outputFile, context);
 			} catch (Throwable t) {
-				logger.error("Impossible to create hierarchies.properties", t);
+				logger.error("Impossible to create hierarchies.xml", t);
 			} finally {
 				logger.trace("OUT");
 			}

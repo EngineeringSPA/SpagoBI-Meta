@@ -2,10 +2,10 @@
 <Dimensions>
 #foreach ($dimension in $dimensions)
 #if (!($dimension.isSimpleDimension()))
-<Dimension name="${dimension.name}">
+<Dimension name="${dimension.name}" entity = "${dimension.qualifiedClassName}">
 <Hierarchies>
 #foreach ($hierarchy in $dimension.getHierarchies())
-<Hierarchy name = "${hierarchy.name}" table = "${hierarchy.tableName}">
+<Hierarchy name = "${hierarchy.name}" >
 #foreach ($level in $hierarchy.getLevels())
 <Level name = "${level.name}" column = "${level.column}" type = "${level.levelType}"/>
 #end

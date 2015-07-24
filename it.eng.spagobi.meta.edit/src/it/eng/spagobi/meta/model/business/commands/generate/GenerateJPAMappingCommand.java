@@ -83,6 +83,7 @@ public class GenerateJPAMappingCommand extends AbstractSpagoBIModelGenerateComma
 			generator = (JpaMappingJarGenerator) descriptor.getGenerator();
 			generator.setLibDir(new File("plugins"));
 			generator.generate(businessModel, directory, isUpdatable);
+			showInformation("Success", "JPA Mapping generated.\nYou can find the Datamart in the specified path under the \"dist\" directory");
 		} catch (Exception e) {
 			logger.error("An error occurred while executing command [{}]:", ModifyBusinessTableColumnsCommand.class.getName(), e);
 			showInformation("Error in JPAMappingGenerator", "Cannot create JPA Mapping classes");

@@ -35,4 +35,6 @@ public interface IMondrianDimension {
 
 	public boolean isSimpleDimension();
 
+	public String getQualifiedClassName();
+
 }
