@@ -246,6 +246,14 @@ public class JpaTable extends AbstractJpaTable {
 		return property != null ? property.getValue() : "";
 	}
 
+	public String getType() {
+		String tableType = getAttribute("structural.tabletype");
+		if (tableType != null) {
+			tableType = tableType.replaceAll(" ", "_");
+		}
+		return tableType;
+	}
+
 	@Override
 	public List<IJpaSubEntity> getSubEntities() {
 		// List<IJpaSubEntity> subEntities = new ArrayList<IJpaSubEntity>();
