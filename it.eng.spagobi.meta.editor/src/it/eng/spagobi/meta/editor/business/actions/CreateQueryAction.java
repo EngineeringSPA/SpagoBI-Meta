@@ -9,6 +9,8 @@
  **/
 package it.eng.spagobi.meta.editor.business.actions;
 
+import it.eng.spagobi.meta.editor.business.BusinessModelEditor;
+import it.eng.spagobi.meta.editor.business.BusinessModelEditorInput;
 import it.eng.spagobi.meta.editor.business.dialogs.BusinessModelRelationshipsCheckWarningDialog;
 import it.eng.spagobi.meta.editor.business.wizards.inline.NewQueryFileWizard;
 import it.eng.spagobi.meta.editor.physical.actions.DeletePhysicalModelObjectAction;
@@ -28,6 +30,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.emf.common.command.Command;
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
@@ -35,6 +38,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
 
@@ -44,6 +48,8 @@ import org.eclipse.ui.PlatformUI;
  */
 public class CreateQueryAction extends AbstractSpagoBIModelAction {
 
+	String modelFileFullPath;
+
 	/**
 	 * @param commandClass
 	 * @param workbenchPart
@@ -51,7 +57,13 @@ public class CreateQueryAction extends AbstractSpagoBIModelAction {
 	 */
 	public CreateQueryAction(IWorkbenchPart workbenchPart, ISelection selection) {
 		super(CreateQueryCommand.class, workbenchPart, selection);
-
+		BusinessModelEditor businessModelEditor = (BusinessModelEditor) workbenchPart;
+		IEditorInput editorInput = businessModelEditor.getEditorInput();
+		if (editorInput instanceof BusinessModelEditorInput) {
+			BusinessModelEditorInput businessModelEditorInput = (BusinessModelEditorInput) editorInput;
+			URI fileURI = businessModelEditorInput.getResourceFileURI();
+			modelFileFullPath = fileURI.toFileString();
+		}
 	}
 
 	/**
@@ -118,7 +130,7 @@ public class CreateQueryAction extends AbstractSpagoBIModelAction {
 
 				if (incorrectRelationships.isEmpty() || relationshipsWarningReturnCode == Window.OK) {
 					// CreateQueryWizard wizard = new CreateQueryWizard(businessModel, editingDomain, (AbstractSpagoBIModelCommand)command );
-					NewQueryFileWizard wizard = new NewQueryFileWizard(businessModel, editingDomain, (ISpagoBIModelCommand) command);
+					NewQueryFileWizard wizard = new NewQueryFileWizard(businessModel, editingDomain, (ISpagoBIModelCommand) command, modelFileFullPath);
 					wizard.init(PlatformUI.getWorkbench(), new StructuredSelection());
 					WizardDialog dialog = new WizardDialog(wizard.getShell(), wizard);
 					dialog.create();

@@ -6,7 +6,7 @@
  License, v. 2.0. If a copy of the MPL was not distributed with this file,
  You can obtain one at http://mozilla.org/MPL/2.0/.
  
-**/
+ **/
 package it.eng.spagobi.meta.editor.business.wizards.inline;
 
 import it.eng.spagobi.commons.resource.IResourceLocator;
@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * @author cortella
- *
+ * 
  */
 public class NewQueryFileWizard extends AbstractSpagoBIModelWizard implements INewWizard {
 
@@ -39,21 +39,21 @@ public class NewQueryFileWizard extends AbstractSpagoBIModelWizard implements IN
 	private NewQueryFileWizardPage newFileWizardPage;
 	private IWorkbench workbench;
 	private IFile file;
-	private BusinessModel businessModel;
-	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator(); 
+	private final BusinessModel businessModel;
+	private static final IResourceLocator RL = SpagoBIMetaEditorPlugin.getInstance().getResourceLocator();
 
+	private final String modelFileFullPath;
 
 	private static Logger logger = LoggerFactory.getLogger(NewQueryFileWizard.class);
 
-
-	public NewQueryFileWizard(BusinessModel businessModel, EditingDomain editingDomain,
-			ISpagoBIModelCommand command) {
+	public NewQueryFileWizard(BusinessModel businessModel, EditingDomain editingDomain, ISpagoBIModelCommand command, String modelFileFullPath) {
 		super(editingDomain, command);
 		this.setWindowTitle(RL.getString("business.editor.wizard.newqueryfile.title"));
-		this.setHelpAvailable(false);	
+		this.setHelpAvailable(false);
 		this.businessModel = businessModel;
+		this.modelFileFullPath = modelFileFullPath;
 
-	} 
+	}
 
 	@Override
 	public void addPages() {
@@ -63,43 +63,44 @@ public class NewQueryFileWizard extends AbstractSpagoBIModelWizard implements IN
 	}
 
 	@Override
-	public boolean performFinish() {     
+	public boolean performFinish() {
 		file = newFileWizardPage.createNewFile();
 		try {
 			file.refreshLocal(IResource.DEPTH_ZERO, null);
 		} catch (CoreException e) {
-			logger.error("Refresh Local workspace error",e);
+			logger.error("Refresh Local workspace error", e);
 		}
-		if (file != null){
-			if(businessModel != null){
-				try{
-				logger.debug("set model metadata file: linking to model "+businessModel.getName());
-				file.setPersistentProperty(SpagoBIMetaConstants.MODEL_NAME, businessModel.getName());
-				}
-				catch (Exception e) {
-					logger.error("Error in set model metadata file: linking to model "+businessModel.getName(),e);
+		if (file != null) {
+			if (businessModel != null) {
+				try {
+					logger.debug("set model metadata file: linking to model " + businessModel.getName());
+					file.setPersistentProperty(SpagoBIMetaConstants.MODEL_NAME, businessModel.getName());
+				} catch (Exception e) {
+					logger.error("Error in set model metadata file: linking to model " + businessModel.getName(), e);
 				}
 			}
 			super.performFinish();
 			return true;
-		}
-		else
+		} else
 			return false;
 	}
 
 	@Override
 	public CommandParameter getCommandInputParameter() {
 		String queryFilePath = file.getRawLocation().toOSString();
-		logger.debug("Query file path is [{}]",queryFilePath);
-		return new CommandParameter(businessModel, null, queryFilePath, new ArrayList<Object>());
+		logger.debug("Query file path is [{}]", queryFilePath);
+		return new CommandParameter(businessModel, modelFileFullPath, queryFilePath, new ArrayList<Object>());
 	}
 
+	@Override
 	public void init(IWorkbench workbench, IStructuredSelection selection) {
 		this.workbench = workbench;
 		this.selection = selection;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see it.eng.spagobi.meta.editor.business.wizards.AbstractSpagoBIModelWizard#isWizardComplete()
 	 */
 	@Override
